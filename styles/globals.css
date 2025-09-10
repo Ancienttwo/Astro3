@@ -1,0 +1,98 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: "Rajdhani", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", 
+               "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", 
+               Helvetica, Arial, sans-serif;
+  font-weight: 400;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 3.9%;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --radius: 0.5rem;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+  .dark {
+    /* Landing Page配色 - 黑金紫配色方案 */
+    --background: 0 0% 3%;              /* 深黑背景 - 匹配Landing Page */
+    --foreground: 214 20% 69%;          /* slate-300 - 匹配Landing Page文字 */
+    --card: 0 0% 6%;                    /* 深黑卡片，略亮于背景 */
+    --card-foreground: 214 20% 69%;     /* slate-300 卡片文字 */
+    --popover: 0 0% 4%;                 /* 弹出层深黑 */
+    --popover-foreground: 214 20% 69%;  /* slate-300 */
+    --primary: 45 93% 58%;              /* yellow-400 - 匹配Landing Page主色 */
+    --primary-foreground: 0 0% 3%;      /* 主色上的深色文字 */
+    --secondary: 262 83% 12%;           /* purple-900 - 匹配Landing Page次要色 */
+    --secondary-foreground: 45 93% 58%; /* yellow-400 文字 */
+    --muted: 220 13% 18%;               /* 柔和的深灰 */
+    --muted-foreground: 214 20% 69%;    /* slate-300 */
+    --accent: 262 83% 12%;              /* purple-900 强调色 */
+    --accent-foreground: 45 93% 58%;    /* yellow-400 */
+    --destructive: 0 84% 60%;           /* 红色保持不变 */
+    --destructive-foreground: 0 0% 98%;
+    --border: 220 13% 18%;              /* 深灰边框 */
+    --input: 220 13% 18%;               /* 输入框深灰底色 */
+    --ring: 45 93% 58%;                 /* yellow-400 焦点环 */
+    --chart-1: 45 93% 58%;              /* yellow-400 图表色 */
+    --chart-2: 262 83% 12%;             /* purple-900 */
+    --chart-3: 226 71% 40%;             /* indigo-900 */
+    --chart-4: 25 95% 53%;              /* amber-500 */
+    --chart-5: 262 83% 58%;             /* purple-500 */
+    --sidebar-background: 0 0% 4%;      /* 侧边栏深黑 */
+    --sidebar-foreground: 214 20% 69%;  /* slate-300 */
+    --sidebar-primary: 45 93% 58%;      /* yellow-400 */
+    --sidebar-primary-foreground: 0 0% 8%;
+    --sidebar-accent: 262 83% 12%;      /* purple-900 */
+    --sidebar-accent-foreground: 45 93% 58%;
+    --sidebar-border: 220 13% 18%;
+    --sidebar-ring: 45 93% 58%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}

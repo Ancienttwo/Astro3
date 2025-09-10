@@ -1,0 +1,86 @@
+{
+  "zh-TW": [
+    {
+      "slip_number": 1,
+      "title": "第一籤 上上籤",
+      "content": "天開地闢結良緣\n日吉時良萬事全\n若得此籤非小可\n人行忠正帝王宣",
+      "basic_interpretation": "此籤大吉。天地開泰，良緣天成，時機極佳，萬事亨通。若能心懷忠義，行事正直，必得上天庇佑，貴人提攜，前程似錦。",
+      "historical_context": "此籤取自《三國演義》中劉備三顧茅廬請諸葛亮的典故。劉備以誠待人，諸葛亮被其誠意感動，結為君臣，共創蜀漢大業。",
+      "symbolism": "天開地闢象徵新的開始，結良緣意指遇到貴人相助。日吉時良代表時機成熟，萬事全表示諸事順遂。"
+    },
+    {
+      "slip_number": 2,
+      "title": "第二籤 中吉籤",
+      "content": "鯤魚化作鳳凰飛\n勸君切莫心生疑\n現在正好行好事\n來日必定有聲威",
+      "basic_interpretation": "此籤中吉。如鯤魚化鳳，變化驚人。勸君莫疑，當下行善，必有成就。現在雖平凡，但要堅持正道，未來必有威名遠播之日。",
+      "historical_context": "取自《莊子·逍遙遊》中\"鯤之大，不知其幾千里也；化而為鳥，其名為鵬\"的典故，比喻平凡之人經過努力可以成就大事。",
+      "symbolism": "鯤魚化鳳象徵脫胎換骨，從平凡走向不凡。勸君莫疑表示要有信心，行好事代表要積德行善。"
+    },
+    {
+      "slip_number": 3,
+      "title": "第三籤 中平籤",
+      "content": "臨風冒雨去還歸\n役役勞心似燕飛\n銜泥況築堂前屋\n燕子歸來好處棲",
+      "basic_interpretation": "此籤中平。如燕子辛苦築巢，勞心勞力，但終有成果。雖然過程辛苦，風雨兼程，但只要堅持不懈，最終必能築成理想家園。",
+      "historical_context": "取自燕子春來築巢的自然現象，古人常以燕子比喻勤勞持家、安居樂業的美好願望。",
+      "symbolism": "燕子象徵勤勞和歸宿，銜泥築屋代表辛苦經營，終有好處棲表示努力會有回報。"
+    },
+    {
+      "slip_number": 4,
+      "title": "第四籤 中平籤",
+      "content": "千里跋涉求名利\n萬重山水阻前程\n若得貴人來指引\n前途光明步步登",
+      "basic_interpretation": "此籤中平。求名利需要長途跋涉，前路雖有重重阻礙，但若得貴人指引，前途將光明無限，步步高升。",
+      "historical_context": "取自古代求學或求官必須長途跋涉的典故，如孟母三遷、程門立雪等，強調努力和貴人相助的重要性。",
+      "symbolism": "千里跋涉象徵努力奮鬥，萬重山水代表困難重重，貴人指引表示需要幫助，步步登象徵逐步成功。"
+    },
+    {
+      "slip_number": 5,
+      "title": "第五籤 下籤",
+      "content": "無端惹事禍臨門\n是是非非難辯論\n退步思量方有路\n莫逞英雄自立功",
+      "basic_interpretation": "此籤下籤。無端惹事，是非纏身，處境困難。此時應退一步海闊天空，不可逞強好勝，自立門戶，否則禍事難免。",
+      "historical_context": "取自古代\"退一步海闊天空\"的智慧，如韓信受胯下之辱後成就大業，強調忍讓和智慧的重要性。",
+      "symbolism": "無端惹事象徵意外的麻煩，是非難辯代表複雜的情況，退步思量表示需要冷靜思考，莫逞英雄提醒不要衝動。"
+    }
+  ],
+  "en-US": [
+    {
+      "slip_number": 1,
+      "title": "First Oracle - Most Auspicious",
+      "content": "Heaven opens, earth forms, good relationships bind\nAuspicious day, favorable time, all matters align\nIf you receive this oracle, it is no small thing\nWalk in loyalty and righteousness, the emperor will sing your name",
+      "basic_interpretation": "This oracle is most auspicious. Heaven and earth are in harmony, good relationships are destined, timing is perfect, and all matters will proceed smoothly. If you maintain loyalty and act righteously, you will receive divine protection and support from nobles, leading to a bright future.",
+      "historical_context": "This oracle references the story from \"Romance of the Three Kingdoms\" where Liu Bei visited Zhuge Liang three times to seek his service. Liu Bei's sincerity moved Zhuge Liang, and together they built the Shu Han dynasty.",
+      "symbolism": "Heaven opening and earth forming symbolizes new beginnings, while good relationships represent meeting helpful people. Auspicious day and favorable time indicate perfect timing, and all matters aligning suggests everything will go smoothly."
+    },
+    {
+      "slip_number": 2,
+      "title": "Second Oracle - Moderately Auspicious",
+      "content": "The kun fish transforms into a flying phoenix\nI advise you not to let doubt arise in your heart\nNow is the perfect time to do good deeds\nIn the future, you will surely gain prestige",
+      "basic_interpretation": "This oracle is moderately auspicious. Like the kun fish transforming into a phoenix, change can be remarkable. Do not doubt yourself, do good deeds now, and you will achieve success. Though you may seem ordinary now, by staying on the righteous path, you will gain fame in the future.",
+      "historical_context": "Derived from Zhuangzi's \"Free and Easy Wandering\" which tells of \"the kun is so large, thousands of li in size; it transforms into a bird called the peng,\" symbolizing how ordinary people can achieve great things through effort.",
+      "symbolism": "The kun fish transforming into a phoenix represents complete transformation from ordinary to extraordinary. The advice not to doubt indicates the need for confidence, while doing good deeds represents accumulating virtue."
+    },
+    {
+      "slip_number": 3,
+      "title": "Third Oracle - Average",
+      "content": "Going and returning through wind and rain\nTirelessly working like a flying swallow\nCarrying mud to build a house in front of the hall\nWhen the swallow returns, it finds a good place to rest",
+      "basic_interpretation": "This oracle is average. Like a swallow working hard to build its nest, there is much labor and worry, but ultimately there will be results. Though the process is difficult, facing wind and rain, persistence will eventually create an ideal home.",
+      "historical_context": "Based on the natural phenomenon of swallows building nests in spring, ancient people often compared swallows to diligent homemaking and peaceful living.",
+      "symbolism": "The swallow represents diligence and having a place to belong, carrying mud to build represents hard work and management, and finding a good place to rest indicates that effort will be rewarded."
+    },
+    {
+      "slip_number": 4,
+      "title": "Fourth Oracle - Average",
+      "content": "Traveling thousands of miles seeking fame and fortune\nCountless mountains and waters block the path ahead\nIf a noble person comes to guide you\nThe future will be bright, climbing step by step",
+      "basic_interpretation": "This oracle is average. Seeking fame and fortune requires long journeys, and though there are many obstacles ahead, if you receive guidance from a noble person, your future will be bright and you will ascend step by step.",
+      "historical_context": "Based on ancient stories of those who had to travel long distances for education or official positions, such as Mencius's mother moving three times or standing in snow at Cheng's door, emphasizing the importance of effort and helpful guidance.",
+      "symbolism": "Traveling thousands of miles represents hard work and struggle, countless mountains and waters represent numerous difficulties, noble guidance represents needing help, and climbing step by step symbolizes gradual success."
+    },
+    {
+      "slip_number": 5,
+      "title": "Fifth Oracle - Inauspicious",
+      "content": "Unprovoked troubles bring disaster to your door\nRight and wrong are difficult to debate and distinguish\nStep back and think carefully to find a way\nDo not play the hero and seek to establish your own merit",
+      "basic_interpretation": "This oracle is inauspicious. Unprovoked troubles bring complications of right and wrong that are hard to resolve. At this time, you should step back for broader perspective - do not act stubbornly or try to establish yourself independently, or disaster will be unavoidable.",
+      "historical_context": "Based on the ancient wisdom that \"stepping back opens up vast seas and skies,\" like Han Xin who endured humiliation but later achieved great success, emphasizing the importance of patience and wisdom.",
+      "symbolism": "Unprovoked troubles symbolize unexpected problems, difficult debates represent complex situations, stepping back to think suggests the need for calm reflection, and not playing the hero warns against impulsive actions."
+    }
+  ]
+}

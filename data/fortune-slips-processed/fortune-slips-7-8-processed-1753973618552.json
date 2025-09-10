@@ -1,0 +1,196 @@
+{
+  "metadata": {
+    "processed_at": "2025-07-31T14:53:38.552Z",
+    "total_slips": 2,
+    "languages": [
+      "zh-CN",
+      "zh-TW",
+      "en-US"
+    ],
+    "processor_version": "1.0.0"
+  },
+  "data": [
+    {
+      "base": {
+        "slip_number": 7,
+        "temple_code": "guandi",
+        "fortune_level": "excellent",
+        "categories": [
+          "修道",
+          "求医",
+          "功名",
+          "仙缘"
+        ],
+        "created_at": "2025-07-31T14:53:38.551Z",
+        "updated_at": "2025-07-31T14:53:38.551Z"
+      },
+      "i18n": {
+        "zh-TW": {
+          "language_code": "zh-TW",
+          "title": "洞賓煉丹",
+          "content": "仙風道骨本天生、\n又遇仙宗為主盟、\n指日丹成謝巖谷、\n一朝引領向天行。",
+          "basic_interpretation": "比別人幸運的是天生就有道緣，而且又遇到高人的指點，可以很順利的尋得求道之路，而且可以一路順遂，得到不錯的成就。此籤又可解為求醫者可求得良藥，但又有仙升，即作古升天之意，故求籤者要小心處置。此籤雖是大吉，但除了以上所提之事，對其餘事情幾乎都無任何影響，所以不可全部判斷為大吉籤。",
+          "historical_context": "洞賓煉丹\n唐呂岩。字洞賓。天寶十四年四月十四日巳時生。\n自號純陽子。由進士授江州德化縣令。私行\n廬遇鍾離真人。授天仙劍法。\n另曰遇火龍真人。授天遁劍法。\n得九九數。學金丹之術。居深山中煉丹。丹成長生不老。\n多往來湘鄂間。滕守宗諒嘗遇諸岳陽樓。自稱華州道人。",
+          "symbolism": "本來天生就是仙風道骨，又遇到神仙的好幫助，立即煉成仙丹妙藥，離開了山谷，一旦成仙，遨遊天外去。這首籤詩，表示本來天生仙骨，又得神仙之助，乃得成仙昇騰，也就是暗示，凡高貴的人占得此籤，必事事遂意。若貧賤的人，占得此籤，僅是平常而已。如問疾病，占得此籤，表示當有名醫來治，在一個月內可以治好，否則即有仙逝之兆。",
+          "keywords": [
+            "洞賓煉丹",
+            "比別人幸",
+            "運的是天",
+            "生就有道",
+            "而且又遇",
+            "到高人的",
+            "指點",
+            "可以很順",
+            "利的尋得",
+            "求道之路",
+            "而且可以"
+          ]
+        },
+        "zh-CN": {
+          "language_code": "zh-CN",
+          "title": "洞賓炼丹",
+          "content": "仙风道骨本天生、\n又遇仙宗為主盟、\n指日丹成谢岩谷、\n一朝引领向天行。",
+          "basic_interpretation": "比別人幸运的是天生就有道緣，而且又遇到高人的指點，可以很顺利的尋得求道之路，而且可以一路顺遂，得到不錯的成就。此签又可解為求医者可求得良药，但又有仙升，即作古升天之意，故求签者要小心处置。此签雖是大吉，但除了以上所提之事，对其餘事情幾乎都无任何影響，所以不可全部判斷為大吉签。",
+          "historical_context": "洞賓炼丹\n唐呂岩。字洞賓。天寶十四年四月十四日巳时生。\n自號純阳子。由进士授江州德化縣令。私行\n廬遇鍾離真人。授天仙劍法。\n另曰遇火龍真人。授天遁劍法。\n得九九數。学金丹之術。居深山中炼丹。丹成长生不老。\n多往来湘鄂间。滕守宗諒嘗遇諸岳阳楼。自稱华州道人。",
+          "symbolism": "本来天生就是仙风道骨，又遇到神仙的好幫助，立即炼成仙丹妙药，離开了山谷，一旦成仙，遨遊天外去。这首签詩，表示本来天生仙骨，又得神仙之助，乃得成仙昇騰，也就是暗示，凡高贵的人占得此签，必事事遂意。若贫贱的人，占得此签，僅是平常而已。如問疾病，占得此签，表示当有名医来治，在一个月內可以治好，否則即有仙逝之兆。",
+          "keywords": [
+            "洞賓煉丹",
+            "比別人幸",
+            "運的是天",
+            "生就有道",
+            "而且又遇",
+            "到高人的",
+            "指點",
+            "可以很順",
+            "利的尋得",
+            "求道之路",
+            "而且可以"
+          ]
+        },
+        "en-US": {
+          "language_code": "en-US",
+          "title": "Lu Dongbin Refining Elixir",
+          "content": "Born with immortal spirit and Taoist bones,\nMeeting celestial masters as alliance leaders,\nSoon the elixir will be complete, leaving the mountain valley,\nOne day leading the ascension to heaven.",
+          "basic_interpretation": "You are more fortunate than others, being naturally endowed with spiritual destiny. Moreover, with guidance from enlightened masters, you can smoothly find the path of cultivation and proceed successfully to achieve good accomplishments. This divination can also be interpreted as finding good medicine for those seeking healing, but it also implies celestial ascension, meaning departure from this world, so fortune seekers should handle this carefully. Although this is a great fortune, except for the aforementioned matters, it has almost no influence on other affairs, so it cannot be entirely judged as a great fortune divination.",
+          "historical_context": "Lu Dongbin Refining Elixir\nTang Dynasty's Lu Yan, styled Dongbin, born on the 14th day of the 4th month in the 14th year of Tianbao, at the Si hour.\nSelf-styled as Master Chunyang. Appointed as magistrate of Dehua County in Jiangzhou through imperial examination.\nMet Immortal Zhongli in private travels and learned celestial sword techniques.\nAlso said to have met Fire Dragon Immortal and learned Heaven Escape sword techniques.\nMastered the ninety-nine numbers and learned the art of golden elixir. Lived in deep mountains refining elixir. Upon completion, gained immortality.\nOften traveled between Hunan and Hubei. Teng Shouzong Liang once met him at Yueyang Tower, where he called himself a Taoist from Huazhou.",
+          "symbolism": "Originally born with immortal spirit and Taoist bones, and with the help of celestial beings, immediately refined the immortal elixir medicine, left the mountain valley, and once becoming immortal, soared through the heavens. This divination poem indicates natural immortal bones aided by celestial beings, thus achieving immortal ascension. This suggests that noble people who draw this divination will have everything go according to their wishes. If humble people draw this divination, it will be merely ordinary. When asking about illness, drawing this divination indicates that a famous doctor will come to treat, and recovery within a month is possible, otherwise there may be signs of celestial departure.",
+          "keywords": [
+            "Lu Dongbin Refining Elixir",
+            "more",
+            "fortunate",
+            "than",
+            "others",
+            "being",
+            "naturally",
+            "endowed",
+            "with",
+            "spiritual",
+            "destiny"
+          ]
+        }
+      }
+    },
+    {
+      "base": {
+        "slip_number": 8,
+        "temple_code": "guandi",
+        "fortune_level": "excellent",
+        "categories": [
+          "农作",
+          "事业",
+          "时运",
+          "收获"
+        ],
+        "created_at": "2025-07-31T14:53:38.552Z",
+        "updated_at": "2025-07-31T14:53:38.552Z"
+      },
+      "i18n": {
+        "zh-TW": {
+          "language_code": "zh-TW",
+          "title": "大舜耕歷山",
+          "content": "年來耕稼苦無收、\n今歲田疇定有秋、\n況遇太平無事日、\n士農工賈百無憂。",
+          "basic_interpretation": "過去的努力似乎都沒有收穫，只要再持續下去，今年必定會有結果，而且是不錯的回收。田裡的收成，完全要靠老天爺的幫忙，適逢風調雨順，得以豐收，各行各業也因此而有所斬獲。此籤表示即將有所收穫，不管之前有多麼不順遂，到此又是另一番景象，要好好把握，也表示以前的努力，現在才開始要回收，將會有美好的未來。",
+          "historical_context": "大舜耕歷山\n帝舜有虞氏，瞽瞍之子。父頑母嚴，弟象傲。舜事親盡孝，小杖則受，大杖則走，恐陷親不義也。其耕於歷山，有象為之耕，有鳥為之耘。後受帝堯禪位。\n\n伊尹耕莘樂道\n伊尹自幼聰明穎慧，勤學上進，雖耕於有莘國之野，但卻樂堯舜之道；既掌握了烹調技術，又深懂治國之道；既作奴隸主貴族的廚師，又作貴族子弟的\"師僕\"。由於他研究三皇五帝和大禹王等英明君王的施政之道而遠近聞名，以致於使求賢若渴的商湯王三番五次以玉、帛、馬、皮為禮前往有莘國去聘請他。",
+          "symbolism": "多年來辛勤耕作，可是收穫不多，今年風調雨順，全看秋天的豐收了。而且又逢太平無事的日子，士農工商都是喜氣洋洋，無憂無慮，百事亨通。抽得此籤，先凶後吉之兆。所謂否極泰來，時來運轉是也。過去耕種的苦勞，目下將一齊收穫。正是：「昔否今逢泰，尤當要守成，不論貧與富，自此盡通亨。」",
+          "keywords": [
+            "大舜耕歷山",
+            "過去的努",
+            "力似乎都",
+            "沒有收穫",
+            "只要再持",
+            "續下去",
+            "今年必定",
+            "會有結果",
+            "而且是不",
+            "錯的回收",
+            "田裡的收"
+          ]
+        },
+        "zh-CN": {
+          "language_code": "zh-CN",
+          "title": "大舜耕历山",
+          "content": "年来耕稼苦无收、\n今岁田畴定有秋、\n况遇太平无事日、\n士农工贾百无忧。",
+          "basic_interpretation": "过去的努力似乎都沒有收穫，只要再持續下去，今年必定会有結果，而且是不錯的回收。田裡的收成，完全要靠老天爺的幫忙，適逢风调雨顺，得以丰收，各行各业也因此而有所斬获。此签表示即將有所收穫，不管之前有多麼不顺遂，到此又是另一番景象，要好好把握，也表示以前的努力，现在才开始要回收，將会有美好的未来。",
+          "historical_context": "大舜耕历山\n帝舜有虞氏，瞽瞍之子。父頑母嚴，弟象傲。舜事亲盡孝，小杖則受，大杖則走，恐陷亲不義也。其耕於历山，有象為之耕，有鳥為之耘。后受帝堯禪位。\n\n伊尹耕莘樂道\n伊尹自幼聰明穎慧，勤学上进，雖耕於有莘国之野，但卻樂堯舜之道；既掌握了烹调技術，又深懂治国之道；既作奴隸主贵族的廚師，又作贵族子弟的\"師僕\"。由於他研究三皇五帝和大禹王等英明君王的施政之道而遠近聞名，以致於使求賢若渴的商湯王三番五次以玉、帛、馬、皮為禮前往有莘国去聘請他。",
+          "symbolism": "多年来辛勤耕作，可是收穫不多，今年风调雨顺，全看秋天的丰收了。而且又逢太平无事的日子，士农工商都是喜气洋洋，无忧无慮，百事亨通。抽得此签，先凶后吉之兆。所謂否极泰来，时来运转是也。过去耕種的苦勞，目下將一齊收穫。正是：「昔否今逢泰，尤当要守成，不論贫與富，自此盡通亨。」",
+          "keywords": [
+            "大舜耕歷山",
+            "過去的努",
+            "力似乎都",
+            "沒有收穫",
+            "只要再持",
+            "續下去",
+            "今年必定",
+            "會有結果",
+            "而且是不",
+            "錯的回收",
+            "田裡的收"
+          ]
+        },
+        "en-US": {
+          "language_code": "en-US",
+          "title": "Emperor Shun Farming at Mount Li",
+          "content": "Years of farming with bitter harvests,\nThis year the fields will surely bear fruit in autumn,\nMoreover, meeting peaceful and eventful days,\nScholars, farmers, craftsmen, and merchants all without worry.",
+          "basic_interpretation": "Past efforts seemed to yield no harvest, but if you continue persevering, this year will definitely bring results, and good returns. The harvest in the fields depends entirely on heaven's help. Meeting favorable weather conditions brings abundant harvest, and all trades and professions benefit accordingly. This divination indicates upcoming harvest. No matter how unfavorable things were before, now presents a different scene that should be well grasped. It also indicates that previous efforts are now beginning to pay off, promising a beautiful future.",
+          "historical_context": "Emperor Shun Farming at Mount Li\nEmperor Shun of the You Yu clan, son of Gusou. His father was stubborn, mother harsh, and younger brother Xiang was arrogant. Shun served his parents with complete filial piety, accepting light punishment but avoiding severe punishment, fearing to trap his parents in unrighteousness. When farming at Mount Li, elephants plowed for him and birds weeded for him. Later he received the throne abdicated by Emperor Yao.\n\nYi Yin Farming at Xin, Delighting in the Way\nYi Yin was intelligent and wise from childhood, diligent in learning and progressive. Though farming in the wilderness of the Xin state, he delighted in the way of Yao and Shun. He mastered both culinary skills and the art of governing the state, serving both as chef for slave-owning nobles and as teacher-servant for noble children. Due to his study of the governing ways of the Three Sovereigns and Five Emperors and King Yu, he became famous far and wide, causing the talent-seeking King Tang of Shang to send gifts of jade, silk, horses, and leather to the Xin state three times to invite him.",
+          "symbolism": "Years of diligent farming with little harvest, but this year with favorable weather, all depends on autumn's abundant harvest. Moreover, meeting peaceful and eventful times, scholars, farmers, craftsmen, and merchants are all joyful, carefree, and everything prospers. Drawing this divination indicates first misfortune then fortune. As the saying goes, \"When bad luck reaches its extreme, good luck comes; when fortune turns.\" The bitter labor of past farming will now be harvested all at once. Truly: \"Past misfortune now meets fortune, especially important to maintain success. Whether poor or rich, from now on all will prosper.\"",
+          "keywords": [
+            "Emperor Shun Farming at Mount Li",
+            "past",
+            "efforts",
+            "seemed",
+            "yield",
+            "harvest",
+            "continue",
+            "persevering",
+            "this",
+            "year",
+            "will"
+          ]
+        }
+      }
+    }
+  ],
+  "processing_log": [
+    {
+      "timestamp": "2025-07-31T14:53:38.551Z",
+      "level": "info",
+      "message": "开始处理第7签数据"
+    },
+    {
+      "timestamp": "2025-07-31T14:53:38.552Z",
+      "level": "info",
+      "message": "第7签处理完成，生成3个语言版本"
+    },
+    {
+      "timestamp": "2025-07-31T14:53:38.552Z",
+      "level": "info",
+      "message": "开始处理第8签数据"
+    },
+    {
+      "timestamp": "2025-07-31T14:53:38.552Z",
+      "level": "info",
+      "message": "第8签处理完成，生成3个语言版本"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "network": "BSC Testnet",
+  "chainId": 97,
+  "contractAddress": "0xFC78beF935ce081f42cC3dA5e0F65adC0fF555a7",
+  "deployerAddress": "0x3d72E9Ad5A0Ae1B0911335238822F4eFa2e8F957",
+  "deploymentHash": "0x7c84785b38d44f934efd4a6c29aa2551251184c9c6d6396410fe7b5850c225bb",
+  "timestamp": "2025-07-15T02:32:22.412Z",
+  "config": {
+    "checkinCost": "0.0002",
+    "platformTreasury": "0x6280279d2aD1627552C56088b2A49397be954942",
+    "owner": "0x3d72E9Ad5A0Ae1B0911335238822F4eFa2e8F957",
+    "lastUpdated": "2025-01-16T00:00:00.000Z"
+  }
+}

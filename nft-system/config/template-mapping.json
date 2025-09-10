@@ -1,0 +1,99 @@
+{
+  "templateMapping": {
+    "legendary": {
+      "name": "传奇级",
+      "nameEn": "Legendary",
+      "description": "极品上上签，帝王金辉主题",
+      "templateFile": "legendary.svg",
+      "colorScheme": {
+        "primary": "#FFD700",
+        "secondary": "#8B0000",
+        "accent": "#FFA500"
+      },
+      "rarityScore": 10000,
+      "expectedCount": 2,
+      "specialEffects": [
+        "golden_glow",
+        "dragon_pattern",
+        "star_animation"
+      ]
+    },
+    "epic": {
+      "name": "史诗级",
+      "nameEn": "Epic", 
+      "description": "上吉签文，紫气东来主题",
+      "templateFile": "epic.svg",
+      "colorScheme": {
+        "primary": "#9D4EDD",
+        "secondary": "#4CC9F0",
+        "accent": "#7209B7"
+      },
+      "rarityScore": 5000,
+      "expectedCount": 9,
+      "specialEffects": [
+        "purple_glow",
+        "cloud_pattern",
+        "pearl_shine"
+      ]
+    },
+    "rare": {
+      "name": "稀有级",
+      "nameEn": "Rare",
+      "description": "中平签文，青锋如意主题", 
+      "templateFile": "rare.svg",
+      "colorScheme": {
+        "primary": "#2196F3",
+        "secondary": "#81C784",
+        "accent": "#1976D2"
+      },
+      "rarityScore": 1000,
+      "expectedCount": 89,
+      "specialEffects": [
+        "soft_glow",
+        "wave_pattern",
+        "bamboo_decoration"
+      ]
+    }
+  },
+  
+  "templateSettings": {
+    "canvas": {
+      "width": 400,
+      "height": 600,
+      "dpi": 300,
+      "format": "png"
+    },
+    "fonts": {
+      "chinese_title": "华文行楷",
+      "chinese_content": "华文中宋",
+      "english": "Georgia",
+      "metadata": "Arial"
+    },
+    "layout": {
+      "header_height": 80,
+      "content_height": 400,
+      "footer_height": 40,
+      "padding": 20,
+      "border_radius": 15
+    }
+  },
+
+  "contentRules": {
+    "title_max_length": 20,
+    "poem_max_length": 100,
+    "interpretation_max_length": 80,
+    "symbolism_max_length": 60,
+    "categories_display_count": 3
+  },
+
+  "brandingElements": {
+    "logo_text": "AstroZi",
+    "collection_name": "关帝灵签",
+    "collection_symbol": "GDS",
+    "website_url": "https://astrozi.com",
+    "social_links": {
+      "discord": "https://discord.gg/astrozi",
+      "twitter": "https://twitter.com/astroziai"
+    }
+  }
+}

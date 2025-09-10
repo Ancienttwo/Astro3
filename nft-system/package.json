@@ -1,0 +1,57 @@
+{
+  "name": "guandi-nft-generator",
+  "version": "1.0.0",
+  "description": "关帝灵签 NFT 动态生成系统 - 基于稀有度模板批量生成100个独特NFT",
+  "main": "src/batch-processor.js",
+  "scripts": {
+    "install-deps": "npm install",
+    "generate-all": "node scripts/generate-all.js",
+    "generate-preview": "node scripts/generate-preview.js",
+    "verify-output": "node scripts/verify-output.js",
+    "clean-output": "rm -rf output/* && mkdir -p output/images output/metadata",
+    "test-templates": "node scripts/test-templates.js",
+    "dev": "node scripts/generate-preview.js"
+  },
+  "keywords": [
+    "nft",
+    "guandi",
+    "fortune-slip",
+    "web3",
+    "astrozi",
+    "chinese-culture",
+    "template-engine",
+    "svg-generator"
+  ],
+  "author": "AstroZi Team",
+  "license": "MIT",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.3",
+    "canvas": "^2.11.2",
+    "dotenv": "^16.3.1",
+    "fs-extra": "^11.2.0",
+    "handlebars": "^4.7.8",
+    "sharp": "^0.33.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/astrozi/guandi-nft-generator"
+  },
+  "bugs": {
+    "url": "https://github.com/astrozi/guandi-nft-generator/issues"
+  },
+  "homepage": "https://astrozi.com/guandi",
+  "config": {
+    "output_dir": "./output",
+    "template_dir": "./templates",
+    "image_format": "png",
+    "image_quality": 100,
+    "concurrent_limit": 5
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "network": "BSC Mainnet",
+  "chainId": 56,
+  "contractAddress": "0x3b016F5A7C462Fe51B691Ef18559DE720D9B452F",
+  "deployerAddress": "0xa668719F1a41DA5fA9FF924379713C383E15fd90",
+  "deploymentHash": "0x21af1128675e8468a82cffc0ee619152df3c8f5096e1482194898c7628e4786e",
+  "blockNumber": 54218393,
+  "gasUsed": "2084597",
+  "gasPrice": "5000000000",
+  "timestamp": "2025-07-16T10:27:44.195Z",
+  "config": {
+    "checkinCost": "0.0002",
+    "platformTreasury": "0x6280279d2aD1627552C56088b2A49397be954942",
+    "owner": "0xa668719F1a41DA5fA9FF924379713C383E15fd90"
+  }
+}

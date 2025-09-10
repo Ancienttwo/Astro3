@@ -1,0 +1,818 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 日语字体优化 */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;500;600;700&display=swap');
+
+@layer base {
+  :root {
+    /* 明亮背景色 */
+    --background: 0 0% 100%; /* 纯白背景 */
+    --foreground: 210 20% 11%; /* 深灰文字 */
+    
+    /* 卡片样式 */
+    --card: 0 0% 100%; /* 白色卡片 */
+    --card-foreground: 210 20% 11%;
+    
+    /* 弹窗样式 */
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 20% 11%;
+    
+    /* 皇家紫色主色调 */
+    --primary: 262 80% 58%; /* 皇家紫 #7C3AED */
+    --primary-foreground: 0 0% 100%; /* 白色文字 */
+    
+    /* 金黄色辅助色 */
+    --secondary: 248 6% 93%; /* 淡灰背景 */
+    --secondary-foreground: 210 20% 11%;
+    
+    /* 静音色彩 */
+    --muted: 248 6% 93%; /* 淡灰 */
+    --muted-foreground: 215 13% 34%; /* 中灰文字 */
+    
+    /* 金黄色强调色 */
+    --accent: 45 93% 47%; /* 金黄色 #F59E0B */
+    --accent-foreground: 0 0% 100%; /* 白色文字 */
+    
+    /* 错误色 */
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    
+    /* 边框和输入框 */
+    --border: 262 50% 90%; /* 淡紫色边框 */
+    --input: 0 0% 100%; /* 白色输入框 */
+    --ring: 262 80% 58%; /* 紫色聚焦环 */
+    
+    /* 图表色彩 */
+    --chart-1: 262 80% 58%;
+    --chart-2: 45 93% 47%;
+    --chart-3: 210 20% 45%;
+    --chart-4: 280 100% 70%;
+    --chart-5: 30 100% 50%;
+    
+    --radius: 0.75rem; /* 增加圆角以适应明亮主题 */
+    
+    /* 侧边栏样式 */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 210 20% 11%;
+    --sidebar-primary: 262 80% 58%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 248 6% 93%;
+    --sidebar-accent-foreground: 210 20% 11%;
+    --sidebar-border: 262 50% 90%;
+    --sidebar-ring: 262 80% 58%;
+
+    /* Brandkit 亮色模式变量 */
+    --bg-color: 255 255 255; /* #FFFFFF */
+    --primary-text-color: 61 11 91; /* #3D0B5B */
+    --secondary-text-color: 51 51 51; /* #333333 */
+    --accent-color: 251 203 10; /* #FBCB0A */
+    --card-bg: 255 255 255 / 0.95; /* rgba(255,255,255,0.95) */
+    --logo-color: 66 8 104; /* #420868 */
+  }
+  
+  .dark {
+    /* 为紫微斗数应用优化的暗色主题 */
+    --background: 240 10% 8%; /* 深蓝灰背景，更有神秘感 */
+    --foreground: 240 5% 95%; /* 淡灰白文字 */
+    
+    /* 卡片样式 */
+    --card: 240 10% 12%; /* 深色卡片背景 */
+    --card-foreground: 240 5% 95%;
+    
+    /* 弹窗样式 */
+    --popover: 240 10% 12%;
+    --popover-foreground: 240 5% 95%;
+    
+    /* 紫色主色调 - 暗色下更亮 */
+    --primary: 262 80% 70%; /* 亮紫色 */
+    --primary-foreground: 240 10% 12%; /* 深色文字 */
+    
+    /* 金色辅助色 */
+    --secondary: 240 8% 18%; /* 深灰背景 */
+    --secondary-foreground: 240 5% 95%;
+    
+    /* 静音色彩 */
+    --muted: 240 8% 18%; /* 深灰 */
+    --muted-foreground: 240 5% 70%; /* 中灰文字 */
+    
+    /* 金黄色强调色 - 暗色下更暖 */
+    --accent: 45 93% 60%; /* 温暖金色 */
+    --accent-foreground: 240 10% 12%; /* 深色文字 */
+    
+    /* 错误色 */
+    --destructive: 0 75% 60%; /* 亮红色 */
+    --destructive-foreground: 0 0% 98%;
+    
+    /* 边框和输入框 */
+    --border: 240 8% 20%; /* 深灰边框 */
+    --input: 240 8% 18%; /* 深色输入框 */
+    --ring: 262 80% 70%; /* 紫色聚焦环 */
+    
+    /* 图表色彩 - 暗色下更鲜艳 */
+    --chart-1: 262 80% 70%; /* 紫色 */
+    --chart-2: 45 93% 60%; /* 金色 */
+    --chart-3: 195 100% 65%; /* 青色 */
+    --chart-4: 120 60% 65%; /* 绿色 */
+    --chart-5: 30 100% 65%; /* 橙色 */
+    
+    /* 侧边栏样式 */
+    --sidebar-background: 240 10% 10%;
+    --sidebar-foreground: 240 5% 90%;
+    --sidebar-primary: 262 80% 70%;
+    --sidebar-primary-foreground: 240 10% 12%;
+    --sidebar-accent: 240 8% 16%;
+    --sidebar-accent-foreground: 240 5% 90%;
+    --sidebar-border: 240 8% 20%;
+    --sidebar-ring: 262 80% 70%;
+
+    /* Brandkit 暗色模式变量 */
+    --bg-color: 26 34 66; /* #1A2242 */
+    --primary-text-color: 251 203 10; /* #FBCB0A */
+    --secondary-text-color: 224 224 224; /* #E0E0E0 */
+    --accent-color: 251 203 10; /* #FBCB0A */
+    --card-bg: 0 0 0 / 0.2; /* rgba(0,0,0,0.2) */
+    --logo-color: 251 203 10; /* #FBCB0A */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+    line-height: 1.7;
+    letter-spacing: 0.01em; /* 轻微字间距提升可读性 */
+    font-weight: 400;
+  }
+  
+  /* 默认字体（中文/英文） */
+  body:not([lang="ja"]) {
+    font-family: "Rajdhani", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", 
+                 "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", 
+                 Helvetica, Arial, sans-serif;
+  }
+  
+  /* 日语字体优化 */
+  body[lang="ja"], 
+  [lang="ja"],
+  .font-japanese {
+    font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans", 
+                 "Yu Gothic Medium", "Meiryo", "MS PGothic", sans-serif;
+    line-height: 1.8; /* 日语需要更大的行间距 */
+    letter-spacing: 0.02em; /* 稍大的字间距提高可读性 */
+  }
+  
+  /* 优化文字排版 - 保持原有风格但提升可读性 */
+  h1, h2, h3, h4, h5, h6 {
+    line-height: 1.4;
+    margin-bottom: 0.75em;
+    color: hsl(var(--primary));
+    font-weight: 600;
+  }
+  
+  /* 默认标题字体 */
+  h1:not([lang="ja"]), h2:not([lang="ja"]), h3:not([lang="ja"]), 
+  h4:not([lang="ja"]), h5:not([lang="ja"]), h6:not([lang="ja"]) {
+    font-family: "Rajdhani", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", 
+                 "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  }
+  
+  /* 日语标题字体优化 */
+  h1[lang="ja"], h2[lang="ja"], h3[lang="ja"], 
+  h4[lang="ja"], h5[lang="ja"], h6[lang="ja"],
+  .japanese-heading {
+    font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans", 
+                 "Yu Gothic Medium", "Meiryo", sans-serif;
+    line-height: 1.5; /* 日语标题需要更大行间距 */
+    font-weight: 500; /* 日语标题使用中等字重 */
+    letter-spacing: 0.025em;
+  }
+  
+  p {
+    line-height: 1.7;
+    margin-bottom: 1.25em;
+    color: hsl(var(--foreground));
+    font-weight: 400;
+  }
+  
+  /* 默认段落字体 */
+  p:not([lang="ja"]) {
+    font-family: "Rajdhani", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", 
+                 "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  }
+  
+  /* 日语段落字体优化 */
+  p[lang="ja"],
+  .japanese-text {
+    font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans", 
+                 "Yu Gothic Medium", "Meiryo", sans-serif;
+    line-height: 1.8; /* 日语段落需要更大行间距 */
+    letter-spacing: 0.02em;
+    text-align: justify; /* 日语文本对齐 */
+    text-justify: inter-ideograph; /* 中日文字符对齐优化 */
+  }
+  
+  /* 专业文字内容排版 */
+  .prose {
+    max-width: 65ch;
+    line-height: 1.75;
+    color: hsl(var(--foreground));
+  }
+  
+  /* 默认prose字体 */
+  .prose:not([lang="ja"]) {
+    font-family: "Rajdhani", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", 
+                 "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  }
+  
+  /* 日语prose字体优化 */
+  .prose[lang="ja"] {
+    font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans", 
+                 "Yu Gothic Medium", "Meiryo", sans-serif;
+    line-height: 1.9; /* 日语长文本需要更大行间距 */ 
+    max-width: 55ch; /* 日语字符宽度调整 */
+    letter-spacing: 0.02em;
+  }
+  
+  .prose p {
+    margin-bottom: 1.5em;
+    color: hsl(var(--foreground) / 0.87);
+    font-weight: 400;
+  }
+  
+  /* 日语prose段落优化 */
+  .prose[lang="ja"] p {
+    line-height: 1.9;
+    margin-bottom: 1.6em;
+    text-align: justify;
+    text-justify: inter-ideograph;
+  }
+  
+  .prose h1, .prose h2, .prose h3 {
+    color: hsl(var(--primary));
+    margin-top: 2em;
+    margin-bottom: 1em;
+    font-weight: 600;
+  }
+  
+  .prose ul, .prose ol {
+    margin: 1.5em 0;
+    padding-left: 1.5em;
+  }
+  
+  .prose li {
+    margin-bottom: 0.5em;
+    line-height: 1.6;
+    font-weight: 400;
+  }
+}
+
+@layer utilities {
+  .bg-gradient-conic {
+    background-image: conic-gradient(var(--tw-gradient-stops));
+  }
+
+  .font-rajdhani {
+    font-family: "Rajdhani", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", 
+                 "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+
+  .font-josefin {
+    font-family: "Rajdhani", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", 
+                 "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+
+  .font-noto {
+    font-family: "Rajdhani", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", 
+                 "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    font-weight: 400;
+  }
+
+  /* 皇家主题卡片样式 */
+  .royal-card {
+    background: white;
+    border: 1px solid hsl(var(--border));
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    transition: all 0.2s ease-in-out;
+  }
+  
+  .royal-card:hover {
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    border-color: hsl(var(--primary) / 0.3);
+    transform: translateY(-2px);
+  }
+  
+  /* 专业按钮样式 */
+  .btn-primary {
+    background: hsl(var(--primary));
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+    font-family: "Rajdhani", sans-serif;
+  }
+  
+  .btn-primary:hover {
+    background: hsl(var(--primary) / 0.9);
+    transform: translateY(-1px);
+  }
+  
+  .btn-secondary {
+    background: hsl(var(--accent));
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+    font-family: "Rajdhani", sans-serif;
+  }
+  
+  .btn-secondary:hover {
+    background: hsl(var(--accent) / 0.9);
+    transform: translateY(-1px);
+  }
+
+  /* 优雅分割线 */
+  .section-divider {
+    border-top: 1px solid hsl(var(--border));
+    margin: 2.5rem 0;
+  }
+  
+  /* 文字层次 - 清晰可读 */
+  .text-hierarchy-1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: hsl(var(--primary));
+    margin-bottom: 1rem;
+    font-family: "Rajdhani", sans-serif;
+  }
+  
+  .text-hierarchy-2 {
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: hsl(var(--primary));
+    margin-bottom: 0.75rem;
+    font-family: "Rajdhani", sans-serif;
+  }
+
+  .text-hierarchy-3 {
+    font-size: 1rem;
+    font-weight: 500;
+    color: hsl(var(--foreground));
+    margin-bottom: 0.5rem;
+    font-family: "Rajdhani", sans-serif;
+  }
+  
+  .text-muted {
+    color: hsl(var(--muted-foreground));
+    font-size: 0.875rem;
+    font-family: "Rajdhani", sans-serif;
+  }
+
+  /* 保留星级评分样式 */
+  .star-rating {
+    display: flex;
+    gap: 4px;
+  }
+  
+  .star-filled {
+    color: hsl(var(--accent));
+  }
+
+  .star-empty {
+    color: hsl(var(--muted-foreground));
+  }
+  
+  /* 美丽的浮动动画效果 */
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+  
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  /* 发光效果 */
+  .glow-effect {
+    box-shadow: 0 0 30px rgba(124, 58, 237, 0.3);
+  }
+  
+  .glow-effect:hover {
+    box-shadow: 0 0 40px rgba(124, 58, 237, 0.4);
+  }
+  
+  .glow-effect-orange {
+    box-shadow: 0 0 30px rgba(245, 158, 11, 0.3);
+  }
+  
+  .glow-effect-orange:hover {
+    box-shadow: 0 0 40px rgba(245, 158, 11, 0.4);
+  }
+}
+
+/* 日语排版专用工具类 */
+@layer utilities {
+  /* 日语字体类 */
+  .font-noto-sans-jp {
+    font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans", 
+                 "Yu Gothic Medium", "Meiryo", "MS PGothic", sans-serif;
+  }
+  
+  .font-noto-serif-jp {
+    font-family: "Noto Serif JP", "Hiragino Mincho ProN", "Yu Mincho", 
+                 "MS PMincho", serif;
+  }
+  
+  /* 日语行间距优化 */
+  .leading-japanese {
+    line-height: 1.8;
+  }
+  
+  .leading-japanese-tight {
+    line-height: 1.6;
+  }
+  
+  .leading-japanese-loose {
+    line-height: 2.0;
+  }
+  
+  /* 日语字间距优化 */
+  .tracking-japanese {
+    letter-spacing: 0.02em;
+  }
+  
+  .tracking-japanese-tight {
+    letter-spacing: 0.01em;
+  }
+  
+  .tracking-japanese-wide {
+    letter-spacing: 0.04em;
+  }
+  
+  /* 日语文本对齐 */
+  .text-justify-japanese {
+    text-align: justify;
+    text-justify: inter-ideograph;
+  }
+  
+  /* 日语垂直排版（当需要时） */
+  .writing-vertical-jp {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+  }
+  
+  /* 日语横向排版（默认） */
+  .writing-horizontal-jp {
+    writing-mode: horizontal-tb;
+    text-orientation: mixed;
+  }
+  
+  /* 日语标点符号优化 */
+  .hanging-punctuation-jp {
+    hanging-punctuation: allow-end;
+  }
+  
+  /* 日语数字和英文字符处理 */
+  .text-combine-upright-jp {
+    text-combine-upright: all;
+  }
+  
+  /* 日语文字大小优化 */
+  .text-size-japanese-sm {
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.8;
+  }
+  
+  .text-size-japanese-base {
+    font-size: 1rem; /* 16px */
+    line-height: 1.8;
+  }
+  
+  .text-size-japanese-lg {
+    font-size: 1.125rem; /* 18px */
+    line-height: 1.7;
+  }
+  
+  .text-size-japanese-xl {
+    font-size: 1.25rem; /* 20px */
+    line-height: 1.6;
+  }
+  
+  /* 日语强调样式 */
+  .emphasis-japanese {
+    text-emphasis: filled circle;
+    text-emphasis-position: over right;
+  }
+  
+  .emphasis-japanese-dot {
+    text-emphasis: filled dot;
+    text-emphasis-position: over right;
+  }
+  
+  /* 日语ruby注音支持 */
+  .ruby-japanese {
+    ruby-align: space-around;
+    ruby-position: over;
+  }
+  
+  /* 日语卡片和容器优化 */
+  .card-japanese {
+    border-radius: 8px;
+    padding: 1.5rem;
+    line-height: 1.8;
+    letter-spacing: 0.02em;
+  }
+  
+  /* 日语按钮文字优化 */
+  .btn-japanese {
+    font-size: 0.9rem;
+    letter-spacing: 0.025em;
+    font-weight: 500;
+  }
+  
+  /* 日语表单输入优化 */
+  .input-japanese {
+    font-size: 1rem;
+    line-height: 1.6;
+    letter-spacing: 0.01em;
+  }
+  
+  /* 日语标题层级优化 */
+  .heading-japanese-1 {
+    font-size: 2.25rem;
+    line-height: 1.4;
+    font-weight: 600;
+    letter-spacing: 0.025em;
+  }
+  
+  .heading-japanese-2 {
+    font-size: 1.875rem;
+    line-height: 1.4;
+    font-weight: 500;
+    letter-spacing: 0.025em;
+  }
+  
+  .heading-japanese-3 {
+    font-size: 1.5rem;
+    line-height: 1.5;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+  
+  .heading-japanese-4 {
+    font-size: 1.25rem;
+    line-height: 1.5;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+  
+  /* 日语列表优化 */
+  .list-japanese {
+    line-height: 1.8;
+    letter-spacing: 0.02em;
+  }
+  
+  .list-japanese li {
+    margin-bottom: 0.75rem;
+  }
+  
+  /* 响应式日语排版 */
+  @media (max-width: 640px) {
+    .responsive-japanese {
+      font-size: 0.9rem;
+      line-height: 1.8;
+      letter-spacing: 0.015em;
+    }
+  }
+  
+  @media (min-width: 641px) and (max-width: 1024px) {
+    .responsive-japanese {
+      font-size: 1rem;
+      line-height: 1.8;
+      letter-spacing: 0.02em;
+    }
+  }
+  
+  @media (min-width: 1025px) {
+    .responsive-japanese {
+      font-size: 1.1rem;
+      line-height: 1.8;
+      letter-spacing: 0.02em;
+    }
+  }
+
+  /* 表单和输入框优化 */
+  .form-clean input,
+  .form-clean textarea,
+  .form-clean select {
+    border: 1px solid hsl(var(--border));
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    background: white;
+    font-family: "Rajdhani", sans-serif;
+    font-weight: 400;
+  }
+  
+  .form-clean input:focus,
+  .form-clean textarea:focus,
+  .form-clean select:focus {
+    outline: none;
+    border-color: hsl(var(--primary));
+    box-shadow: 0 0 0 3px hsl(var(--primary) / 0.1);
+  }
+  
+  /* 响应式文字大小 */
+  @media (max-width: 640px) {
+    h1 { font-size: 1.875rem; }
+    h2 { font-size: 1.5rem; }
+    h3 { font-size: 1.25rem; }
+  }
+
+  /* 滚动条隐藏样式 */
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;     /* Firefox */
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;            /* Chrome, Safari and Opera */
+  }
+  
+  /* 自定义滚动条样式 - 美观且实用 */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(156 163 175) transparent;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar {
+    height: 6px;
+    width: 6px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 3px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: rgb(156 163 175);
+    border-radius: 3px;
+    transition: background 0.2s ease;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: rgb(107 114 128);
+  }
+  
+  /* 暗色主题下的滚动条 */
+  .dark .scrollbar-thin {
+    scrollbar-color: rgb(75 85 99) transparent;
+  }
+  
+  .dark .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: rgb(75 85 99);
+  }
+  
+  .dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: rgb(107 114 128);
+  }
+  
+  /* 专门为八字大运和流年优化的滚动条 */
+  .bazi-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(124, 58, 237, 0.5) transparent;
+    scroll-behavior: smooth;
+  }
+  
+  .bazi-scroll::-webkit-scrollbar {
+    height: 4px;
+    width: 4px;
+  }
+  
+  .bazi-scroll::-webkit-scrollbar-track {
+    background: rgba(124, 58, 237, 0.1);
+    border-radius: 2px;
+  }
+  
+  .bazi-scroll::-webkit-scrollbar-thumb {
+    background: rgba(124, 58, 237, 0.5);
+    border-radius: 2px;
+    transition: all 0.2s ease;
+  }
+  
+  .bazi-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(124, 58, 237, 0.8);
+  }
+  
+  /* 暗色主题下的八字滚动条 */
+  .dark .bazi-scroll {
+    scrollbar-color: rgba(245, 158, 11, 0.6) transparent;
+  }
+  
+  .dark .bazi-scroll::-webkit-scrollbar-track {
+    background: rgba(245, 158, 11, 0.1);
+  }
+  
+  .dark .bazi-scroll::-webkit-scrollbar-thumb {
+    background: rgba(245, 158, 11, 0.6);
+  }
+  
+  .dark .bazi-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(245, 158, 11, 0.8);
+  }
+  
+  /* 全面的字体统一规则 - 确保所有元素都使用Rajdhani */
+  * {
+    font-family: "Rajdhani", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", 
+                 "Hiragino Sans GB", "Microsoft YaHei", sans-serif !important;
+  }
+  
+  /* 按钮和交互元素 */
+  button, .btn, input, textarea, select {
+    font-weight: 500;
+  }
+  
+  /* 导航和菜单元素 */
+  nav, .nav, .menu {
+    font-weight: 500;
+  }
+  
+  /* 文本元素 */
+  span, div, label, a, strong, em, small {
+    font-weight: inherit;
+  }
+  
+  /* 代码元素保持等宽字体 */
+  code, pre {
+    font-family: "Fira Code", "Consolas", "Monaco", monospace !important;
+  }
+  
+  /* 表格元素 */
+  table, th, td {
+    font-weight: inherit;
+  }
+  
+  /* 列表元素 */
+  ul, ol, li, dl, dt, dd {
+    font-weight: inherit;
+  }
+  
+  /* Logo滤镜 - 暗模式下变为黄色 */
+  .logo-filter {
+    transition: filter 0.3s ease;
+  }
+  
+  .dark .logo-filter {
+    filter: brightness(0) saturate(100%) invert(70%) sepia(99%) saturate(1142%) hue-rotate(0deg) brightness(104%) contrast(101%);
+  }
+  
+  /* 移动端安全区域支持 */
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .safe-left {
+    padding-left: env(safe-area-inset-left);
+  }
+  
+  .safe-right {
+    padding-right: env(safe-area-inset-right);
+  }
+  
+  /* 移动端底部导航栏优化 */
+  .mobile-bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    border-top: 1px solid hsl(var(--border));
+    z-index: 50;
+    padding: 0.5rem;
+    padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
+  }
+}

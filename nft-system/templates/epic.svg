@@ -1,0 +1,162 @@
+<svg width="400" height="600" viewBox="0 0 400 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- 史诗级渐变背景 -->
+    <linearGradient id="epicGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#9D4EDD;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#7209B7;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4CC9F0;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- 紫色边框渐变 -->
+    <linearGradient id="purpleBorder" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#9D4EDD;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#7209B7;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#9D4EDD;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- 紫色发光效果 -->
+    <filter id="purpleGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- 紫色文字效果 -->
+    <filter id="purpleText" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="1" dy="1" stdDeviation="1" flood-color="#2A0845"/>
+    </filter>
+    
+    <!-- 云纹图案 -->
+    <pattern id="cloudPattern" patternUnits="userSpaceOnUse" width="40" height="40" patternTransform="rotate(45)">
+      <circle cx="20" cy="20" r="15" fill="none" stroke="#9D4EDD" stroke-width="0.5" opacity="0.3"/>
+    </pattern>
+  </defs>
+  
+  <!-- 主背景 -->
+  <rect width="400" height="600" fill="url(#epicGradient)" rx="15" ry="15"/>
+  
+  <!-- 云纹装饰背景 -->
+  <rect width="400" height="600" fill="url(#cloudPattern)" opacity="0.2" rx="15" ry="15"/>
+  
+  <!-- 紫色边框 -->
+  <rect x="5" y="5" width="390" height="590" fill="none" stroke="url(#purpleBorder)" stroke-width="2" rx="12" ry="12" filter="url(#purpleGlow)"/>
+  
+  <!-- 装饰祥云 -->
+  <g opacity="0.4">
+    <ellipse cx="80" cy="100" rx="25" ry="15" fill="none" stroke="#9D4EDD" stroke-width="1.5"/>
+    <ellipse cx="320" cy="200" rx="20" ry="12" fill="none" stroke="#7209B7" stroke-width="1.5"/>
+    <ellipse cx="120" cy="480" rx="30" ry="18" fill="none" stroke="#4CC9F0" stroke-width="1.5"/>
+  </g>
+  
+  <!-- 头部区域 -->
+  <rect x="20" y="20" width="360" height="80" fill="rgba(157,78,221,0.2)" rx="8" ry="8"/>
+  
+  <!-- 稀有度标识 -->
+  <text x="200" y="45" text-anchor="middle" font-family="华文行楷, serif" font-size="18" fill="#2A0845" font-weight="bold" filter="url(#purpleText)">
+    史诗 · EPIC
+  </text>
+  
+  <!-- 签号 -->
+  <text x="200" y="70" text-anchor="middle" font-family="华文行楷, serif" font-size="24" fill="#2A0845" font-weight="bold" filter="url(#purpleText)">
+    {{formatSlipNumber slipNumber}}
+  </text>
+  
+  <!-- AstroZi Logo区域 -->
+  <rect x="320" y="25" width="60" height="20" fill="rgba(42,8,69,0.8)" rx="10" ry="10"/>
+  <text x="350" y="38" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#9D4EDD" font-weight="bold">
+    AstroZi
+  </text>
+  
+  <!-- 主体内容区域 -->
+  <rect x="20" y="120" width="360" height="400" fill="rgba(255,255,255,0.95)" rx="8" ry="8" stroke="#9D4EDD" stroke-width="2"/>
+  
+  <!-- 签文标题 -->
+  <text x="200" y="150" text-anchor="middle" font-family="华文行楷, serif" font-size="20" fill="#7209B7" font-weight="bold">
+    {{title}}
+  </text>
+  
+  <!-- 英文标题 -->
+  <text x="200" y="170" text-anchor="middle" font-family="Georgia, serif" font-size="12" fill="#666" font-style="italic">
+    {{titleEn}}
+  </text>
+  
+  <!-- 分隔线 -->
+  <line x1="40" y1="185" x2="360" y2="185" stroke="#9D4EDD" stroke-width="2"/>
+  
+  <!-- 吉凶等级 -->
+  <text x="200" y="205" text-anchor="middle" font-family="华文中宋, serif" font-size="16" fill="#7209B7" font-weight="bold">
+    {{formatFortuneLevel fortuneLevel}}
+  </text>
+  
+  <!-- 签诗内容 -->
+  <foreignObject x="40" y="220" width="320" height="120">
+    <div xmlns="http://www.w3.org/1999/xhtml" style="font-family: 华文中宋, serif; font-size: 14px; line-height: 1.6; color: #333; text-align: center; padding: 10px;">
+      {{truncate poem 100}}
+    </div>
+  </foreignObject>
+  
+  <!-- 古典概述 -->
+  <foreignObject x="40" y="350" width="320" height="80">
+    <div xmlns="http://www.w3.org/1999/xhtml" style="font-family: 华文中宋, serif; font-size: 12px; line-height: 1.5; color: #555; padding: 10px;">
+      <strong>古典概述：</strong>{{truncate interpretation 80}}
+    </div>
+  </foreignObject>
+  
+  <!-- 现代寓意 -->
+  <foreignObject x="40" y="430" width="320" height="60">
+    <div xmlns="http://www.w3.org/1999/xhtml" style="font-family: 华文中宋, serif; font-size: 11px; line-height: 1.4; color: #666; padding: 10px;">
+      <strong>现代寓意：</strong>{{truncate symbolism 60}}
+    </div>
+  </foreignObject>
+  
+  <!-- 运势精选 -->
+  {{#if categories}}
+  <foreignObject x="40" y="490" width="320" height="30">
+    <div xmlns="http://www.w3.org/1999/xhtml" style="font-family: 华文中宋, serif; font-size: 10px; line-height: 1.3; color: #7209B7; padding: 5px;">
+      <strong>精选运势：</strong>
+      {{#each (slice categories 0 2)}}{{name}}{{#unless @last}}、{{/unless}}{{/each}}
+    </div>
+  </foreignObject>
+  {{/if}}
+  
+  <!-- 底部元数据区域 -->
+  <rect x="20" y="540" width="360" height="40" fill="rgba(157,78,221,0.3)" rx="8" ry="8"/>
+  
+  <!-- Mint信息 -->
+  <text x="50" y="558" font-family="Arial, sans-serif" font-size="10" fill="#2A0845" font-weight="bold">
+    #{{slipNumber}}/100
+  </text>
+  
+  <!-- 生成日期 -->
+  <text x="200" y="558" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#2A0845">
+    {{currentDate}}
+  </text>
+  
+  <!-- 品牌标识 -->
+  <text x="350" y="558" text-anchor="end" font-family="Arial, sans-serif" font-size="10" fill="#2A0845" font-weight="bold">
+    关帝灵签
+  </text>
+  
+  <!-- 装饰光点效果 -->
+  <g opacity="0.7">
+    <circle cx="60" cy="90" r="1.5" fill="#9D4EDD">
+      <animate attributeName="opacity" values="0.4;1;0.4" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="340" cy="150" r="1" fill="#7209B7">
+      <animate attributeName="opacity" values="0.6;1;0.6" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="90" cy="520" r="2" fill="#4CC9F0">
+      <animate attributeName="opacity" values="0.5;1;0.5" dur="2.5s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  
+  <!-- 边角装饰 -->
+  <g stroke="#9D4EDD" stroke-width="1" fill="none" opacity="0.5">
+    <path d="M30,30 L40,30 L40,40" />
+    <path d="M360,30 L370,30 L370,40" />
+    <path d="M30,570 L30,560 L40,560" />
+    <path d="M370,570 L370,560 L360,560" />
+  </g>
+</svg>

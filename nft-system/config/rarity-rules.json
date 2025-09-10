@@ -1,0 +1,137 @@
+{
+  "rarityRules": {
+    "mapping": {
+      "legendary": {
+        "criteria": {
+          "fortune_level": ["excellent"],
+          "special_slips": [1, 42],
+          "description": "仅限极品上上签中的顶级签文"
+        },
+        "weight": 10000,
+        "drop_rate": 0.02
+      },
+      "epic": {
+        "criteria": {
+          "fortune_level": ["good"],
+          "exclude_slips": [1, 42],
+          "description": "所有上吉签文"
+        },
+        "weight": 5000,
+        "drop_rate": 0.09
+      },
+      "rare": {
+        "criteria": {
+          "fortune_level": ["average", "caution", "warning"],
+          "description": "中平及以下签文"
+        },
+        "weight": 1000,
+        "drop_rate": 0.89
+      }
+    },
+
+    "validationRules": {
+      "total_supply": 100,
+      "expected_distribution": {
+        "legendary": 2,
+        "epic": 9,
+        "rare": 89
+      },
+      "tolerance": {
+        "legendary": 0,
+        "epic": 1,
+        "rare": 5
+      }
+    },
+
+    "specialCases": {
+      "guaranteed_legendary": [1, 42],
+      "guaranteed_epic": [],
+      "manual_overrides": {
+        "description": "手动指定特定签文的稀有度",
+        "overrides": {}
+      }
+    }
+  },
+
+  "qualityTiers": {
+    "legendary": {
+      "min_content_quality": 0.95,
+      "required_fields": [
+        "title",
+        "title_en", 
+        "poem",
+        "interpretation",
+        "historical_context",
+        "symbolism"
+      ],
+      "bonus_attributes": [
+        "historical_allusion",
+        "modern_relevance",
+        "cultural_significance"
+      ]
+    },
+    "epic": {
+      "min_content_quality": 0.85,
+      "required_fields": [
+        "title",
+        "title_en",
+        "poem", 
+        "interpretation",
+        "symbolism"
+      ],
+      "bonus_attributes": [
+        "categories",
+        "modern_interpretation"
+      ]
+    },
+    "rare": {
+      "min_content_quality": 0.70,
+      "required_fields": [
+        "title",
+        "poem",
+        "interpretation"
+      ],
+      "bonus_attributes": [
+        "categories"
+      ]
+    }
+  },
+
+  "rarityWeights": {
+    "content_completeness": 0.4,
+    "fortune_level": 0.3,
+    "historical_significance": 0.2,
+    "user_preference": 0.1
+  },
+
+  "marketingTiers": {
+    "legendary": {
+      "marketing_name": "帝王签",
+      "marketing_description": "千年难遇的极品上上签，承载帝王之运",
+      "expected_floor_price": "0.1 ETH",
+      "special_utility": [
+        "VIP社区访问权",
+        "专属解签服务",
+        "实体签文收藏品"
+      ]
+    },
+    "epic": {
+      "marketing_name": "祥瑞签",
+      "marketing_description": "上吉好运签文，紫气东来福运满",
+      "expected_floor_price": "0.05 ETH",
+      "special_utility": [
+        "高级社区权限",
+        "解签优先服务"
+      ]
+    },
+    "rare": {
+      "marketing_name": "如意签",
+      "marketing_description": "日常运势指引，青锋如意保平安",
+      "expected_floor_price": "0.02 ETH",
+      "special_utility": [
+        "基础社区权限",
+        "运势查询服务"
+      ]
+    }
+  }
+}

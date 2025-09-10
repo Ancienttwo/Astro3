@@ -1,0 +1,175 @@
+<svg width="400" height="600" viewBox="0 0 400 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- 稀有级渐变背景 -->
+    <linearGradient id="rareGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2196F3;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#1976D2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#81C784;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- 蓝色边框渐变 -->
+    <linearGradient id="blueBorder" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2196F3;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1976D2;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- 淡雅光效 -->
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- 蓝色文字效果 -->
+    <filter id="blueText" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="1" dy="1" stdDeviation="0.5" flood-color="#0D47A1"/>
+    </filter>
+    
+    <!-- 水波纹图案 -->
+    <pattern id="wavePattern" patternUnits="userSpaceOnUse" width="50" height="30">
+      <path d="M0,15 Q12.5,5 25,15 Q37.5,25 50,15" stroke="#2196F3" stroke-width="0.5" fill="none" opacity="0.3"/>
+    </pattern>
+    
+    <!-- 竹叶图案 -->
+    <g id="bambooLeaf">
+      <ellipse cx="0" cy="0" rx="8" ry="3" fill="none" stroke="#81C784" stroke-width="0.8" opacity="0.6"/>
+    </g>
+  </defs>
+  
+  <!-- 主背景 -->
+  <rect width="400" height="600" fill="url(#rareGradient)" rx="15" ry="15"/>
+  
+  <!-- 水波纹装饰背景 -->
+  <rect width="400" height="300" fill="url(#wavePattern)" opacity="0.3" rx="15" ry="15"/>
+  
+  <!-- 简约边框 -->
+  <rect x="5" y="5" width="390" height="590" fill="none" stroke="url(#blueBorder)" stroke-width="2" rx="12" ry="12"/>
+  
+  <!-- 竹叶装饰 -->
+  <g opacity="0.4">
+    <use href="#bambooLeaf" transform="translate(70,120) rotate(30)"/>
+    <use href="#bambooLeaf" transform="translate(330,300) rotate(-45)"/>
+    <use href="#bambooLeaf" transform="translate(100,450) rotate(60)"/>
+    <use href="#bambooLeaf" transform="translate(300,520) rotate(-30)"/>
+  </g>
+  
+  <!-- 头部区域 -->
+  <rect x="20" y="20" width="360" height="80" fill="rgba(33,150,243,0.15)" rx="8" ry="8"/>
+  
+  <!-- 稀有度标识 -->
+  <text x="200" y="45" text-anchor="middle" font-family="华文行楷, serif" font-size="18" fill="#0D47A1" font-weight="bold" filter="url(#blueText)">
+    稀有 · RARE
+  </text>
+  
+  <!-- 签号 -->
+  <text x="200" y="70" text-anchor="middle" font-family="华文行楷, serif" font-size="24" fill="#0D47A1" font-weight="bold" filter="url(#blueText)">
+    {{formatSlipNumber slipNumber}}
+  </text>
+  
+  <!-- AstroZi Logo区域 -->
+  <rect x="320" y="25" width="60" height="20" fill="rgba(13,71,161,0.8)" rx="10" ry="10"/>
+  <text x="350" y="38" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#2196F3" font-weight="bold">
+    AstroZi
+  </text>
+  
+  <!-- 主体内容区域 -->
+  <rect x="20" y="120" width="360" height="400" fill="rgba(255,255,255,0.95)" rx="8" ry="8" stroke="#2196F3" stroke-width="1"/>
+  
+  <!-- 签文标题 -->
+  <text x="200" y="150" text-anchor="middle" font-family="华文行楷, serif" font-size="20" fill="#1976D2" font-weight="bold">
+    {{title}}
+  </text>
+  
+  <!-- 英文标题 -->
+  <text x="200" y="170" text-anchor="middle" font-family="Georgia, serif" font-size="12" fill="#666" font-style="italic">
+    {{titleEn}}
+  </text>
+  
+  <!-- 分隔线 -->
+  <line x1="40" y1="185" x2="360" y2="185" stroke="#2196F3" stroke-width="1"/>
+  
+  <!-- 吉凶等级 -->
+  <text x="200" y="205" text-anchor="middle" font-family="华文中宋, serif" font-size="16" fill="#1976D2" font-weight="bold">
+    {{formatFortuneLevel fortuneLevel}}
+  </text>
+  
+  <!-- 签诗内容 -->
+  <foreignObject x="40" y="220" width="320" height="120">
+    <div xmlns="http://www.w3.org/1999/xhtml" style="font-family: 华文中宋, serif; font-size: 14px; line-height: 1.6; color: #333; text-align: center; padding: 10px;">
+      {{truncate poem 100}}
+    </div>
+  </foreignObject>
+  
+  <!-- 古典概述 -->
+  <foreignObject x="40" y="350" width="320" height="80">
+    <div xmlns="http://www.w3.org/1999/xhtml" style="font-family: 华文中宋, serif; font-size: 12px; line-height: 1.5; color: #555; padding: 10px;">
+      <strong>古典概述：</strong>{{truncate interpretation 80}}
+    </div>
+  </foreignObject>
+  
+  <!-- 现代寓意 -->
+  <foreignObject x="40" y="430" width="320" height="60">
+    <div xmlns="http://www.w3.org/1999/xhtml" style="font-family: 华文中宋, serif; font-size: 11px; line-height: 1.4; color: #666; padding: 10px;">
+      <strong>现代寓意：</strong>{{truncate symbolism 60}}
+    </div>
+  </foreignObject>
+  
+  <!-- 重点运势 -->
+  {{#if categories}}
+  <foreignObject x="40" y="490" width="320" height="30">
+    <div xmlns="http://www.w3.org/1999/xhtml" style="font-family: 华文中宋, serif; font-size: 10px; line-height: 1.3; color: #1976D2; padding: 5px;">
+      <strong>重点关注：</strong>
+      {{#each (slice categories 0 3)}}{{name}}{{#unless @last}}、{{/unless}}{{/each}}
+    </div>
+  </foreignObject>
+  {{/if}}
+  
+  <!-- 底部元数据区域 -->
+  <rect x="20" y="540" width="360" height="40" fill="rgba(33,150,243,0.2)" rx="8" ry="8"/>
+  
+  <!-- Mint信息 -->
+  <text x="50" y="558" font-family="Arial, sans-serif" font-size="10" fill="#0D47A1" font-weight="bold">
+    #{{slipNumber}}/100
+  </text>
+  
+  <!-- 生成日期 -->
+  <text x="200" y="558" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#0D47A1">
+    {{currentDate}}
+  </text>
+  
+  <!-- 品牌标识 -->
+  <text x="350" y="558" text-anchor="end" font-family="Arial, sans-serif" font-size="10" fill="#0D47A1" font-weight="bold">
+    关帝灵签
+  </text>
+  
+  <!-- 装饰水滴效果 -->
+  <g opacity="0.6">
+    <circle cx="80" cy="110" r="1" fill="#2196F3">
+      <animate attributeName="opacity" values="0.3;0.8;0.3" dur="4s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="320" cy="180" r="0.8" fill="#81C784">
+      <animate attributeName="opacity" values="0.5;1;0.5" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="120" cy="530" r="1.2" fill="#1976D2">
+      <animate attributeName="opacity" values="0.4;0.9;0.4" dur="3.5s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  
+  <!-- 简约几何边框装饰 -->
+  <g stroke="#2196F3" stroke-width="0.5" fill="none" opacity="0.7">
+    <rect x="25" y="25" width="15" height="15" rx="2"/>
+    <rect x="360" y="25" width="15" height="15" rx="2"/>
+    <rect x="25" y="560" width="15" height="15" rx="2"/>
+    <rect x="360" y="560" width="15" height="15" rx="2"/>
+  </g>
+  
+  <!-- 水纹动画 -->
+  <g opacity="0.3">
+    <circle cx="200" cy="300" r="50" fill="none" stroke="#2196F3" stroke-width="0.5">
+      <animate attributeName="r" values="50;70;50" dur="6s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.3;0.1;0.3" dur="6s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+</svg>

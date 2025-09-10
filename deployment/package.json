@@ -1,0 +1,24 @@
+{
+  "name": "astrozi-contract-deployment",
+  "version": "1.0.0",
+  "description": "AstroZi智能合约部署工具",
+  "main": "deploy-setup.js",
+  "scripts": {
+    "deploy:testnet": "npx hardhat run deploy-setup.js --network bscTestnet",
+    "deploy:mainnet": "npx hardhat run deploy-setup.js --network bscMainnet",
+    "verify": "npx hardhat verify --network bscTestnet",
+    "test": "npx hardhat test",
+    "compile": "npx hardhat compile",
+    "node": "npx hardhat node"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@nomicfoundation/hardhat-verify": "^2.0.0",
+    "@openzeppelin/contracts": "^5.0.0",
+    "hardhat": "^2.19.0",
+    "dotenv": "^16.3.1"
+  },
+  "keywords": ["blockchain", "smart-contract", "bsc", "astrozi"],
+  "author": "AstroZi Team",
+  "license": "MIT"
+}

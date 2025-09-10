@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <defs>
+    <linearGradient id="petalGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#9333ea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#6366f1;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- 透明背景 -->
+  
+  <!-- 简化的花朵图案 -->
+  <g transform="translate(16, 16)">
+    
+    <!-- 上方花瓣 -->
+    <ellipse cx="0" cy="-8" rx="2" ry="5" fill="url(#petalGradient)"/>
+    
+    <!-- 下方花瓣 -->
+    <ellipse cx="0" cy="8" rx="2" ry="5" fill="url(#petalGradient)"/>
+    
+    <!-- 左方花瓣 -->
+    <ellipse cx="-8" cy="0" rx="5" ry="2" fill="url(#petalGradient)"/>
+    
+    <!-- 右方花瓣 -->
+    <ellipse cx="8" cy="0" rx="5" ry="2" fill="url(#petalGradient)"/>
+    
+    <!-- 对角花瓣 -->
+    <ellipse cx="-6" cy="-6" rx="3" ry="4" fill="url(#petalGradient)" transform="rotate(-45 -6 -6)"/>
+    <ellipse cx="6" cy="-6" rx="3" ry="4" fill="url(#petalGradient)" transform="rotate(45 6 -6)"/>
+    <ellipse cx="-6" cy="6" rx="3" ry="4" fill="url(#petalGradient)" transform="rotate(45 -6 6)"/>
+    <ellipse cx="6" cy="6" rx="3" ry="4" fill="url(#petalGradient)" transform="rotate(-45 6 6)"/>
+    
+    <!-- 中心圆形 -->
+    <circle cx="0" cy="0" r="3" fill="url(#petalGradient)"/>
+    
+  </g>
+</svg> 
