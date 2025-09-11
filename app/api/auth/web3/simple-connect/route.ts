@@ -6,7 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { headers } from 'next/headers'
-import { ethers } from 'ethers'
+import { verifyMessage, isAddress } from 'viem'
 
 // Supabase Admin客户端
 const supabaseAdmin = createClient(
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
     }
     
     // 验证钱包地址格式（简单验证）
-    if (!/^0x[a-fA-F0-9]{40}$/.test(wallet_address)) {
+    if (!/^0x[a-fA-F0-9]{40}$/.test(wallet_address) || !isAddress(wallet_address as `0x${string}`)) {
       return NextResponse.json({
         success: false,
         error: '钱包地址格式无效',
@@ -87,15 +87,14 @@ export async function POST(request: NextRequest) {
           }, { status: 400 })
         }
         
-        // 验证签名
-        const recoveredAddress = ethers.verifyMessage(message, signature)
-        
-        if (recoveredAddress.toLowerCase() !== wallet_address.toLowerCase()) {
-          console.error('❌ Signature verification failed:', {
-            expected: wallet_address.toLowerCase(),
-            recovered: recoveredAddress.toLowerCase()
-          })
-          
+        // 验证签名（viem）
+        const ok = await verifyMessage({
+          address: wallet_address as `0x${string}`,
+          message,
+          signature: (signature.startsWith('0x') ? signature : `0x${signature}`) as `0x${string}`,
+        })
+        if (!ok) {
+          console.error('❌ Signature verification failed (viem)')
           return NextResponse.json({
             success: false,
             error: 'Invalid signature',

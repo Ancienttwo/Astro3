@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { verifyWeb3Auth } from '@/lib/auth';
+import { getMutualAidUser } from '@/lib/mutual-aid-auth';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -13,16 +13,16 @@ const supabase = createClient(
  */
 export async function GET(request: NextRequest) {
   try {
-    // 验证Web3身份
-    const authResult = await verifyWeb3Auth(request);
-    if (!authResult.success) {
+    // 认证用户
+    const user = await getMutualAidUser(request as any);
+    if (!user) {
       return NextResponse.json(
         {
           success: false,
           error: {
             code: 'AUTHENTICATION_REQUIRED',
             message: '需要Web3身份验证',
-            details: authResult.error,
+            details: 'No valid mutual-aid user',
           },
         },
         { status: 401 }
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
         created_at,
         role
       `)
-      .eq('id', authResult.userId)
+      .eq('id', user.id)
       .single();
 
     if (profileError || !userProfile) {
@@ -68,11 +68,11 @@ export async function GET(request: NextRequest) {
       nftData,
       recentActivity,
     ] = await Promise.all([
-      getUserRequests(authResult.userId),
-      getUserValidations(authResult.userId),
-      getUserRewards(authResult.userId),
-      getUserNFTs(authResult.userId),
-      getRecentActivity(authResult.userId),
+      getUserRequests(user.id),
+      getUserValidations(user.id),
+      getUserRewards(user.id),
+      getUserNFTs(user.id),
+      getRecentActivity(user.id),
     ]);
 
     // 计算综合统计
@@ -137,10 +137,10 @@ export async function GET(request: NextRequest) {
       recentActivity: recentActivity,
       
       // 排行榜位置
-      rankings: await getUserRankings(authResult.userId),
+      rankings: await getUserRankings(user.id),
       
       // 成就和徽章
-      achievements: await getUserAchievements(authResult.userId, comprehensiveStats),
+      achievements: await getUserAchievements(user.id, comprehensiveStats),
     };
 
     return NextResponse.json(response);
@@ -237,7 +237,7 @@ async function getUserRequests(userId: string) {
  */
 async function getUserValidations(userId: string) {
   try {
-    const { data: validations, error } = await supabase
+    const { data: validationsRaw, error } = await supabase
       .from('mutual_aid_validations')
       .select(`
         vote,
@@ -252,9 +252,23 @@ async function getUserValidations(userId: string) {
       `)
       .eq('validator_id', userId);
 
-    if (error || !validations) {
+    if (error || !validationsRaw) {
       return getDefaultValidationStats();
     }
+
+    type ValidationRecord = {
+      vote: 'approve' | 'reject';
+      confidence_score: number;
+      created_at: string;
+      request?: {
+        status?: string;
+        amount?: string;
+        category?: string;
+        severity_level?: number;
+      };
+    };
+
+    const validations = validationsRaw as unknown as ValidationRecord[];
 
     const now = new Date();
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
@@ -269,8 +283,8 @@ async function getUserValidations(userId: string) {
     validations.forEach(validation => {
       const finalStatus = validation.request?.status;
       if (
-        (validation.vote === 'approve' && ['approved', 'completed'].includes(finalStatus)) ||
-        (validation.vote === 'reject' && finalStatus === 'rejected')
+        (validation.vote === 'approve' && (['approved', 'completed'] as string[]).includes(finalStatus || '')) ||
+        (validation.vote === 'reject' && (finalStatus || '') === 'rejected')
       ) {
         correctValidations++;
       }
@@ -429,7 +443,7 @@ async function getRecentActivity(userId: string) {
         .limit(5),
     ]);
 
-    const activities = [];
+    const activities: any[] = [];
 
     // 添加申请活动
     if (requests.data) {
@@ -456,7 +470,7 @@ async function getRecentActivity(userId: string) {
           timestamp: validation.created_at,
           details: {
             id: validation.id,
-            requestAmount: validation.request?.amount,
+            requestAmount: (validation.request as any)?.amount,
           },
         });
       });

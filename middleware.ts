@@ -1,40 +1,80 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import {NextResponse} from 'next/server'
+import type {NextRequest} from 'next/server'
+import createIntlMiddleware from 'next-intl/middleware'
+
+// Configure locale handling via next-intl
+const intlMiddleware = createIntlMiddleware({
+  // Supported locales
+  locales: ['zh', 'en', 'ja'],
+  // Default locale without prefix
+  defaultLocale: 'zh',
+  localePrefix: 'as-needed'
+})
 
 export function middleware(request: NextRequest) {
-  const pathname = request.nextUrl.pathname
-  
-  // 检查路径是否已经包含语言前缀
-  const pathnameIsMissingLocale = !['/en', '/ja'].some(
-    (locale) => pathname.startsWith(locale) || pathname === locale
-  )
+  const { pathname } = request.nextUrl
 
-  // 如果是API路由、静态资源或特殊路径，直接通过
-  if (
-    pathname.startsWith('/api/') ||
-    pathname.startsWith('/_next/') ||
-    pathname.startsWith('/favicon.ico') ||
-    pathname.includes('.')
-  ) {
-    return
+  // If path looks like a static asset (has an extension), do not localize.
+  // Additionally, if it is locale-prefixed, rewrite to the root static path.
+  if (/\.[^/]+$/.test(pathname)) {
+    const segments = pathname.split('/')
+    const first = segments[1]
+    if (['en', 'zh', 'ja'].includes(first)) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/' + segments.slice(2).join('/')
+      return NextResponse.rewrite(url)
+    }
+    return NextResponse.next()
   }
 
-  // 重定向到默认语言（中文）不需要前缀
-  if (pathnameIsMissingLocale) {
-    // 对于根路径或中文路径，不需要重定向
-    return
+  // Delegate locale routing/detection to next-intl for non-static routes
+  const response = intlMiddleware(request)
+
+  // Preserve existing security headers
+  const isProd = process.env.NODE_ENV === 'production'
+  const securityHeaders: Record<string, string> = {
+    'X-XSS-Protection': '1; mode=block',
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'SAMEORIGIN',
+    'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
+    'Referrer-Policy': 'strict-origin-when-cross-origin',
+    'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=(self)'
   }
 
-  return NextResponse.next()
+  const devCsp = [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://cdn.jsdelivr.net https://*.supabase.co https://js.stripe.com",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "font-src 'self' https://fonts.gstatic.com data:",
+    "img-src 'self' data: https: blob:",
+    "connect-src 'self' http://localhost:* ws://localhost:* https: wss: https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://*.sentry.io https://auth.privy.io https://api.privy.io https://*.privy.io wss://relay.walletconnect.com https://relay.walletconnect.com",
+    "frame-src 'self' https://js.stripe.com https://*.privy.io",
+    "worker-src 'self' blob:"
+  ].join('; ')
+
+  const prodCsp = [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://cdn.jsdelivr.net https://*.supabase.co https://js.stripe.com",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "font-src 'self' https://fonts.gstatic.com data:",
+    "img-src 'self' data: https: blob:",
+    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://*.sentry.io https://auth.privy.io https://api.privy.io https://*.privy.io wss://relay.walletconnect.com https://relay.walletconnect.com",
+    "frame-src 'self' https://js.stripe.com https://*.privy.io"
+  ].join('; ')
+
+  securityHeaders['Content-Security-Policy'] = isProd ? prodCsp : devCsp
+
+  Object.entries(securityHeaders).forEach(([key, value]) => {
+    response.headers.set(key, value)
+  })
+
+  return response
 }
 
 export const config = {
   matcher: [
-    // 匹配所有路径，除了以下路径：
-    // - api 路由
-    // - _next/static (静态文件)
-    // - _next/image (图片优化文件)
-    // - favicon.ico (网站图标)
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    // Skip all requests that include a file extension (e.g., assets),
+    // api routes, Next internals, and Vercel internals
+    '/((?!api|_next|_vercel|.*\..*).*)'
   ],
 }

@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -20,7 +20,8 @@ import {
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useDailyCheckin } from '@/hooks/useDailyCheckin';
-import { ethers } from 'ethers';
+import { useAccount, useChainId, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
+import { formatEther } from 'viem';
 
 interface UnifiedCheckinWelcomeProps {
   user: any;
@@ -39,19 +40,6 @@ const CONTRACT_ABI = [
   "event CheckinCompleted(address indexed user, uint256 pointsEarned, uint256 consecutiveDays, uint256 airdropWeightEarned, uint256 bnbPaid, uint256 timestamp)"
 ];
 
-interface Web3CheckinData {
-  canCheckin: boolean;
-  checkinCost: bigint;
-  previewPoints: bigint;
-  previewConsecutiveDays: bigint;
-  userBalance: bigint;
-  userStats?: {
-    totalPoints: bigint;
-    consecutiveDays: bigint;
-    totalCheckins: bigint;
-  };
-}
-
 export default function UnifiedCheckinWelcome({ user, isWeb3User, userProfile }: UnifiedCheckinWelcomeProps) {
   // Web2 check-in hooks
   const { 
@@ -61,113 +49,84 @@ export default function UnifiedCheckinWelcome({ user, isWeb3User, userProfile }:
     getNextConsecutiveReward 
   } = useDailyCheckin();
 
-  // Web3 states
-  const [web3Loading, setWeb3Loading] = useState(false);
-  const [web3CheckinData, setWeb3CheckinData] = useState<Web3CheckinData | null>(null);
+  // Web3 (wagmi)
+  const { isConnected } = useAccount();
+  const chainId = useChainId();
+  const activeAddress = (user?.wallet_address || '') as `0x${string}`;
+  const { data: userStatsData, isFetching: f1, refetch: refetchStats } = useReadContract({
+    address: CONTRACT_ADDRESS as `0x${string}`,
+    abi: CONTRACT_ABI as any,
+    functionName: 'getUserStats',
+    args: [activeAddress],
+    query: { enabled: !!activeAddress && isWeb3User && chainId === 56 },
+  });
+  const { data: canCheckinData, isFetching: f2, refetch: refetchCan } = useReadContract({
+    address: CONTRACT_ADDRESS as `0x${string}`,
+    abi: CONTRACT_ABI as any,
+    functionName: 'canCheckin',
+    args: [activeAddress],
+    query: { enabled: !!activeAddress && isWeb3User && chainId === 56 },
+  });
+  const { data: checkinCost } = useReadContract({
+    address: CONTRACT_ADDRESS as `0x${string}`,
+    abi: CONTRACT_ABI as any,
+    functionName: 'checkinCost',
+    query: { enabled: isWeb3User && chainId === 56 },
+  });
+  const { data: previewRewardsData, isFetching: f3, refetch: refetchPreview } = useReadContract({
+    address: CONTRACT_ADDRESS as `0x${string}`,
+    abi: CONTRACT_ABI as any,
+    functionName: 'previewCheckinRewards',
+    args: [activeAddress],
+    query: { enabled: !!activeAddress && isWeb3User && chainId === 56 },
+  });
+  const userStats = useMemo(() => {
+    if (!userStatsData) return null;
+    const d = userStatsData as any[];
+    return { totalPoints: d[0], consecutiveDays: d[1], totalCheckins: d[5] } as { totalPoints: bigint; consecutiveDays: bigint; totalCheckins: bigint };
+  }, [userStatsData]);
+  const canCheckin = Boolean(canCheckinData);
+  const previewPoints = (previewRewardsData as any[])?.[0] as bigint | undefined;
+  const previewConsecutiveDays = (previewRewardsData as any[])?.[2] as bigint | undefined;
+
+  const { writeContract, isPending } = useWriteContract();
+  const [txHash, setTxHash] = useState<`0x${string}` | undefined>(undefined);
+  const { data: receipt, isLoading: isWaiting } = useWaitForTransactionReceipt({ hash: txHash, query: { enabled: !!txHash } });
   const [web3Result, setWeb3Result] = useState<string | null>(null);
   const [lastTransactionHash, setLastTransactionHash] = useState<string | null>(null);
-  const [provider, setProvider] = useState<ethers.BrowserProvider | null>(null);
 
-  // Initialize Web3 for Web3 users
-  useEffect(() => {
-    if (isWeb3User && typeof window !== 'undefined' && window.ethereum) {
-      const web3Provider = new ethers.BrowserProvider(window.ethereum);
-      setProvider(web3Provider);
-    }
-  }, [isWeb3User]);
-
-  // Load Web3 check-in data
-  useEffect(() => {
-    if (isWeb3User && provider && user?.wallet_address) {
-      loadWeb3CheckinData();
-    }
-  }, [isWeb3User, provider, user?.wallet_address]);
-
-  const loadWeb3CheckinData = async () => {
-    if (!provider || !user?.wallet_address) return;
-    
-    setWeb3Loading(true);
-    try {
-      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
-      
-      // Get user BNB balance
-      const balance = await provider.getBalance(user.wallet_address);
-      
-      // Load contract data in parallel
-      const [canCheckin, checkinCost, previewRewards, userStats] = await Promise.all([
-        contract.canCheckin(user.wallet_address),
-        contract.checkinCost(),
-        contract.previewCheckinRewards(user.wallet_address),
-        contract.getUserStats(user.wallet_address)
-      ]);
-
-      setWeb3CheckinData({
-        canCheckin,
-        checkinCost,
-        previewPoints: previewRewards[0],
-        previewConsecutiveDays: previewRewards[2],
-        userBalance: balance,
-        userStats: {
-          totalPoints: userStats[0],
-          consecutiveDays: userStats[1],
-          totalCheckins: userStats[2]
-        }
-      });
-    } catch (error) {
-      console.error('Failed to load Web3 check-in data:', error);
-      setWeb3Result('Unable to load check-in data, please refresh and try again');
-    } finally {
-      setWeb3Loading(false);
-    }
-  };
+  const web3Loading = f1 || f2 || f3 || isPending || isWaiting;
 
   const handleWeb3Checkin = async () => {
-    if (!provider || !web3CheckinData) return;
-    
-    setWeb3Loading(true);
+    if (!isConnected || !isWeb3User || !canCheckin || !checkinCost) return;
     setWeb3Result(null);
-
     try {
-      const signer = await provider.getSigner();
-      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-      
-      // Execute paid check-in
-      const tx = await contract.performCheckin({
-        value: web3CheckinData.checkinCost,
-        gasLimit: 500000
+      const hash = await writeContract({
+        address: CONTRACT_ADDRESS as `0x${string}`,
+        abi: CONTRACT_ABI as any,
+        functionName: 'performCheckin',
+        value: checkinCost as bigint,
       });
-
-      setLastTransactionHash(tx.hash);
-      setWeb3Result(`Check-in transaction submitted, waiting for confirmation...`);
-
-      // Wait for transaction confirmation
-      const receipt = await tx.wait();
-      
-      if (receipt.status === 1) {
-        setWeb3Result(`🎉 Check-in successful! Earned ${ethers.formatUnits(web3CheckinData.previewPoints, 0)} credits`);
-        
-        // Refresh data
-        await loadWeb3CheckinData();
-      } else {
-        setWeb3Result('Transaction failed, please try again');
-      }
+      setTxHash(hash as `0x${string}`);
+      setLastTransactionHash(hash as string);
+      setWeb3Result('Check-in transaction submitted, waiting for confirmation...');
     } catch (error: any) {
-      console.error('Web3 check-in failed:', error);
-      
-      let errorMessage = 'Check-in failed, please try again';
-      if (error.code === 'INSUFFICIENT_FUNDS') {
-        errorMessage = 'Insufficient BNB balance, please top up';
-      } else if (error.message?.includes('User denied')) {
-        errorMessage = 'Transaction cancelled by user';
-      } else if (error.message?.includes('gas')) {
-        errorMessage = 'Insufficient gas, please check network settings';
-      }
-      
-      setWeb3Result(errorMessage);
-    } finally {
-      setWeb3Loading(false);
+      const msg = error?.message || 'Check-in failed, please try again';
+      setWeb3Result(msg);
     }
   };
+
+  useEffect(() => {
+    if (!receipt) return;
+    if (receipt.status === 'success') {
+      setWeb3Result('🎉 Check-in successful!');
+      refetchStats();
+      refetchCan();
+      refetchPreview();
+    } else {
+      setWeb3Result('Transaction failed, please try again');
+    }
+  }, [receipt, refetchStats, refetchCan, refetchPreview]);
 
   const handleWeb2Checkin = async () => {
     const checkinSummary = getCheckinSummary();
@@ -257,18 +216,18 @@ export default function UnifiedCheckinWelcome({ user, isWeb3User, userProfile }:
         </div>
 
         {/* Web3 Preview Rewards */}
-        {isWeb3User && web3CheckinData?.canCheckin && (
+        {isWeb3User && canCheckin && (
           <div className="grid grid-cols-2 gap-4 mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
             <div className="text-center">
               <p className="text-sm text-gray-600 dark:text-gray-400">Estimated Credits</p>
               <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                +{ethers.formatUnits(web3CheckinData.previewPoints, 0)}
+                +{Number(previewPoints ?? 0n)}
               </p>
             </div>
             <div className="text-center">
               <p className="text-sm text-gray-600 dark:text-gray-400">Consecutive Days</p>
               <p className="text-lg font-bold text-green-600 dark:text-green-400">
-                {ethers.formatUnits(web3CheckinData.previewConsecutiveDays, 0)}
+                {Number(previewConsecutiveDays ?? 0n)}
               </p>
             </div>
           </div>
@@ -290,18 +249,18 @@ export default function UnifiedCheckinWelcome({ user, isWeb3User, userProfile }:
                   BSC Mainnet
                 </span>
               </div>
-              {web3CheckinData?.userStats && (
+              {userStats && (
                 <>
                   <div>
                     <span className="text-gray-600 dark:text-gray-400">Total Points:</span>
                     <span className="text-green-600 dark:text-green-400 font-semibold ml-2">
-                      {ethers.formatUnits(web3CheckinData.userStats.totalPoints, 0)}
+                      {Number(userStats.totalPoints)}
                     </span>
                   </div>
                   <div>
                     <span className="text-gray-600 dark:text-gray-400">Consecutive Days:</span>
                     <span className="text-purple-600 dark:text-purple-400 font-semibold ml-2">
-                      {ethers.formatUnits(web3CheckinData.userStats.consecutiveDays, 0)}
+                      {Number(userStats.consecutiveDays)}
                     </span>
                   </div>
                 </>

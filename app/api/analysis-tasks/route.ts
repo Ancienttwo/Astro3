@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { invalidateByExactPath } from '@/lib/edge/invalidate'
 
 // 简化的认证函数
 async function authenticateRequest(request: NextRequest) {
@@ -163,6 +164,13 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(`✅ 任务创建成功: ${task.id}`)
+
+    // 失效边缘缓存：任务列表/详情
+    try {
+      await invalidateByExactPath('/api/analysis-tasks', 'astrology')
+      await invalidateByExactPath(`/api/analysis-tasks/${task.id}`, 'astrology')
+    } catch {}
+
     return NextResponse.json(task)
 
   } catch (error) {

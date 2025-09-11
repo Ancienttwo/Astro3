@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { verifyJWTToken } from '@/lib/jwt-auth';
-import { ethers } from 'ethers';
+import { CacheManager } from '@/lib/redis-cache'
+import { invalidateByExactPath } from '@/lib/edge/invalidate'
+import { isAddress } from 'viem';
 
 // Web3用户积分查询
 export async function GET(request: NextRequest) {
@@ -15,7 +17,7 @@ export async function GET(request: NextRequest) {
     const web3User = JSON.parse(decodeURIComponent(atob(web3UserHeader)));
     const walletAddress = web3User.walletAddress?.toLowerCase();
 
-    if (!walletAddress || !ethers.isAddress(walletAddress)) {
+    if (!walletAddress || !isAddress(walletAddress as `0x${string}`)) {
       return NextResponse.json({ error: 'Invalid wallet address' }, { status: 400 });
     }
 
@@ -101,7 +103,7 @@ export async function POST(request: NextRequest) {
     const web3User = JSON.parse(decodeURIComponent(atob(web3UserHeader)));
     const walletAddress = web3User.walletAddress?.toLowerCase();
 
-    if (!walletAddress || !ethers.isAddress(walletAddress)) {
+    if (!walletAddress || !isAddress(walletAddress as `0x${string}`)) {
       return NextResponse.json({ error: 'Invalid wallet address' }, { status: 400 });
     }
 
@@ -162,6 +164,12 @@ export async function POST(request: NextRequest) {
 
     // 更新空投资格
     await updateAirdropEligibility(walletAddress);
+
+    // 缓存失效：用户缓存、排行榜/全局缓存
+    try { await CacheManager.clearUserCache('web3_'+walletAddress, walletAddress) } catch {}
+    try { await CacheManager.clearGlobalCache() } catch {}
+    try { await invalidateByExactPath('/api/airdrop/leaderboard', 'user') } catch {}
+    try { await invalidateByExactPath('/api/points/leaderboard', 'user') } catch {}
 
     return NextResponse.json({
       success: true,

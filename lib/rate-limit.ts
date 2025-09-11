@@ -18,10 +18,8 @@ export function checkRateLimit(
     blockDurationMs: 60 * 60 * 1000 // 1小时
   }
 ): { allowed: boolean; remainingAttempts?: number; blockUntil?: number } {
-  const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 
-            request.headers.get('x-real-ip') || 
-            request.ip || 
-            'unknown'
+  const forwarded = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip');
+  const ip = forwarded?.split(',')[0]?.trim() || 'unknown'
   
   const now = Date.now()
   const { maxAttempts, windowMs, blockDurationMs } = config
@@ -92,10 +90,8 @@ export function recordFailedAttempt(ip: string, reason: string) {
 }
 
 export function getIPAttemptCount(request: NextRequest): number {
-  const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 
-            request.headers.get('x-real-ip') || 
-            request.ip || 
-            'unknown'
+  const forwarded = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip');
+  const ip = forwarded?.split(',')[0]?.trim() || 'unknown'
   
   const userAttempts = attempts.get(ip) || []
   const now = Date.now()

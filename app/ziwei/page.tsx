@@ -1,4 +1,6 @@
 "use client";
+// @ts-expect-error next-dynamic-flag
+export const dynamic = 'force-dynamic'
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from "@/components/ui/button";
@@ -8,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Solar } from 'lunar-typescript';
+import { Solar } from '@/lib/lunar';
 import { User, Sparkles, Save, BarChart, Eye, Star, Clock, Bot, RefreshCw, Brain, Book, ArrowLeft, Lightbulb, ChevronDown } from 'lucide-react';
 import type { RecordData } from '@/types/legacy';
 import ZiweiChartWithConnections from '@/components/ZiweiChartWithConnections';
@@ -72,8 +74,8 @@ export interface PalaceData {
   heavenlyStem: HeavenlyStem;
   isLaiYinPalace: boolean;
   isShenGong: boolean;
-  decade: string; // e.g., "6-15"
-  decadeIndex: number;
+  decade?: string; // e.g., "6-15"
+  decadeIndex?: number;
   fiveElementsBureau?: FiveElementsBureau;
   yearlyLuck?: { year: number; age: number; flowName?: string };
   yearlyName?: string;

@@ -4,7 +4,7 @@
  */
 
 // 使用统一的Supabase客户端实例，避免多实例冲突
-import { supabase } from '@/lib/supabase'
+import { supabase, getSupabaseAdmin } from '@/lib/supabase'
 
 /**
  * 客户端会话检查（组件中使用）
@@ -677,13 +677,62 @@ export async function getCurrentUnifiedUser(request?: Request): Promise<UnifiedU
     if (typeof window === 'undefined' && request) {
       console.log('🔍 服务器端模式，解析认证信息...')
       
-      // 检查Authorization Bearer token
+      // 检查Authorization Bearer token / 以及简化的Web3头
       const authHeader = request.headers.get('Authorization')
+      const web3Header = request.headers.get('X-Web3-Auth')
+      const xWalletHeader = request.headers.get('X-Wallet-Address')
       console.log('🔍 服务器端检查认证headers:', {
-        hasAuthorizationHeader: !!authHeader
+        hasAuthorizationHeader: !!authHeader,
+        hasWeb3Header: !!web3Header,
+        hasXWalletHeader: !!xWalletHeader
       })
       
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        // 1) 简化Web3头（X-Wallet-Address）
+        if (xWalletHeader && /^0x[0-9a-fA-F]{40}$/.test(xWalletHeader)) {
+          try {
+            const admin = getSupabaseAdmin()
+            const wallet = xWalletHeader.toLowerCase()
+            const { data: web3User } = await admin
+              .from('users')
+              .select('*')
+              .eq('wallet_address', wallet)
+              .in('auth_type', ['web3', 'walletconnect', 'web3auth'])
+              .single()
+            if (web3User) {
+              return web3User
+            }
+          } catch (e) {
+            console.log('❌ X-Wallet-Address解析失败:', e)
+          }
+        }
+
+        // 2) 兼容旧的X-Web3-Auth JSON头
+        if (web3Header) {
+          try {
+            const payload = JSON.parse(web3Header)
+            const wallet = (payload.wallet_address || '').toLowerCase()
+            if (!wallet) {
+              console.log('❌ X-Web3-Auth缺少wallet_address')
+              return null
+            }
+            const admin = getSupabaseAdmin()
+            const { data: web3User, error: web3Error } = await admin
+              .from('users')
+              .select('*')
+              .eq('wallet_address', wallet)
+              .in('auth_type', ['web3', 'walletconnect', 'web3auth'])
+              .single()
+            if (web3Error || !web3User) {
+              console.log('❌ X-Web3-Auth查无此Web3用户:', web3Error?.message)
+              return null
+            }
+            return web3User
+          } catch (e) {
+            console.log('❌ 解析X-Web3-Auth失败:', e)
+            return null
+          }
+        }
         console.log('❌ 缺少Authorization Bearer token')
         return null
       }
@@ -798,7 +847,26 @@ export async function getCurrentUnifiedUser(request?: Request): Promise<UnifiedU
         }
       }
       
-      // 如果不是自定义JWT，尝试Supabase认证 (Web2用户)
+      // 如果不是有效JWT：兼容“Bearer 钱包地址”
+      if (/^0x[0-9a-fA-F]{40}$/.test(token)) {
+        try {
+          const admin = getSupabaseAdmin()
+          const wallet = token.toLowerCase()
+          const { data: web3User } = await admin
+            .from('users')
+            .select('*')
+            .eq('wallet_address', wallet)
+            .in('auth_type', ['web3', 'walletconnect', 'web3auth'])
+            .single()
+          if (web3User) {
+            return web3User
+          }
+        } catch (e) {
+          console.log('❌ Bearer钱包地址认证失败:', e)
+        }
+      }
+
+      // 如果不是自定义JWT，尝试Supabase认证 (Web2 或 Web3 通过 Supabase session)
       try {
         const { data, error } = await supabase.auth.getUser(token)
         if (error || !data.user) {
@@ -807,29 +875,60 @@ export async function getCurrentUnifiedUser(request?: Request): Promise<UnifiedU
         }
         
         const user = data.user
-        
-        // 如果没有找到Web2用户，返回null
-        if (!user || !user.email) {
-          console.log('❌ 无法获取Web2认证用户')
-          return null
-        }
-        
-        // 查找Web2用户，确保不是Web3用户
-        const normalizedEmail = normalizeEmail(user.email)
-        const { data: unifiedUser, error: dbError } = await supabase
+
+        // 服务器端后端操作需要使用管理员客户端避免RLS限制
+        const admin = getSupabaseAdmin()
+
+        // 标识是否为Web3虚拟邮箱（多种历史格式兼容）
+        const email = user.email || ''
+        const isWeb3Email = email.endsWith('@web3.local') ||
+                            email.endsWith('@web3.astrozi.app') ||
+                            email.endsWith('@astrozi.ai') ||
+                            email.endsWith('@web3.wallet')
+
+        // 优先按用户ID查找（避免仅凭邮箱导致的类型误判）
+        let { data: unifiedUser, error: dbError } = await admin
           .from('users')
           .select('*')
-          .eq('email', normalizedEmail)
-          .neq('auth_type', 'web3') // 排除Web3用户
+          .eq('id', user.id)
           .single()
 
-        if (dbError || !unifiedUser) {
-          // 创建Web2用户
-          return await getOrCreateUserByEmail(
-            normalizedEmail,
-            'supabase',
-            user.id
-          )
+        if (dbError && dbError.code !== 'PGRST116') {
+          // 非“未找到”错误，直接记录并返回null
+          console.log('❌ 查询统一用户失败:', dbError)
+          return null
+        }
+
+        if (!unifiedUser) {
+          // 未找到用户记录，创建之（根据类型填充必要字段）
+          const now = new Date().toISOString()
+          const newRecord: any = {
+            id: user.id,
+            email: email ? normalizeEmail(email) : undefined,
+            username: (user.user_metadata?.full_name || user.user_metadata?.name || undefined),
+            created_at: now,
+            updated_at: now
+          }
+
+          if (isWeb3Email || user.user_metadata?.wallet_address) {
+            newRecord.auth_type = 'web3'
+            newRecord.wallet_address = (user.user_metadata?.wallet_address || '').toLowerCase()
+          } else {
+            newRecord.auth_type = 'web2'
+          }
+
+          const { data: created, error: createError } = await admin
+            .from('users')
+            .insert(newRecord)
+            .select('*')
+            .single()
+
+          if (createError) {
+            console.error('❌ 创建统一用户失败:', createError)
+            return null
+          }
+
+          unifiedUser = created
         }
 
         return unifiedUser

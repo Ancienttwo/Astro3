@@ -78,7 +78,7 @@ function detectFortuneLocale(pathname: string, searchParams: URLSearchParams | n
   }
   
   // Use main app's language detection as fallback
-  const mainAppLang = getCurrentLanguage(pathname, searchParams);
+  const mainAppLang = getCurrentLanguage(pathname, searchParams ?? undefined as any);
   return mainAppLang === 'en' ? 'en-US' : 'zh-CN';
 }
 

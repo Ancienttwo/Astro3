@@ -9,7 +9,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseReadonly as supabase } from '@/lib/supabase-optimized';
 
 // 支持的语言类型
 type SupportedLanguage = 'zh-CN' | 'zh-TW' | 'en-US';
@@ -108,25 +108,41 @@ async function getFortuneSlip(
     }
 
     // 构建响应数据
+    type FortuneSlipRow = {
+      id: string;
+      slip_number: number;
+      fortune_level?: string;
+      categories?: string[];
+      title?: string;
+      content?: string;
+      basic_interpretation?: string;
+      historical_context?: string;
+      symbolism?: string;
+      created_at?: string;
+      updated_at?: string;
+      [key: string]: any;
+    };
+    const row = data as unknown as FortuneSlipRow;
+
     const response: FortuneSlipResponse = {
-      id: data.id,
-      slip_number: data.slip_number,
+      id: row.id,
+      slip_number: row.slip_number,
       temple_name: templeData.temple_name,
-      fortune_level: data.fortune_level || 'average',
-      categories: data.categories || [],
+      fortune_level: row.fortune_level || 'average',
+      categories: row.categories || [],
       
       // 多语言内容（优先使用指定语言，回退到默认语言）
-      title: data[`title${languageSuffix}`] || data.title || 'Unknown Title',
-      content: data[`content${languageSuffix}`] || data.content || 'No content available',
-      basic_interpretation: data[`basic_interpretation${languageSuffix}`] || data.basic_interpretation || 'No interpretation available',
-      historical_context: data[`historical_context${languageSuffix}`] || data.historical_context,
-      symbolism: data[`symbolism${languageSuffix}`] || data.symbolism,
+      title: row[`title${languageSuffix}`] || row.title || 'Unknown Title',
+      content: row[`content${languageSuffix}`] || row.content || 'No content available',
+      basic_interpretation: row[`basic_interpretation${languageSuffix}`] || row.basic_interpretation || 'No interpretation available',
+      historical_context: row[`historical_context${languageSuffix}`] || row.historical_context,
+      symbolism: row[`symbolism${languageSuffix}`] || row.symbolism,
       
       // 元数据
       language,
       api_version: '1.0-existing',
-      created_at: data.created_at,
-      updated_at: data.updated_at
+      created_at: row.created_at || new Date().toISOString(),
+      updated_at: row.updated_at || new Date().toISOString()
     };
 
     return response;

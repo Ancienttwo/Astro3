@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Solar } from 'lunar-typescript'
+import { Solar } from '@/lib/lunar'
 import { useIsMobile } from '@/hooks/useDeviceType'
 import MobileAppLayout, { MobileCard, MobilePageHeader } from '@/components/MobileAppLayout'
 import AnalysisLayout from '@/components/AnalysisLayout'

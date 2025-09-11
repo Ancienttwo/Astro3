@@ -28,10 +28,10 @@ async function authenticateRequest(request: NextRequest) {
 // 查询异步任务状态和结果
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ taskId: string }> }
+  { params }: { params: { taskId: string } }
 ) {
   try {
-    const { taskId } = await params
+    const { taskId } = params
     
     if (!taskId) {
       return NextResponse.json({ error: '缺少任务ID' }, { status: 400 })

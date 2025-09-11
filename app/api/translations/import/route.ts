@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { invalidateByExactPath } from '@/lib/edge/invalidate'
 
 // 批量导入翻译
 export async function POST(request: NextRequest) {
@@ -122,6 +123,13 @@ export async function POST(request: NextRequest) {
         results.errors.push(`处理翻译失败: ${error}`);
       }
     }
+
+    try {
+      await invalidateByExactPath('/api/translations','user')
+      await invalidateByExactPath('/api/translations/stats','user')
+      await invalidateByExactPath('/api/translations/categories','user')
+      await invalidateByExactPath('/api/translations/export','user')
+    } catch {}
 
     return NextResponse.json(results);
   } catch (error) {

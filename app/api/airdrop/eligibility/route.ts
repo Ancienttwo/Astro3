@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
-import { ethers } from 'ethers';
+import { CacheManager } from '@/lib/redis-cache'
+import { invalidateByExactPath } from '@/lib/edge/invalidate'
+import { isAddress } from 'viem';
 
 // 获取用户空投资格
 export async function GET(request: NextRequest) {
@@ -8,7 +10,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const walletAddress = searchParams.get('wallet_address')?.toLowerCase();
 
-    if (!walletAddress || !ethers.isAddress(walletAddress)) {
+    if (!walletAddress || !isAddress(walletAddress as `0x${string}`)) {
       return NextResponse.json({ error: 'Invalid wallet address' }, { status: 400 });
     }
 
@@ -73,7 +75,7 @@ export async function GET(request: NextRequest) {
           eligibility: newEligibilityData || null,
           userStats: pointsData || null,
           checkinHistory: checkinStats || [],
-          summary: generateEligibilitySummary(newEligibilityData, pointsData, checkinStats)
+          summary: generateEligibilitySummary(newEligibilityData, pointsData, checkinStats || [])
         }
       });
     }
@@ -84,7 +86,7 @@ export async function GET(request: NextRequest) {
         eligibility: eligibilityData || null,
         userStats: pointsData || null,
         checkinHistory: checkinStats || [],
-        summary: generateEligibilitySummary(eligibilityData, pointsData, checkinStats)
+        summary: generateEligibilitySummary(eligibilityData, pointsData, checkinStats || [])
       }
     });
 
@@ -100,7 +102,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { walletAddress } = body;
 
-    if (!walletAddress || !ethers.isAddress(walletAddress)) {
+    if (!walletAddress || !isAddress(walletAddress as `0x${string}`)) {
       return NextResponse.json({ error: 'Invalid wallet address' }, { status: 400 });
     }
 
@@ -114,6 +116,11 @@ export async function POST(request: NextRequest) {
       console.error('Error updating airdrop eligibility:', updateError);
       return NextResponse.json({ error: 'Failed to update eligibility' }, { status: 500 });
     }
+
+    // 缓存失效：用户空投缓存与排行榜
+    try { await CacheManager.clearUserCache('web3_'+walletAddress.toLowerCase(), walletAddress.toLowerCase()) } catch {}
+    try { await CacheManager.clearGlobalCache() } catch {}
+    try { await invalidateByExactPath('/api/airdrop/leaderboard', 'user') } catch {}
 
     return NextResponse.json({
       success: true,

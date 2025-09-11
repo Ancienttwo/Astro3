@@ -69,11 +69,12 @@ export async function POST(request: NextRequest) {
     }
 
     // 查询用户记录
-    const { data: userUsage, error: fetchError } = await supabaseAdmin
+    const { data: userUsageRow, error: fetchError } = await supabaseAdmin
       .from('user_usage')
       .select('*')
       .eq('user_id', user.id)
       .single()
+    let userUsage = userUsageRow as any
 
     if (fetchError && fetchError.code === 'PGRST116') {
       // 用户记录不存在，创建新记录
@@ -96,7 +97,7 @@ export async function POST(request: NextRequest) {
       if (createError) {
         return NextResponse.json({ error: '创建用户记录失败' }, { status: 500 })
       }
-      userUsage = newUsage
+      userUsage = newUsage as any
     } else if (fetchError) {
       return NextResponse.json({ error: '查询用户记录失败' }, { status: 500 })
     }

@@ -19,10 +19,10 @@ export const CATEGORIES = [
 
 export const getMingZhu = (lifePalaceBranch: EarthlyBranch): StarName => {
   const branchIndex = EARTHLY_BRANCHES.indexOf(lifePalaceBranch);
-  const mingZhuStars: StarName[] = [
+  const mingZhuStars = [
     '贪狼', '巨门', '存保', '文曲', '廉贞', '武曲',
     '破军', '武曲', '廉贞', '文曲', '存保', '巨门'
-  ];
+  ] as unknown as StarName[];
   return mingZhuStars[branchIndex];
 };
 
@@ -36,11 +36,11 @@ export const getShenZhu = (birthYearBranch: EarthlyBranch): StarName => {
 };
 
 export const getStarsByType = (stars: StarData[]) => {
-  const mainStars = stars.filter(s => s.type === '主星');
-  const auxiliaryStars = stars.filter(s => s.type === '辅星');
-  const blessingsStars = stars.filter(s => s.type === '吉星');
-  const inauspiciousStars = stars.filter(s => s.type === '煞星');
-  const miscStars = stars.filter(s => s.type === '杂星');
+  const mainStars = stars.filter(s => String(s.type) === '主星');
+  const auxiliaryStars = stars.filter(s => String(s.type) === '辅星');
+  const blessingsStars = stars.filter(s => String(s.type) === '吉星');
+  const inauspiciousStars = stars.filter(s => String(s.type) === '煞星');
+  const miscStars = stars.filter(s => String(s.type) === '杂星');
 
   return { mainStars, auxiliaryStars, blessingsStars, inauspiciousStars, miscStars };
 };
@@ -75,8 +75,8 @@ export const getDestinyArrowAnalysis = (palaces: PalaceData[]) => {
   const lifePalaceStars = lifePalace.stars || [];
   const bodyPalaceStars = bodyPalace.stars || [];
   
-  const hasDestinyArrow = lifePalaceStars.some(s => s.name === '命宫箭') || 
-                         bodyPalaceStars.some(s => s.name === '身宫箭');
+  const hasDestinyArrow = lifePalaceStars.some(s => String(s.name) === '命宫箭') || 
+                         bodyPalaceStars.some(s => String(s.name) === '身宫箭');
   
   if (!hasDestinyArrow) return null;
 

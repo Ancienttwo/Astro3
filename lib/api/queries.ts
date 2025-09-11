@@ -1,6 +1,7 @@
 'use client';
 
-import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
+import React from 'react';
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery, keepPreviousData } from '@tanstack/react-query';
 import { api, APIError } from './client';
 import { useMutualAidStore } from '@/lib/stores/mutualAidStore';
 
@@ -122,7 +123,7 @@ export function useAidRequests(page = 1, limit = 10, filters?: Record<string, an
       return response;
     },
     ...commonQueryOptions,
-    keepPreviousData: true,
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -133,9 +134,11 @@ export function useInfiniteAidRequests(limit = 10, filters?: Record<string, any>
       const response = await api.getAidRequests(pageParam, limit);
       return response;
     },
+    initialPageParam: 1,
     getNextPageParam: (lastPage) => {
-      if (lastPage.pagination.hasNext) {
-        return lastPage.pagination.page + 1;
+      const lp: any = lastPage as any;
+      if (lp?.pagination?.hasNext) {
+        return lp.pagination.page + 1;
       }
       return undefined;
     },
@@ -218,7 +221,7 @@ export function useLeaderboard(
     },
     ...commonQueryOptions,
     staleTime: 2 * 60 * 1000, // 2 minutes for leaderboard
-    keepPreviousData: true,
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -296,7 +299,12 @@ export function useSubmitValidation() {
         reason: string;
       };
     }) => {
-      const response = await api.submitValidation(requestId, data);
+      const payload = {
+        vote: data.vote,
+        confidenceScore: data.confidence,
+        reason: data.reason
+      };
+      const response = await api.submitValidation(requestId, payload);
       return response.data;
     },
     onSuccess: () => {
@@ -386,7 +394,12 @@ export function useOptimisticValidation() {
         reason: string;
       };
     }) => {
-      const response = await api.submitValidation(requestId, data);
+      const payload = {
+        vote: data.vote,
+        confidenceScore: data.confidence,
+        reason: data.reason
+      };
+      const response = await api.submitValidation(requestId, payload);
       return response.data;
     },
     onMutate: async ({ requestId, data }) => {
@@ -433,37 +446,49 @@ export function useRealTimeUpdates() {
   const queryClient = useQueryClient();
   
   React.useEffect(() => {
-    const cleanup = api.subscribeToUpdates(
-      ['requests', 'validations', 'nfts', 'notifications'],
-      (update) => {
-        // Handle different update types
-        switch (update.type) {
-          case 'new_request':
-            queryClient.invalidateQueries({ queryKey: queryKeys.requests() });
-            break;
-          case 'request_status_changed':
-            queryClient.invalidateQueries({ queryKey: queryKeys.requests() });
-            queryClient.invalidateQueries({ queryKey: queryKeys.myRequests() });
-            break;
-          case 'new_validation':
-            queryClient.invalidateQueries({ queryKey: queryKeys.validations() });
-            break;
-          case 'nft_minted':
-            queryClient.invalidateQueries({ queryKey: queryKeys.nfts() });
-            break;
-          case 'notification':
-            queryClient.invalidateQueries({ queryKey: queryKeys.notifications() });
-            // Also add to local store
-            useMutualAidStore.getState().addNotification(update.data);
-            break;
+    let cleanupFn: (() => void) | undefined;
+    let cancelled = false;
+
+    (async () => {
+      cleanupFn = await api.subscribeToUpdates(
+        ['requests', 'validations', 'nfts', 'notifications'],
+        (update) => {
+          // Handle different update types
+          switch (update.type) {
+            case 'new_request':
+              queryClient.invalidateQueries({ queryKey: queryKeys.requests() });
+              break;
+            case 'request_status_changed':
+              queryClient.invalidateQueries({ queryKey: queryKeys.requests() });
+              queryClient.invalidateQueries({ queryKey: queryKeys.myRequests() });
+              break;
+            case 'new_validation':
+              queryClient.invalidateQueries({ queryKey: queryKeys.validations() });
+              break;
+            case 'nft_minted':
+              queryClient.invalidateQueries({ queryKey: queryKeys.nfts() });
+              break;
+            case 'notification':
+              queryClient.invalidateQueries({ queryKey: queryKeys.notifications() });
+              // Also add to local store
+              useMutualAidStore.getState().addNotification(update.data);
+              break;
+          }
+        },
+        (error) => {
+          console.error('Real-time connection error:', error);
         }
-      },
-      (error) => {
-        console.error('Real-time connection error:', error);
+      );
+
+      if (cancelled) {
+        cleanupFn?.();
       }
-    );
-    
-    return cleanup;
+    })();
+
+    return () => {
+      cancelled = true;
+      cleanupFn?.();
+    };
   }, [queryClient]);
 }
 

@@ -18,6 +18,7 @@ import {
   type UserContext,
   type FortuneSlipData
 } from '@/lib/services/ai-interpretation-service';
+import { checkRateLimitRedis } from '@/lib/rate-limit-redis'
 
 // 请求接口
 interface AIInterpretationRequest {
@@ -102,17 +103,31 @@ async function getFortuneSlipData(
     }
 
     // 构建标准化数据
+    type FortuneSlipRow = {
+      id: string;
+      slip_number: number;
+      fortune_level?: string;
+      categories?: string[];
+      title?: string;
+      content?: string;
+      basic_interpretation?: string;
+      historical_context?: string;
+      symbolism?: string;
+      [key: string]: any;
+    };
+    const row = data as unknown as FortuneSlipRow;
+
     return {
-      id: data.id,
-      slip_number: data.slip_number,
+      id: row.id,
+      slip_number: row.slip_number,
       temple_name: templeData.temple_name,
-      fortune_level: data.fortune_level || 'average',
-      categories: data.categories || [],
-      title: data[`title${languageSuffix}`] || data.title || 'Unknown Title',
-      content: data[`content${languageSuffix}`] || data.content || 'No content',
-      basic_interpretation: data[`basic_interpretation${languageSuffix}`] || data.basic_interpretation || 'No interpretation',
-      historical_context: data[`historical_context${languageSuffix}`] || data.historical_context,
-      symbolism: data[`symbolism${languageSuffix}`] || data.symbolism,
+      fortune_level: row.fortune_level || 'average',
+      categories: row.categories || [],
+      title: row[`title${languageSuffix}`] || row.title || 'Unknown Title',
+      content: row[`content${languageSuffix}`] || row.content || 'No content',
+      basic_interpretation: row[`basic_interpretation${languageSuffix}`] || row.basic_interpretation || 'No interpretation',
+      historical_context: row[`historical_context${languageSuffix}`] || row.historical_context,
+      symbolism: row[`symbolism${languageSuffix}`] || row.symbolism,
       language
     };
 
@@ -184,6 +199,26 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   const startTime = Date.now();
 
   try {
+    // 速率限制（防止AI接口滥用）
+    const rl = await checkRateLimitRedis(request as any, {
+      maxAttempts: 20,
+      windowMs: 60 * 1000,
+      blockDurationMs: 5 * 60 * 1000,
+      bucket: 'ai_interpret'
+    })
+    if (!rl.allowed) {
+      return NextResponse.json({
+        success: false,
+        error: 'Too Many Requests',
+        meta: {
+          request_id: requestId,
+          timestamp: new Date().toISOString(),
+          api_version: '2.0-ai',
+          retry_after: rl.blockUntil || undefined
+        }
+      }, { status: 429 })
+    }
+
     // 解析请求体
     const body = await request.json();
     const validation = validateRequest(body);

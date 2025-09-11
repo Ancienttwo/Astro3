@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { invalidateByExactPath } from '@/lib/edge/invalidate'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -253,6 +254,10 @@ export async function PUT(request: NextRequest) {
     }
 
     console.log(`档案${currentProfile ? '更新' : '创建'}成功:`, updatedProfile.id)
+    try {
+      await invalidateByExactPath('/api/user/profile', 'user')
+      await invalidateByExactPath('/api/user/profile-unified', 'user')
+    } catch {}
 
     return NextResponse.json({
       success: true,

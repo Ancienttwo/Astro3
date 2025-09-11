@@ -89,19 +89,59 @@ export class APIClient {
   /**
    * 获取认证头部 - 支持Web3和Web2认证
    */
-  private async getAuthHeaders(): Promise<Record<string, string>> {
+  private async getAuthHeaders(url?: string): Promise<Record<string, string>> {
     console.log('🔍 开始获取认证头部...');
     
     const headers: Record<string, string> = {
       'Content-Type': 'application/json'
     };
 
+    const isUserApi = typeof url === 'string' && url.startsWith('/api/user/');
     let hasValidWeb3Auth = false;
 
-    // 首先尝试Web3认证 (客户端环境)
+    // 对于 /api/user/* 优先使用 Supabase 会话
+    if (isUserApi) {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token) {
+          headers['Authorization'] = `Bearer ${session.access_token}`;
+          console.log('🔑 [UserAPI] 使用Supabase Bearer token认证');
+          return headers;
+        }
+      } catch (e) {
+        console.log('⚠️ [UserAPI] 获取Supabase会话失败，尝试Web3认证');
+      }
+    }
+
+    // 其他情况：优先尝试客户端会话 (Supabase/Privy/WC 统一)
     if (typeof window !== 'undefined') {
       try {
-        // 检查WalletConnect认证
+        // 0) 标准 Supabase 会话（Privy或WalletConnect设定）
+        const supabaseJwt = localStorage.getItem('supabase_jwt');
+        if (supabaseJwt) {
+          headers['Authorization'] = `Bearer ${supabaseJwt}`;
+          const cu = localStorage.getItem('current_user');
+          if (cu) {
+            try { const u = JSON.parse(cu); if (u?.wallet_address) headers['X-Wallet-Address'] = u.wallet_address; } catch {}
+          }
+          console.log('🔑 使用本地Supabase JWT认证');
+          return headers;
+        }
+
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session?.access_token) {
+            headers['Authorization'] = `Bearer ${session.access_token}`;
+            const cu = localStorage.getItem('current_user');
+            if (cu) {
+              try { const u = JSON.parse(cu); if (u?.wallet_address) headers['X-Wallet-Address'] = u.wallet_address; } catch {}
+            }
+            console.log('🔑 使用Supabase会话认证');
+            return headers;
+          }
+        } catch {}
+
+        // 1) 检查WalletConnect认证
         const walletConnectAuth = localStorage.getItem('walletconnect_auth');
         const currentUser = localStorage.getItem('current_user');
         
@@ -128,8 +168,16 @@ export class APIClient {
             hasValidWeb3Auth = false;
             throw new AuthError('Web3认证已过期，请重新连接钱包');
           } else if (authData.auth_token && userData.wallet_address && userData.auth_method === 'walletconnect') {
-            // 只使用标准的Authorization Bearer header
+            // 使用标准的Authorization Bearer header，并附带Web3标识头（与部分API兼容）
             headers['Authorization'] = `Bearer ${authData.auth_token}`;
+            headers['X-Wallet-Address'] = userData.wallet_address;
+            try {
+              headers['X-Web3-Auth'] = JSON.stringify({
+                wallet_address: userData.wallet_address,
+                auth_token: authData.auth_token,
+                auth_method: 'walletconnect'
+              });
+            } catch {}
             console.log('🔑 设置WalletConnect Bearer token认证:', {
               walletAddress: userData.wallet_address,
               hasAuthToken: !!authData.auth_token
@@ -159,8 +207,9 @@ export class APIClient {
             localStorage.removeItem('current_user');
             throw new AuthError('Web3认证已过期，请重新连接钱包');
           } else if (authData.auth_token && userData.wallet_address) {
-            // 只使用标准的Authorization Bearer header
+            // 只使用标准的Authorization Bearer header，并附带钱包头
             headers['Authorization'] = `Bearer ${authData.auth_token}`;
+            headers['X-Wallet-Address'] = userData.wallet_address;
             console.log('🔑 使用传统Web3 Bearer token认证:', userData.wallet_address);
             hasValidWeb3Auth = true;
             return headers;
@@ -193,6 +242,17 @@ export class APIClient {
                   const authData = JSON.parse(walletConnectAuth);
                   if (authData.auth_token) {
                     headers['Authorization'] = `Bearer ${authData.auth_token}`;
+                    try { const u = JSON.parse(localStorage.getItem('current_user') || '{}'); if (u?.wallet_address) headers['X-Wallet-Address'] = u.wallet_address; } catch {}
+                    try {
+                      const restoredUser = JSON.parse(localStorage.getItem('current_user') || '{}')
+                      if (restoredUser?.wallet_address) {
+                        headers['X-Web3-Auth'] = JSON.stringify({
+                          wallet_address: restoredUser.wallet_address,
+                          auth_token: authData.auth_token,
+                          auth_method: 'walletconnect'
+                        });
+                      }
+                    } catch {}
                     console.log('🔑 使用恢复的Web3认证token');
                     hasValidWeb3Auth = true;
                     return headers;
@@ -344,11 +404,15 @@ export class APIClient {
   /**
    * 核心请求方法
    */
-  private async request<T>(
+  private async request<T = any>(
     url: string, 
     config: RequestConfig,
     attempt: number = 1
   ): Promise<APIResponse<T>> {
+    // 定时器句柄在 finally 中需要可见
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    // 控制器需要在 catch 中可见以判断取消原因
+    let controller: AbortController | undefined;
     const fullUrl = `${this.baseURL}${url}`;
     const cacheKey = this.getCacheKey(url, config);
 
@@ -371,12 +435,12 @@ export class APIClient {
       // 对于非公开端点，获取认证头部
       if (!this.isPublicEndpoint(url)) {
         try {
-          const authHeaders = await this.getAuthHeaders();
+          const authHeaders = await this.getAuthHeaders(url);
           headers = {
             ...headers,
             ...authHeaders
           };
-        } catch (authError) {
+        } catch (authError: any) {
           console.error(`❌ 获取认证头部失败: ${url}`, authError);
           // 如果是AuthError且明确要求重新认证，应该抛出错误而不是继续请求
           if (authError instanceof AuthError && authError.message.includes('重新连接钱包')) {
@@ -393,11 +457,18 @@ export class APIClient {
       const body = config.body ? JSON.stringify(config.body) : undefined;
 
       // 创建超时控制器
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => {
+      controller = new AbortController();
+      // 使用带原因的 abort，避免浏览器/Node 提示 "signal is aborted without reason"
+      const abortOnTimeout = () => {
         console.log(`⏰ 请求超时: ${config.method} ${fullUrl}`);
-        controller.abort();
-      }, config.timeout || this.timeout);
+        const reason: any =
+          typeof DOMException !== 'undefined'
+            ? new DOMException('Timeout', 'AbortError')
+            : new Error('Timeout');
+        controller!.abort(reason);
+      };
+      const timeoutMs = config.timeout ?? this.timeout;
+      timeoutId = setTimeout(abortOnTimeout, timeoutMs);
 
       console.log(`🌐 API请求: ${config.method} ${fullUrl}`);
 
@@ -406,10 +477,11 @@ export class APIClient {
         method: config.method,
         headers,
         body,
-        signal: controller.signal
+        signal: controller!.signal
       });
 
-      clearTimeout(timeoutId);
+      // 清理超时计时器（成功路径）
+      try { if (timeoutId) clearTimeout(timeoutId as any); } catch {}
 
       // 解析响应
       let data: APIResponse<T>;
@@ -443,7 +515,7 @@ export class APIClient {
       console.log(`✅ API成功: ${config.method} ${fullUrl}`);
       return data;
 
-    } catch (error) {
+    } catch (error: any) {
       console.error(`❌ API失败: ${config.method} ${fullUrl}`, error);
 
       // 认证错误不重试，但提供更详细的错误信息
@@ -491,8 +563,13 @@ export class APIClient {
       }
 
       // 特殊处理AbortError
-      if (error.name === 'AbortError') {
-        throw new APIError('请求超时，请稍后重试', 0);
+      if (error.name === 'AbortError' || (error as any).code === 'ABORT_ERR') {
+        // 尝试区分超时与用户/系统取消（基于本地 controller 状态与 reason）
+        const abortedByTimeout = !!controller?.signal?.aborted;
+        const reasonMsg = (controller as any)?.signal?.reason?.message || (controller as any)?.signal?.reason || '';
+        const isTimeout = abortedByTimeout && /timeout/i.test(String(reasonMsg)) || abortedByTimeout;
+        const msg = isTimeout ? '请求超时，请稍后重试' : '请求已取消';
+        throw new APIError(msg, 0);
       }
 
       throw new APIError(
@@ -528,22 +605,25 @@ export class APIClient {
   /**
    * GET请求
    */
-  async get<T>(url: string, options: { 
+  async get<T = any>(url: string, options: { 
     cache?: boolean; 
     timeout?: number; 
+    headers?: Record<string, string>;
   } = {}): Promise<APIResponse<T>> {
     return this.request<T>(url, {
       method: 'GET',
       cache: options.cache,
-      timeout: options.timeout
+      timeout: options.timeout,
+      headers: options.headers
     });
   }
 
   /**
    * POST请求
    */
-  async post<T>(url: string, data?: any, options: {
+  async post<T = any>(url: string, data?: any, options: {
     timeout?: number;
+    headers?: Record<string, string>;
   } = {}): Promise<APIResponse<T>> {
     // POST请求后清除相关缓存
     this.clearCache(url.split('?')[0]);
@@ -551,15 +631,17 @@ export class APIClient {
     return this.request<T>(url, {
       method: 'POST',
       body: data,
-      timeout: options.timeout
+      timeout: options.timeout,
+      headers: options.headers
     });
   }
 
   /**
    * PUT请求
    */
-  async put<T>(url: string, data?: any, options: {
+  async put<T = any>(url: string, data?: any, options: {
     timeout?: number;
+    headers?: Record<string, string>;
   } = {}): Promise<APIResponse<T>> {
     // PUT请求后清除相关缓存
     this.clearCache(url.split('?')[0]);
@@ -567,30 +649,36 @@ export class APIClient {
     return this.request<T>(url, {
       method: 'PUT',
       body: data,
-      timeout: options.timeout
+      timeout: options.timeout,
+      headers: options.headers
     });
   }
 
   /**
    * DELETE请求
    */
-  async delete<T>(url: string, options: {
+  async delete<T = any>(url: string, options: {
     timeout?: number;
+    headers?: Record<string, string>;
+    body?: any;
   } = {}): Promise<APIResponse<T>> {
     // DELETE请求后清除相关缓存
     this.clearCache(url.split('?')[0]);
     
     return this.request<T>(url, {
       method: 'DELETE',
-      timeout: options.timeout
+      timeout: options.timeout,
+      headers: options.headers,
+      body: options.body
     });
   }
 
   /**
    * PATCH请求
    */
-  async patch<T>(url: string, data?: any, options: {
+  async patch<T = any>(url: string, data?: any, options: {
     timeout?: number;
+    headers?: Record<string, string>;
   } = {}): Promise<APIResponse<T>> {
     // PATCH请求后清除相关缓存
     this.clearCache(url.split('?')[0]);
@@ -598,7 +686,8 @@ export class APIClient {
     return this.request<T>(url, {
       method: 'PATCH',
       body: data,
-      timeout: options.timeout
+      timeout: options.timeout,
+      headers: options.headers
     });
   }
 

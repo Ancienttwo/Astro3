@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import jwt from 'jsonwebtoken'
+import crypto from 'crypto'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -32,10 +33,14 @@ export async function GET(request: NextRequest) {
     // 尝试解析Web3 JWT token
     try {
       const decoded = jwt.verify(token, jwtSecret) as any
-      if (decoded.wallet_address) {
-        console.log('🔍 检测到Web3 JWT token:', decoded.wallet_address)
-        walletAddress = decoded.wallet_address
-        userId = decoded.id || decoded.wallet_address
+      // 兼容不同命名风格的字段：wallet_address | walletAddress | wallet | address
+      const decodedWallet = decoded.wallet_address || decoded.walletAddress || decoded.wallet || decoded.address
+      if (decodedWallet) {
+        const normalized = String(decodedWallet).toLowerCase()
+        console.log('🔍 检测到Web3 JWT token:', normalized)
+        walletAddress = normalized
+        // 兼容不同命名风格：id | userId | wallet(作为兜底)
+        userId = decoded.id || decoded.userId || normalized
         isWeb3User = true
       }
     } catch (web3Error) {
@@ -69,7 +74,8 @@ export async function GET(request: NextRequest) {
       const { data: newUsage, error: createError } = await supabaseAdmin
         .from('user_usage')
         .insert({
-          user_id: userId,
+          // Web3 用户：为非空约束生成安全的随机UUID（与SQL函数保持一致）
+          user_id: isWeb3User ? crypto.randomUUID() : userId,
           user_email: isWeb3User ? `web3_${walletAddress}@astrozi.app` : '',
           wallet_address: walletAddress,
           user_type: isWeb3User ? 'web3' : 'web2',
@@ -130,9 +136,13 @@ export async function PUT(request: NextRequest) {
     // 尝试解析Web3 JWT token
     try {
       const decoded = jwt.verify(token, jwtSecret) as any
-      if (decoded.wallet_address) {
-        walletAddress = decoded.wallet_address
-        userId = decoded.id || decoded.wallet_address
+      // 兼容不同命名风格的字段：wallet_address | walletAddress | wallet | address
+      const decodedWallet = decoded.wallet_address || decoded.walletAddress || decoded.wallet || decoded.address
+      if (decodedWallet) {
+        const normalized = String(decodedWallet).toLowerCase()
+        walletAddress = normalized
+        // 兼容不同命名风格：id | userId | wallet(作为兜底)
+        userId = decoded.id || decoded.userId || normalized
         isWeb3User = true
       }
     } catch (web3Error) {

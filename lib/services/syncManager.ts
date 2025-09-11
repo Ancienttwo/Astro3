@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useMutualAidStore } from '@/lib/stores/mutualAidStore';
-import { api } from '@/lib/api/client';
+// 使用默认导入 apiClient（互助系统专用客户端），同时保留便捷 api 方法
+import apiClient, { api } from '@/lib/api/client';
 import { queryKeys } from '@/lib/api/queries';
 import { QueryClient } from '@tanstack/react-query';
 
@@ -148,9 +149,10 @@ class SyncManager {
       return true;
 
     } catch (error) {
-      console.error('Sync failed:', error);
-      this.syncState.syncErrors.push(error.message);
-      this.emit('syncError', error);
+      const msg = error instanceof Error ? error.message : String(error);
+      console.error('Sync failed:', msg);
+      this.syncState.syncErrors.push(msg);
+      this.emit('syncError', msg);
       return false;
 
     } finally {
@@ -177,13 +179,15 @@ class SyncManager {
         );
         
       } catch (error) {
-        console.error('Failed to upload change:', change, error);
+        const msg = error instanceof Error ? error.message : String(error);
+        console.error('Failed to upload change:', change, msg);
         
         // Check if it's a conflict
-        if (error.status === 409) {
+        const status = (error as any)?.status;
+        if (status === 409) {
           this.syncState.conflictsToResolve.push({
             local: change,
-            error: error
+            error: msg
           });
         }
       }
@@ -194,7 +198,8 @@ class SyncManager {
   private async uploadChange(change: any) {
     switch (change.type) {
       case 'user_preferences':
-        return api.post('/user/preferences', change.data);
+        // 对应服务端 PUT /api/user/preferences
+        return apiClient.put('/user/preferences', change.data);
       
       case 'validation_submit':
         return api.submitValidation(change.requestId, change.data);
@@ -210,67 +215,97 @@ class SyncManager {
     }
   }
 
-  // Download latest data from server
+  // Download latest data from server (graceful, section-isolated)
   private async downloadLatestData() {
     const store = useMutualAidStore.getState();
-    
-    try {
-      // Get latest server timestamps
-      const serverTimestamps = await this.getServerTimestamps();
-      
-      // Check what needs updating
-      const localTimestamps = this.getLocalTimestamps();
-      
-      // Download user profile if needed
-      if (this.needsUpdate(localTimestamps.userProfile, serverTimestamps.userProfile)) {
+
+    // Get latest server timestamps (with fallback)
+    const serverTimestamps = await this.getServerTimestamps();
+    const localTimestamps = this.getLocalTimestamps();
+
+    let anySectionSucceeded = false;
+
+    // 1) User profile
+    if (this.needsUpdate(localTimestamps.userProfile, serverTimestamps.userProfile)) {
+      try {
         const userProfile = await api.getUserStats();
-        store.setUserProfile(userProfile.data);
-        this.queryClient?.setQueryData(queryKeys.userProfile(), userProfile.data);
+        if (userProfile?.data) {
+          store.setUserProfile(userProfile.data);
+          this.queryClient?.setQueryData(queryKeys.userProfile(), userProfile.data);
+          anySectionSucceeded = true;
+        }
+      } catch (e) {
+        console.warn('[Sync] 忽略用户画像更新错误:', e instanceof Error ? e.message : e);
       }
+    }
 
-      // Download NFT collection if needed
-      if (this.needsUpdate(localTimestamps.nftCollection, serverTimestamps.nftCollection)) {
+    // 2) NFT collection (route可能不存在，失败时忽略)
+    if (this.needsUpdate(localTimestamps.nftCollection, serverTimestamps.nftCollection)) {
+      try {
         const nftCollection = await api.getNFTCollection();
-        store.updateNFTCollection(nftCollection.data);
-        this.queryClient?.setQueryData(queryKeys.nftCollection(), nftCollection.data);
+        if (nftCollection?.data) {
+          store.updateNFTCollection(nftCollection.data);
+          this.queryClient?.setQueryData(queryKeys.nftCollection(), nftCollection.data);
+          anySectionSucceeded = true;
+        }
+      } catch (e) {
+        console.warn('[Sync] NFT合集接口不可用，已跳过:', e instanceof Error ? e.message : e);
       }
+    }
 
-      // Download recent requests if needed
-      if (this.needsUpdate(localTimestamps.requests, serverTimestamps.requests)) {
-        const requests = await api.getMyRequests();
-        // Update store with new requests
-        requests.data.forEach((request: any) => {
-          const existing = store.user.mutualAidHistory.find(r => r.id === request.id);
-          if (existing) {
-            store.updateAidRequest(request.id, request);
-          } else {
-            store.addAidRequest(request);
-          }
-        });
+    // 3) My recent requests
+    if (this.needsUpdate(localTimestamps.requests, serverTimestamps.requests)) {
+      try {
+        const requests: any = await api.getMyRequests();
+        if (requests?.data) {
+          requests.data.forEach((request: any) => {
+            const existing = store.user.mutualAidHistory.find(r => r.id === request.id);
+            if (existing) {
+              store.updateAidRequest(request.id, request);
+            } else {
+              store.addAidRequest(request);
+            }
+          });
+          anySectionSucceeded = true;
+        }
+      } catch (e) {
+        console.warn('[Sync] 忽略互助请求更新错误:', e instanceof Error ? e.message : e);
       }
+    }
 
-      // Download notifications if needed
-      if (this.needsUpdate(localTimestamps.notifications, serverTimestamps.notifications)) {
-        const notifications = await api.getNotifications(1, 20);
-        // Sync notifications with local store
-        notifications.data.forEach((notification: any) => {
-          const existing = store.ui.notifications.find(n => n.id === notification.id);
-          if (!existing) {
-            store.addNotification(notification);
-          }
-        });
+    // 4) Notifications (route可能不存在，失败时忽略)
+    if (this.needsUpdate(localTimestamps.notifications, serverTimestamps.notifications)) {
+      try {
+        const notifications: any = await api.getNotifications(1, 20);
+        if (notifications?.data) {
+          notifications.data.forEach((notification: any) => {
+            const existing = store.ui.notifications.find(n => n.id === notification.id);
+            if (!existing) {
+              store.addNotification(notification);
+            }
+          });
+          anySectionSucceeded = true;
+        }
+      } catch (e) {
+        console.warn('[Sync] 通知接口不可用，已跳过:', e instanceof Error ? e.message : e);
       }
+    }
 
-    } catch (error) {
-      console.error('Failed to download latest data:', error);
-      throw error;
+    if (!anySectionSucceeded) {
+      console.warn('[Sync] 无数据项成功更新（可能接口未就绪或无权限）。');
     }
   }
 
   // Get server timestamps for data freshness check
   private async getServerTimestamps(): Promise<Record<string, string>> {
-    const response = await api.get('/sync/timestamps');
-    return response.data;
+    // No dedicated endpoint yet; force refresh by returning current timestamps.
+    const now = new Date().toISOString();
+    return {
+      userProfile: now,
+      nftCollection: now,
+      requests: now,
+      notifications: now,
+    };
   }
 
   // Get local timestamps from store
@@ -298,7 +333,8 @@ class SyncManager {
       try {
         await this.resolveConflict(conflict);
       } catch (error) {
-        console.error('Failed to resolve conflict:', conflict, error);
+        const msg = error instanceof Error ? error.message : String(error);
+        console.error('Failed to resolve conflict:', conflict, msg);
       }
     }
 

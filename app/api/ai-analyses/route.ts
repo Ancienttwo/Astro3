@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { invalidateByExactPath } from '@/lib/edge/invalidate'
 import { getCurrentUnifiedUser } from '@/lib/auth'
 
 // 创建Supabase管理员客户端
@@ -269,6 +270,10 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(`✅ 手动保存${analysis_type}分析成功: ${data.id}`)
+    try {
+      await invalidateByExactPath('/api/ai-analyses','astrology')
+      await invalidateByExactPath('/api/analysis-tasks','astrology')
+    } catch {}
     return NextResponse.json({ 
       success: true, 
       analysis: data,

@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# MCP Command Wrapper for Context7
+# This script provides the /mcp command functionality
+
+echo "Context7 MCP Status"
+echo "==================="
+echo ""
+
+# Check if servers are actually loaded in Claude
+if ls ~/Library/Logs/Claude/mcp-server-*.log 2>/dev/null | grep -q context7; then
+  echo "✅ MCP Servers Active:"
+else
+  echo "⚠️  MCP Servers Configured (restart Claude Desktop to activate):"
+fi
+
+echo "  • context7 - Sequential MCP for code analysis"
+echo "  • filesystem - File system operations"  
+echo "  • github - GitHub API operations"
+echo "  • @magicuidesign/mcp - MagicUI components"
+echo ""
+echo "📍 Configuration:"
+echo "  ~/Library/Application Support/Claude/claude_desktop_config.json"
+echo ""
+echo "🔧 Quick Actions:"
+echo "  • Diagnose issues: node diagnose-mcp.js"
+echo "  • Test workflows: node test-mcp.js"
+echo "  • View logs: tail -f ~/Library/Logs/Claude/mcp-server-context7.log"
+echo ""
+
+# Check last error in log
+if [ -f ~/Library/Logs/Claude/mcp-server-context7.log ]; then
+  LAST_ERROR=$(grep -i error ~/Library/Logs/Claude/mcp-server-context7.log | tail -1)
+  if [ ! -z "$LAST_ERROR" ]; then
+    echo "⚠️  Last error in log:"
+    echo "  ${LAST_ERROR:0:80}..."
+    echo ""
+  fi
+fi
+
+echo "💡 IMPORTANT: Restart Claude Desktop after configuration changes!"

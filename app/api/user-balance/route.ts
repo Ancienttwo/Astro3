@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { verifyAuthToken } from '@/lib/api-auth';
-import { ethers } from 'ethers';
 import { getWeb2UserUsage, getWeb3UserUsage } from '@/lib/utils/user-usage-utils';
 import { ValidationMiddleware, ErrorFactory, createSuccessResponse, withErrorHandler } from '@/lib/middleware/error-handler';
 

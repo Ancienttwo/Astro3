@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { verifyWeb3Auth } from '@/lib/auth';
-import { ethers } from 'ethers';
+import { getMutualAidUser } from '@/lib/mutual-aid-auth';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -80,16 +79,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify Web3 authentication
-    const authResult = await verifyWeb3Auth(request);
-    if (!authResult.success) {
+    // Verify authentication via Mutual Aid auth
+    const user = await getMutualAidUser(request as any);
+    if (!user) {
       return NextResponse.json(
         {
           success: false,
           error: {
             code: 'AUTHENTICATION_REQUIRED',
             message: 'Invalid or missing authentication',
-            details: authResult.error
+            details: 'No valid mutual-aid user'
           }
         },
         { status: 401 }
@@ -97,7 +96,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify wallet address matches authenticated user
-    if (walletAddress.toLowerCase() !== authResult.walletAddress.toLowerCase()) {
+    if (user.wallet_address && walletAddress.toLowerCase() !== user.wallet_address.toLowerCase()) {
       return NextResponse.json(
         {
           success: false,
@@ -153,7 +152,7 @@ export async function POST(request: NextRequest) {
     const { data: prediction, error: predictionError } = await supabase
       .from('mutual_aid_predictions')
       .insert({
-        user_id: authResult.userId,
+        user_id: user.id,
         wallet_address: walletAddress,
         fortune_slip_number: fortuneSlipNumber,
         birth_data: birthData,
@@ -407,13 +406,13 @@ function analyzePersonalContext(personalContext: any) {
   let confidence = 0.9; // High confidence in user-provided context
   
   // Map user severity to numeric scale
-  const severityMap = {
+  const severityMap: Record<'low'|'medium'|'high', number> = {
     'low': 3,
     'medium': 6,
     'high': 9
   };
   
-  severity = severityMap[userSeverity] || 5;
+  severity = severityMap[(userSeverity as 'low'|'medium'|'high')] || 5;
   
   // Adjust based on duration
   if (duration.includes('week') || duration.includes('急')) {

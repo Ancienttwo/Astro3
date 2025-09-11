@@ -91,6 +91,56 @@ export class AIInterpretationService {
   }
 
   /**
+   * 通用解读入口（与现有API路由兼容）
+   * 允许以简化参数调用并根据level选择对应的解读流程
+   */
+  async generateInterpretation(
+    slip_number: number,
+    title: string,
+    content: string,
+    basic_interpretation: string,
+    interpretation_level: InterpretationLevel,
+    user_info: Partial<UserContext> = {},
+    language: 'zh' | 'en' = 'zh'
+  ): Promise<AIInterpretationResult> {
+    const langMap: Record<'zh' | 'en', SupportedLanguage> = {
+      zh: 'zh-CN',
+      en: 'en-US'
+    };
+
+    const fortuneSlip: FortuneSlipData = {
+      id: `slip_${slip_number}`,
+      slip_number,
+      temple_name: '',
+      fortune_level: '',
+      categories: [],
+      title,
+      content,
+      basic_interpretation,
+      language: langMap[language] || 'zh-CN'
+    };
+
+    // 根据解读等级分派
+    if (interpretation_level === 'basic') {
+      return this.generateBasicInterpretation(fortuneSlip, user_info);
+    }
+
+    if (interpretation_level === 'personalized') {
+      // 强制断言为完整的UserContext，缺失字段将由提示词处理
+      return this.generatePersonalizedInterpretation(
+        fortuneSlip,
+        user_info as UserContext
+      );
+    }
+
+    // 深度解读：直接使用统一调用链，构建深度提示词
+    const prompt = this.buildPromptByLevel('deep', fortuneSlip, user_info as UserContext);
+    const systemPrompt = this.getSystemPrompt('deep', fortuneSlip.language);
+    const ai = await this.callAIAPI(prompt, 'deep', fortuneSlip.language);
+    return this.parseAIResponse(ai.content, 'deep', fortuneSlip.language, ai.usage);
+  }
+
+  /**
    * 生成基础解读 (Level 1)
    * 基于签文内容的标准化解读，无需用户背景信息
    */
@@ -156,10 +206,9 @@ export class AIInterpretationService {
   async generateStreamingInterpretation(
     level: InterpretationLevel,
     fortuneSlip: FortuneSlipData,
-    userContext?: UserContext,
     onChunk?: (chunk: string) => void
   ): Promise<AIInterpretationResult> {
-    const prompt = this.buildPromptByLevel(level, fortuneSlip, userContext);
+    const prompt = this.buildPromptByLevel(level, fortuneSlip, undefined);
     const systemPrompt = this.getSystemPrompt(level, fortuneSlip.language);
     
     try {

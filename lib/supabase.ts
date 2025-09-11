@@ -22,7 +22,7 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 // 标准客户端实例
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+export const supabase = createClient(supabaseUrl!, supabaseAnonKey!, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
@@ -33,8 +33,9 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 // 管理员客户端（仅服务端使用）
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-export const supabaseAdmin = supabaseServiceKey 
-  ? createClient(supabaseUrl, supabaseServiceKey, {
+// 在客户端渲染路径避免抛错/访问服务端密钥
+export const supabaseAdmin: any = (typeof window === 'undefined' && supabaseServiceKey)
+  ? createClient(supabaseUrl!, supabaseServiceKey, {
       auth: {
         autoRefreshToken: false,
         persistSession: false
@@ -42,16 +43,18 @@ export const supabaseAdmin = supabaseServiceKey
     })
   : null
 
-// 服务端专用管理员客户端（带错误检查）
+// 服务端专用管理员客户端（调用时校验）
 export function getSupabaseAdmin() {
+  if (typeof window !== 'undefined') {
+    throw new Error('getSupabaseAdmin() must be called on the server')
+  }
   if (!supabaseServiceKey) {
-    if (process.env.NODE_ENV === 'development') {
-      console.warn('⚠️ SUPABASE_SERVICE_ROLE_KEY not found. Admin functions will not work.')
-      return null
-    }
     throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY environment variable')
   }
-  return supabaseAdmin!
+  // 优先返回上面的单例，否则惰性创建一个
+  return supabaseAdmin ?? createClient(supabaseUrl!, supabaseServiceKey, {
+    auth: { autoRefreshToken: false, persistSession: false }
+  })
 }
 
 // 标准化数据库类型定义

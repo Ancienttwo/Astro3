@@ -1,5 +1,6 @@
-// Web3智能合约签到交互库
-import { ethers } from 'ethers';
+// Web3智能合约签到交互库（Viem / Wagmi 版本）
+import { createWalletClient, createPublicClient, custom, http, parseEther, formatEther, decodeEventLog } from 'viem';
+import { bsc } from 'viem/chains';
 
 // 合约配置
 export const CHECKIN_CONTRACT_CONFIG = {
@@ -26,8 +27,9 @@ export const CHECKIN_CONTRACT_ABI = [
   'function checkinCost() public view returns (uint256)',
   'function getContractInfo() external view returns (uint256 _checkinCost, uint256 _totalUsers, uint256 _totalCheckins, uint256 _totalRevenue, uint256 _contractBalance)',
   
-  // 交易方法
+  // 交易方法（兼容两种命名）
   'function performCheckin() external payable',
+  'function dailyCheckin() external payable',
   
   // 事件
   'event CheckinCompleted(address indexed user, uint256 pointsEarned, uint256 consecutiveDays, uint256 airdropWeightEarned, uint256 bnbPaid, uint256 timestamp)',
@@ -58,31 +60,29 @@ export interface CheckinResult {
 }
 
 export class Web3CheckinService {
-  private provider: ethers.BrowserProvider | null = null;
-  private contract: ethers.Contract | null = null;
-  private signer: ethers.Signer | null = null;
+  private walletClient: ReturnType<typeof createWalletClient> | null = null;
+  private publicClient: ReturnType<typeof createPublicClient> | null = null;
 
   constructor() {
     this.initializeProvider();
   }
 
   private async initializeProvider() {
-    if (typeof window !== 'undefined' && window.ethereum) {
-      try {
-        this.provider = new ethers.BrowserProvider(window.ethereum);
-        await this.provider.send('eth_requestAccounts', []);
-        this.signer = await this.provider.getSigner();
-        
-        if (CHECKIN_CONTRACT_CONFIG.contractAddress) {
-          this.contract = new ethers.Contract(
-            CHECKIN_CONTRACT_CONFIG.contractAddress,
-            CHECKIN_CONTRACT_ABI,
-            this.signer
-          );
-        }
-      } catch (error) {
-        console.error('Failed to initialize Web3 provider:', error);
-      }
+    if (typeof window === 'undefined' || !(window as any).ethereum) return;
+    try {
+      const eth = (window as any).ethereum;
+      this.walletClient = createWalletClient({
+        chain: bsc,
+        transport: custom(eth),
+      });
+      this.publicClient = createPublicClient({
+        chain: bsc,
+        transport: custom(eth),
+      });
+      // request accounts to ensure permission
+      await eth.request({ method: 'eth_requestAccounts' });
+    } catch (error) {
+      console.error('Failed to initialize Web3 client:', error);
     }
   }
 
@@ -91,8 +91,26 @@ export class Web3CheckinService {
    */
   async canCheckinToday(userAddress: string): Promise<boolean> {
     try {
-      if (!this.contract) await this.initializeProvider();
-      return await this.contract!.canCheckinToday(userAddress);
+      if (!this.publicClient) await this.initializeProvider();
+      const address = CHECKIN_CONTRACT_CONFIG.contractAddress as `0x${string}`;
+      // 优先尝试 canCheckin，再回退 canCheckinToday
+      try {
+        const r = await this.publicClient!.readContract({
+          address,
+          abi: CHECKIN_CONTRACT_ABI as any,
+          functionName: 'canCheckin',
+          args: [userAddress as `0x${string}`],
+        });
+        return Boolean(r);
+      } catch {
+        const r2 = await this.publicClient!.readContract({
+          address,
+          abi: CHECKIN_CONTRACT_ABI as any,
+          functionName: 'canCheckinToday',
+          args: [userAddress as `0x${string}`],
+        });
+        return Boolean(r2);
+      }
     } catch (error) {
       console.error('Error checking checkin status:', error);
       return false;
@@ -104,16 +122,23 @@ export class Web3CheckinService {
    */
   async getUserCheckinData(userAddress: string): Promise<UserCheckinData | null> {
     try {
-      if (!this.contract) await this.initializeProvider();
-      
-      const data = await this.contract!.getUserCheckinData(userAddress);
+      if (!this.publicClient) await this.initializeProvider();
+      const address = CHECKIN_CONTRACT_CONFIG.contractAddress as `0x${string}`;
+      // 优先兼容 getUserStats
+      const res = await this.publicClient!.readContract({
+        address,
+        abi: CHECKIN_CONTRACT_ABI as any,
+        functionName: 'getUserStats',
+        args: [userAddress as `0x${string}`],
+      }) as any;
+      // 约定返回: (totalPoints, consecutiveDays, lastCheckinDate, airdropWeight, totalBNBSpent, totalCheckins, isActive)
       return {
-        lastCheckinDate: data.lastCheckinDate.toString(),
-        consecutiveDays: Number(data.consecutiveDays),
-        totalDays: Number(data.totalDays),
-        totalCredits: Number(data.totalCredits),
-        totalAiReports: Number(data.totalAiReports),
-        totalSpent: ethers.formatEther(data.totalSpent), // BNB has 18 decimals
+        lastCheckinDate: (res?.[2] ?? 0).toString(),
+        consecutiveDays: Number(res?.[1] ?? 0),
+        totalDays: Number(res?.[5] ?? 0),
+        totalCredits: Number(res?.[0] ?? 0),
+        totalAiReports: 0,
+        totalSpent: formatEther(res?.[4] ?? 0n),
       };
     } catch (error) {
       console.error('Error fetching user checkin data:', error);
@@ -126,15 +151,19 @@ export class Web3CheckinService {
    */
   async previewCheckinRewards(userAddress: string): Promise<CheckinRewards | null> {
     try {
-      if (!this.contract) await this.initializeProvider();
-      
-      const [nextCredits, nextAiReports, nextConsecutiveDays] = 
-        await this.contract!.previewCheckinRewards(userAddress);
+      if (!this.publicClient) await this.initializeProvider();
+      const address = CHECKIN_CONTRACT_CONFIG.contractAddress as `0x${string}`;
+      const [pointsEarned, airdropWeightEarned, consecutiveDays] = await this.publicClient!.readContract({
+        address,
+        abi: CHECKIN_CONTRACT_ABI as any,
+        functionName: 'previewCheckinRewards',
+        args: [userAddress as `0x${string}`],
+      }) as any[];
       
       return {
-        nextCredits: Number(nextCredits),
-        nextAiReports: Number(nextAiReports),
-        nextConsecutiveDays: Number(nextConsecutiveDays),
+        nextCredits: Number(pointsEarned ?? 0),
+        nextAiReports: Number(airdropWeightEarned ?? 0),
+        nextConsecutiveDays: Number(consecutiveDays ?? 0),
       };
     } catch (error) {
       console.error('Error previewing checkin rewards:', error);
@@ -147,10 +176,9 @@ export class Web3CheckinService {
    */
   async getBNBBalance(userAddress: string): Promise<string> {
     try {
-      if (!this.provider) await this.initializeProvider();
-      
-      const balance = await this.provider!.getBalance(userAddress);
-      return ethers.formatEther(balance);
+      if (!this.publicClient) await this.initializeProvider();
+      const balance = await this.publicClient!.getBalance({ address: userAddress as `0x${string}` });
+      return formatEther(balance);
     } catch (error) {
       console.error('Error fetching BNB balance:', error);
       return '0';
@@ -162,10 +190,23 @@ export class Web3CheckinService {
    */
   async getCurrentCheckinPrice(): Promise<string> {
     try {
-      if (!this.contract) await this.initializeProvider();
-      
-      const price = await this.contract!.checkinPrice();
-      return ethers.formatEther(price);
+      if (!this.publicClient) await this.initializeProvider();
+      const address = CHECKIN_CONTRACT_CONFIG.contractAddress as `0x${string}`;
+      try {
+        const price = await this.publicClient!.readContract({
+          address,
+          abi: CHECKIN_CONTRACT_ABI as any,
+          functionName: 'checkinPrice',
+        }) as bigint;
+        return formatEther(price);
+      } catch {
+        const price2 = await this.publicClient!.readContract({
+          address,
+          abi: CHECKIN_CONTRACT_ABI as any,
+          functionName: 'checkinCost',
+        }) as bigint;
+        return formatEther(price2);
+      }
     } catch (error) {
       console.error('Error fetching checkin price:', error);
       return CHECKIN_CONTRACT_CONFIG.checkinPrice;
@@ -177,13 +218,12 @@ export class Web3CheckinService {
    */
   async performCheckin(): Promise<CheckinResult> {
     try {
-      if (!this.contract || !this.signer) await this.initializeProvider();
-      
-      const userAddress = await this.signer!.getAddress();
+      if (!this.walletClient || !this.publicClient) await this.initializeProvider();
+      const [userAddress] = await this.walletClient!.getAddresses();
       
       // 获取当前签到价格
       const checkinPriceStr = await this.getCurrentCheckinPrice();
-      const checkinPriceWei = ethers.parseEther(checkinPriceStr);
+      const checkinPriceWei = parseEther(checkinPriceStr);
       
       // 检查BNB余额
       const balance = await this.getBNBBalance(userAddress);
@@ -194,35 +234,46 @@ export class Web3CheckinService {
         };
       }
 
-      // 执行签到 (发送BNB)
-      const tx = await this.contract!.dailyCheckin({
-        value: checkinPriceWei
-      });
-      const receipt = await tx.wait();
+      // 执行签到 (发送BNB) - 优先performCheckin，再回退dailyCheckin
+      let hash: `0x${string}`;
+      const address = CHECKIN_CONTRACT_CONFIG.contractAddress as `0x${string}`;
+      try {
+        hash = await this.walletClient!.writeContract({
+          address,
+          abi: CHECKIN_CONTRACT_ABI as any,
+          functionName: 'performCheckin',
+          value: checkinPriceWei,
+        });
+      } catch {
+        hash = await this.walletClient!.writeContract({
+          address,
+          abi: CHECKIN_CONTRACT_ABI as any,
+          functionName: 'dailyCheckin',
+          value: checkinPriceWei,
+        });
+      }
+      const receipt = await this.publicClient!.waitForTransactionReceipt({ hash });
       
       // 解析事件获取奖励信息
-      const events = receipt.logs?.filter((log: any) => {
-        try {
-          return this.contract!.interface.parseLog(log)?.name === 'CheckinCompleted';
-        } catch {
-          return false;
-        }
-      });
-      
       let creditsEarned = 0;
       let aiReportsEarned = 0;
-      
-      if (events && events.length > 0) {
-        const parsedEvent = this.contract!.interface.parseLog(events[0]);
-        creditsEarned = Number(parsedEvent?.args?.creditsEarned || 0);
-        aiReportsEarned = Number(parsedEvent?.args?.aiReportsEarned || 0);
-      }
+      try {
+        const log = receipt.logs?.[0];
+        if (log) {
+          const parsed = decodeEventLog({ abi: CHECKIN_CONTRACT_ABI as any, data: log.data, topics: log.topics });
+          if ((parsed as any)?.eventName === 'CheckinCompleted') {
+            const args: any = (parsed as any).args;
+            creditsEarned = Number(args?.pointsEarned ?? args?.creditsEarned ?? 0);
+            aiReportsEarned = Number(args?.airdropWeightEarned ?? args?.aiReportsEarned ?? 0);
+          }
+        }
+      } catch {}
       
       // 同步到后端数据库
       try {
         await this.syncCheckinToBackend({
           userAddress,
-          txHash: receipt.hash,
+          txHash: receipt.transactionHash,
           consecutiveDays: creditsEarned ? Math.floor(creditsEarned / 10) : 1, // 反推连续天数
           creditsEarned,
           aiReportsEarned,
@@ -237,7 +288,7 @@ export class Web3CheckinService {
       
       return {
         success: true,
-        txHash: receipt.hash,
+        txHash: receipt.transactionHash,
         gasUsed: receipt.gasUsed?.toString(),
         creditsEarned,
         aiReportsEarned,
@@ -276,7 +327,7 @@ export class Web3CheckinService {
         'X-Web3-User': btoa(encodeURIComponent(JSON.stringify(web3User)))
       };
 
-      const response = await fetch('/api/web3-checkin', {
+      const response = await fetch('/api/points/web3', {
         method: 'POST',
         headers,
         body: JSON.stringify(data)
@@ -306,7 +357,7 @@ export class Web3CheckinService {
         'X-Web3-User': btoa(encodeURIComponent(JSON.stringify(web3User)))
       };
 
-      const response = await fetch(`/api/web3-checkin?userAddress=${userAddress}`, {
+      const response = await fetch(`/api/points/web3?userAddress=${userAddress}`, {
         headers
       });
 
@@ -357,10 +408,9 @@ export class Web3CheckinService {
    */
   async checkNetwork(): Promise<boolean> {
     try {
-      if (!this.provider) await this.initializeProvider();
-      
-      const network = await this.provider!.getNetwork();
-      return Number(network.chainId) === CHECKIN_CONTRACT_CONFIG.chainId;
+      if (!this.publicClient) await this.initializeProvider();
+      const chainId = await this.publicClient!.getChainId();
+      return Number(chainId) === CHECKIN_CONTRACT_CONFIG.chainId;
     } catch (error) {
       console.error('Error checking network:', error);
       return false;
@@ -376,7 +426,8 @@ export class Web3CheckinService {
         return false;
       }
 
-      await window.ethereum.request({
+      const eth: any = (window as any).ethereum;
+      await eth.request({
         method: 'wallet_switchEthereumChain',
         params: [{ chainId: '0x38' }], // BSC主网
       });
@@ -386,7 +437,8 @@ export class Web3CheckinService {
       // 如果网络不存在，尝试添加
       if (error.code === 4902) {
         try {
-          await window.ethereum.request({
+          const eth2: any = (window as any).ethereum;
+          await eth2.request({
             method: 'wallet_addEthereumChain',
             params: [{
               chainId: '0x38',

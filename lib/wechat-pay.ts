@@ -39,6 +39,45 @@ export interface WechatPayResult {
   trade_type?: string
 }
 
+// 通用XML解析结果映射
+export type WechatXmlMap = Record<string, string>
+
+// 统一下单返回（字符串字段为主）
+export interface WechatUnifiedOrderResponse extends WechatXmlMap {
+  return_code: string
+  return_msg?: string
+  result_code?: string
+  prepay_id?: string
+  code_url?: string
+  trade_type?: string
+}
+
+// 订单查询返回
+export interface WechatOrderQueryResponse extends WechatXmlMap {
+  return_code: string
+  return_msg?: string
+  result_code?: string
+  trade_state?: string
+  transaction_id?: string
+  out_trade_no?: string
+}
+
+// 关闭订单返回
+export interface WechatCloseOrderResponse extends WechatXmlMap {
+  return_code: string
+  return_msg?: string
+  result_code?: string
+}
+
+// 支付回调解析后的结果
+export interface WechatPaymentCallbackData extends WechatXmlMap {
+  return_code: string
+  result_code?: string
+  out_trade_no?: string
+  transaction_id?: string
+  total_fee?: string
+}
+
 export interface WechatJSAPIParams {
   appId: string
   timeStamp: string
@@ -60,7 +99,7 @@ export class WechatPay {
    * @param order 订单信息
    * @returns 支付结果
    */
-  async createOrder(order: WechatPayOrder): Promise<WechatPayResult> {
+  async createOrder(order: WechatPayOrder): Promise<WechatUnifiedOrderResponse> {
     const url = 'https://api.mch.weixin.qq.com/pay/unifiedorder'
     
     const params = {
@@ -83,10 +122,10 @@ export class WechatPay {
 
     // 生成签名
     const sign = this.generateSign(params)
-    params.sign = sign
+    const payload: any = { ...params, sign }
 
     // 转换为XML格式
-    const xml = this.objectToXml(params)
+    const xml = this.objectToXml(payload)
 
     try {
       const response = await axios.post(url, xml, {
@@ -135,7 +174,7 @@ export class WechatPay {
    * @param xmlData 回调XML数据
    * @returns 处理结果
    */
-  async handlePaymentCallback(xmlData: string): Promise<any> {
+  async handlePaymentCallback(xmlData: string): Promise<WechatPaymentCallbackData> {
     const data = this.xmlToObject(xmlData)
 
     // 验证签名
@@ -152,7 +191,7 @@ export class WechatPay {
       throw new Error(`支付失败: ${data.return_msg || data.err_code_des}`)
     }
 
-    return data
+    return data as WechatPaymentCallbackData
   }
 
   /**
@@ -160,7 +199,7 @@ export class WechatPay {
    * @param outTradeNo 商户订单号
    * @returns 订单状态
    */
-  async queryOrder(outTradeNo: string): Promise<any> {
+  async queryOrder(outTradeNo: string): Promise<WechatOrderQueryResponse> {
     const url = 'https://api.mch.weixin.qq.com/pay/orderquery'
     
     const params = {
@@ -171,9 +210,9 @@ export class WechatPay {
     }
 
     const sign = this.generateSign(params)
-    params.sign = sign
+    const payload: any = { ...params, sign }
 
-    const xml = this.objectToXml(params)
+    const xml = this.objectToXml(payload)
 
     try {
       const response = await axios.post(url, xml, {
@@ -182,7 +221,7 @@ export class WechatPay {
         }
       })
 
-      return this.xmlToObject(response.data)
+      return this.xmlToObject(response.data) as WechatOrderQueryResponse
     } catch (error) {
       console.error('查询微信支付订单失败:', error)
       throw error
@@ -194,7 +233,7 @@ export class WechatPay {
    * @param outTradeNo 商户订单号
    * @returns 关闭结果
    */
-  async closeOrder(outTradeNo: string): Promise<any> {
+  async closeOrder(outTradeNo: string): Promise<WechatCloseOrderResponse> {
     const url = 'https://api.mch.weixin.qq.com/pay/closeorder'
     
     const params = {
@@ -205,9 +244,9 @@ export class WechatPay {
     }
 
     const sign = this.generateSign(params)
-    params.sign = sign
+    const payload: any = { ...params, sign }
 
-    const xml = this.objectToXml(params)
+    const xml = this.objectToXml(payload)
 
     try {
       const response = await axios.post(url, xml, {
@@ -216,7 +255,7 @@ export class WechatPay {
         }
       })
 
-      return this.xmlToObject(response.data)
+      return this.xmlToObject(response.data) as WechatCloseOrderResponse
     } catch (error) {
       console.error('关闭微信支付订单失败:', error)
       throw error
@@ -275,8 +314,8 @@ export class WechatPay {
    * @param xml XML字符串
    * @returns 对象
    */
-  private xmlToObject(xml: string): any {
-    const obj: any = {}
+  private xmlToObject(xml: string): WechatXmlMap {
+    const obj: WechatXmlMap = {}
     const regex = /<(\w+)>([^<]*)<\/\1>/g
     let match
     
@@ -293,7 +332,7 @@ export class WechatPay {
    * @param sign 签名
    * @returns 是否验证通过
    */
-  verifySign(params: any, sign: string): boolean {
+  verifySign(params: WechatXmlMap, sign: string): boolean {
     const calculatedSign = this.generateSign(params)
     return calculatedSign === sign
   }

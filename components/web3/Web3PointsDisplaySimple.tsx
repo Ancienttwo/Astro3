@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Coins, Calendar, TrendingUp, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { ethers } from 'ethers';
+import { useChainId, useReadContract } from 'wagmi';
 
 // Contract configuration
 const CONTRACT_ADDRESS = '0x3b016F5A7C462Fe51B691Ef18559DE720D9B452F';
@@ -17,16 +17,6 @@ const CONTRACT_ABI = [
   "function totalCheckins() view returns (uint256)"
 ];
 
-interface UserStats {
-  totalPoints: bigint;
-  consecutiveDays: bigint;
-  lastCheckinDate: bigint;
-  airdropWeight: bigint;
-  totalBNBSpent: bigint;
-  totalCheckins: bigint;
-  isActive: boolean;
-}
-
 interface Web3PointsDisplaySimpleProps {
   walletAddress: string;
   onPointsUpdate?: () => void;
@@ -36,76 +26,22 @@ export default function Web3PointsDisplaySimple({
   walletAddress, 
   onPointsUpdate 
 }: Web3PointsDisplaySimpleProps) {
-  const [userStats, setUserStats] = useState<UserStats | null>(null);
-  const [canCheckin, setCanCheckin] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [isCorrectNetwork, setIsCorrectNetwork] = useState(false);
+  const chainId = useChainId();
   const { toast } = useToast();
-
-  useEffect(() => {
-    if (walletAddress) {
-      checkNetwork();
-      loadContractData();
-    }
-  }, [walletAddress]);
-
-  const checkNetwork = async () => {
-    if (typeof window !== 'undefined' && window.ethereum) {
-      try {
-        const provider = new ethers.BrowserProvider(window.ethereum);
-        const network = await provider.getNetwork();
-        setIsCorrectNetwork(Number(network.chainId) === 56); // BSC Mainnet
-      } catch (error) {
-        console.error('Error checking network:', error);
-        setIsCorrectNetwork(false);
-      }
-    }
-  };
-
-  const loadContractData = async () => {
-    setLoading(true);
-    try {
-      if (typeof window !== 'undefined' && window.ethereum) {
-        const provider = new ethers.BrowserProvider(window.ethereum);
-        const network = await provider.getNetwork();
-        
-        if (Number(network.chainId) !== 56) {
-          setIsCorrectNetwork(false);
-          setLoading(false);
-          return;
-        }
-        
-        setIsCorrectNetwork(true);
-        const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
-
-        const [userStatsData, canCheckinData] = await Promise.all([
-          contract.getUserStats(walletAddress),
-          contract.canCheckin(walletAddress)
-        ]);
-
-        setUserStats({
-          totalPoints: userStatsData[0],
-          consecutiveDays: userStatsData[1],
-          lastCheckinDate: userStatsData[2],
-          airdropWeight: userStatsData[3],
-          totalBNBSpent: userStatsData[4],
-          totalCheckins: userStatsData[5],
-          isActive: userStatsData[6]
-        });
-
-        setCanCheckin(canCheckinData);
-      }
-    } catch (error) {
-      console.error('Error loading contract data:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load contract data",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data: userStatsData, refetch: refetchStats, isFetching: f1 } = useReadContract({
+    address: CONTRACT_ADDRESS as `0x${string}`,
+    abi: CONTRACT_ABI as any,
+    functionName: 'getUserStats',
+    args: [walletAddress as `0x${string}`],
+    query: { enabled: !!walletAddress && chainId === 56 },
+  });
+  const { data: canCheckinData, refetch: refetchCan, isFetching: f2 } = useReadContract({
+    address: CONTRACT_ADDRESS as `0x${string}`,
+    abi: CONTRACT_ABI as any,
+    functionName: 'canCheckin',
+    args: [walletAddress as `0x${string}`],
+    query: { enabled: !!walletAddress && chainId === 56 },
+  });
 
   const formatNumber = (num: bigint) => {
     const n = Number(num);
@@ -135,6 +71,7 @@ export default function Web3PointsDisplaySimple({
     return 'bg-gray-500';
   };
 
+  const isCorrectNetwork = chainId === 56;
   if (!isCorrectNetwork) {
     return (
       <Card>
@@ -145,6 +82,7 @@ export default function Web3PointsDisplaySimple({
     );
   }
 
+  const loading = f1 || f2;
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -160,6 +98,22 @@ export default function Web3PointsDisplaySimple({
     );
   }
 
+  const userStats = useMemo(() => {
+    if (!userStatsData) return null;
+    const d = userStatsData as any[];
+    return {
+      totalPoints: d[0] as bigint,
+      consecutiveDays: d[1] as bigint,
+      lastCheckinDate: d[2] as bigint,
+      airdropWeight: d[3] as bigint,
+      totalBNBSpent: d[4] as bigint,
+      totalCheckins: d[5] as bigint,
+      isActive: d[6] as boolean,
+    };
+  }, [userStatsData]);
+
+  const canCheckin = Boolean(canCheckinData);
+
   if (!userStats) {
     return (
       <Card>
@@ -167,7 +121,7 @@ export default function Web3PointsDisplaySimple({
           <p className="text-gray-500">No Web3 data available</p>
           <Button 
             variant="outline" 
-            onClick={loadContractData}
+            onClick={() => { refetchStats(); refetchCan(); }}
             className="mt-2"
           >
             <RefreshCw className="w-4 h-4 mr-2" />
@@ -240,7 +194,7 @@ export default function Web3PointsDisplaySimple({
       <div className="flex gap-4">
         <Button 
           variant="outline" 
-          onClick={loadContractData}
+          onClick={() => { refetchStats(); refetchCan(); }}
           className="flex-1"
         >
           <RefreshCw className="w-4 h-4 mr-2" />

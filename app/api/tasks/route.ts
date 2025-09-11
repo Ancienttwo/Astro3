@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
-import { ethers } from 'ethers';
+import { isAddress } from 'viem';
 
 // 获取任务列表及用户完成状态
 export async function GET(request: NextRequest) {
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
       try {
         const web3User = JSON.parse(decodeURIComponent(atob(web3UserHeader)));
         walletAddress = web3User.walletAddress?.toLowerCase();
-        if (!ethers.isAddress(walletAddress)) {
+        if (!isAddress(walletAddress as `0x${string}`)) {
           walletAddress = null;
         }
       } catch (e) {
@@ -151,7 +151,7 @@ export async function POST(request: NextRequest) {
       try {
         const web3User = JSON.parse(decodeURIComponent(atob(web3UserHeader)));
         walletAddress = web3User.walletAddress?.toLowerCase();
-        if (!ethers.isAddress(walletAddress)) {
+        if (!isAddress(walletAddress as `0x${string}`)) {
           walletAddress = null;
         }
       } catch (e) {

@@ -67,12 +67,17 @@ export function createSecureAPIHandler(handler: (request: NextRequest) => Promis
 /**
  * 兼容性函数 - 用于需要verifyAuthToken的API
  */
-export async function verifyAuthToken(request: NextRequest) {
+export async function verifyAuthToken(request: NextRequest): Promise<{
+  success: boolean;
+  user: any; // 统一以any类型暴露，实际策略为前端控制
+  skip: boolean;
+  message: string;
+}> {
   // 为了向后兼容，保留此函数
   const authResult = await checkAPIPermission(request);
   return {
     success: authResult.success,
-    user: null, // 前端权限控制策略下不返回用户信息
+    user: null as any, // 保持兼容性以避免广泛的TS错误
     skip: authResult.skip,
     message: authResult.message
   };

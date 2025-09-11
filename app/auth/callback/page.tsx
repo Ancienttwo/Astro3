@@ -9,6 +9,9 @@ import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
 import Logo from '@/components/Logo'
 
 export default function AuthCallbackPage() {
+  // This page reads search params at runtime; avoid SSG
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const __dynamic = (exports as any).dynamic = 'force-dynamic'
   const router = useRouter()
   const searchParams = useSearchParams()
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing')

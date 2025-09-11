@@ -17,7 +17,7 @@ export interface SEOConfig {
 const defaultConfig = {
   siteName: 'AstroZi',
   siteUrl: 'https://astrozi.com',
-  defaultImage: '/logo.png',
+  defaultImage: '/logo_light.png',
   twitterHandle: '@astrozi',
   locale: 'zh-CN' as const
 }

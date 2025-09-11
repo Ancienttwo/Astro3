@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { verifyAuthToken } from '@/lib/api-auth';
-import { ethers } from 'ethers';
+import { isAddress } from 'viem';
+import { CacheManager } from '@/lib/redis-cache'
+import { invalidateByExactPath } from '@/lib/edge/invalidate'
 
 // 统一的报告消费API - 支持Web2和Web3用户
 export async function POST(request: NextRequest) {
@@ -172,6 +174,8 @@ async function consumeWeb2Reports(
     }
 
     console.log(`✅ Web2 charge successful: user=${authResult.user.email}, charged=${amount}`);
+    try { await CacheManager.clearUserCache(userId) } catch {}
+    try { await invalidateByExactPath('/api/user-usage', 'user') } catch {}
 
     return NextResponse.json({
       success: true,
@@ -214,7 +218,7 @@ async function consumeWeb3Reports(
     const web3User = JSON.parse(decodeURIComponent(atob(web3UserHeader)));
     const walletAddress = web3User.walletAddress?.toLowerCase();
 
-    if (!walletAddress || !ethers.isAddress(walletAddress)) {
+    if (!walletAddress || !isAddress(walletAddress as `0x${string}`)) {
       return NextResponse.json({ error: 'Invalid wallet address' }, { status: 400 });
     }
 
@@ -298,6 +302,8 @@ async function consumeWeb3Reports(
     }
 
     console.log(`✅ Web3 charge successful: wallet=${walletAddress}, charged=${amount}`);
+    try { await CacheManager.clearUserCache('web3_'+walletAddress, walletAddress) } catch {}
+    try { await invalidateByExactPath('/api/user-usage', 'user') } catch {}
 
     return NextResponse.json({
       success: true,

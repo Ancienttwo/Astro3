@@ -112,13 +112,13 @@ class APIClient {
     retries: number = 3,
     delay: number = 1000
   ): Promise<T> {
-    let lastError: Error;
+    let lastError: unknown;
 
     for (let i = 0; i <= retries; i++) {
       try {
         return await fn();
-      } catch (error) {
-        lastError = error as Error;
+      } catch (error: any) {
+        lastError = error;
         
         // Don't retry on 4xx errors (except 408, 429)
         if (error instanceof APIError && error.status) {
@@ -134,7 +134,7 @@ class APIClient {
       }
     }
 
-    throw lastError;
+    throw (lastError instanceof Error ? lastError : new Error('Unknown error'));
   }
 
   // Core request method
@@ -165,7 +165,7 @@ class APIClient {
         });
 
         response = await this.withTimeout(requestPromise, timeout);
-      } catch (error) {
+      } catch (error: any) {
         if (error instanceof TimeoutError) {
           throw error;
         }
@@ -177,7 +177,7 @@ class APIClient {
       try {
         const text = await response.text();
         responseData = text ? JSON.parse(text) : {};
-      } catch (error) {
+      } catch (error: any) {
         throw new APIError(`Invalid JSON response: ${error.message}`, response.status);
       }
 
@@ -299,7 +299,7 @@ class APIClient {
           try {
             const data = JSON.parse(event.data);
             onMessage(data);
-          } catch (error) {
+          } catch (error: any) {
             onError?.(new Error(`Invalid SSE data: ${error.message}`));
           }
         };
@@ -321,7 +321,7 @@ class APIClient {
           try {
             const data = JSON.parse(event.data);
             onMessage(data);
-          } catch (error) {
+          } catch (error: any) {
             onError?.(new Error(`Invalid WebSocket data: ${error.message}`));
           }
         };
@@ -372,8 +372,12 @@ export const api = {
     return apiClient.getPaginated('/mutual-aid/requests', page, limit);
   },
 
-  async getMyRequests() {
-    return apiClient.get('/mutual-aid/requests/my');
+  async getMyRequests(page = 1, limit = 10) {
+    return apiClient.getPaginated<import('@/types/mutual-aid').MyRequestSummaryDTO>(
+      '/mutual-aid/requests/my',
+      page,
+      limit
+    );
   },
 
   async updateRequestStatus(requestId: string, status: string) {
@@ -382,19 +386,34 @@ export const api = {
 
   // Community Validation
   async getPendingValidations(page = 1, limit = 10) {
-    return apiClient.getPaginated('/mutual-aid/validations/pending', page, limit);
+    return apiClient.getPaginated<import('@/types/mutual-aid').PendingValidationRequestDTO>(
+      '/mutual-aid/validations',
+      page,
+      limit
+    );
   },
 
-  async submitValidation(requestId: string, data: {
-    vote: 'approve' | 'reject';
-    confidence: number;
-    reason: string;
-  }) {
-    return apiClient.post(`/mutual-aid/validations/${requestId}`, data);
+  async submitValidation(
+    requestId: string,
+    data: {
+      vote: 'approve' | 'reject'
+      confidenceScore: number
+      reason: string
+      reviewTime?: number
+    }
+  ) {
+    return apiClient.post<import('@/types/mutual-aid').SubmitValidationResultDTO>(
+      `/mutual-aid/validations/${requestId}`,
+      data
+    );
   },
 
-  async getValidationHistory() {
-    return apiClient.get('/mutual-aid/validations/history');
+  async getValidationHistory(page = 1, limit = 10) {
+    return apiClient.getPaginated<import('@/types/mutual-aid').ValidationHistoryItemDTO>(
+      '/mutual-aid/validations/history',
+      page,
+      limit
+    );
   },
 
   // NFT Collection

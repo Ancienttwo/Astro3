@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase, supabaseAdmin } from '@/lib/supabase'
+import { invalidateByExactPath } from '@/lib/edge/invalidate'
 
 // 简化的认证函数
 async function authenticateRequest(request: NextRequest) {
@@ -82,6 +83,11 @@ export async function POST(request: NextRequest) {
 
     console.log(`✅ 任务已取消: ${taskId}`)
 
+    try {
+      await invalidateByExactPath('/api/analysis-tasks', 'astrology')
+      await invalidateByExactPath(`/api/analysis-tasks/${taskId}`, 'astrology')
+    } catch {}
+
     return NextResponse.json({
       success: true,
       message: '任务已成功取消',
@@ -145,6 +151,10 @@ export async function DELETE(request: NextRequest) {
     }
 
     console.log(`✅ 已批量取消${tasks.length}个任务`)
+
+    try {
+      await invalidateByExactPath('/api/analysis-tasks', 'astrology')
+    } catch {}
 
     return NextResponse.json({
       success: true,

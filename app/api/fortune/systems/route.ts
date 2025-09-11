@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseReadonly as supabase } from '@/lib/supabase-optimized';
 import type { APIResponse } from '@/types/fatebook';
 
 export interface TempleSystem {

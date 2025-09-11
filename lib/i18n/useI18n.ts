@@ -1,13 +1,12 @@
-import { useSearchParams, usePathname } from 'next/navigation';
-import { getDictionary } from './dictionaries';
+"use client";
+import {useLocale, useMessages} from 'next-intl';
+import type {Dictionary} from './dictionaries';
 
 export function useI18n() {
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
-  
-  // 检查路径是否以 /en 开头，或者 URL 参数中有 lang=en
-  const locale = pathname.startsWith('/en') || searchParams.get('lang') === 'en' ? 'en' : 'zh';
-  const dict = getDictionary(locale);
+  // 从 next-intl Provider 获取
+  const localeRaw = useLocale();
+  const locale = (localeRaw === 'en' || localeRaw === 'ja') ? localeRaw : 'zh';
+  const dict = useMessages() as unknown as Dictionary;
   
   return {
     dict,

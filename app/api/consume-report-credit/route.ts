@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 用户认证
-    console.log('🔐 开始用户认证...')
+    console.warn('🔐 开始用户认证...')
     const authResult = await authenticateRequest(request)
     if (!authResult.success) {
       console.log('❌ 用户认证失败:', authResult.error)
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
     }
 
     const user = authResult.user!
-    console.log('✅ 用户认证成功:', user.email)
+    console.warn('✅ 用户认证成功:', user.email)
 
     // 解析请求体
     let body
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
     }
 
     const { taskId, analysisType, amount = 1 } = body
-    console.log('📋 请求参数:', { taskId, analysisType, amount })
+    console.warn('📋 请求参数:', { taskId, analysisType, amount })
 
     if (!taskId || !analysisType) {
       console.log('❌ 缺少必要参数')
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    console.log(`💰 开始处理扣费: 用户=${user.email}, 任务=${taskId}, 分析类型=${analysisType}, 金额=${amount}`)
+    console.warn(`💰 开始处理扣费: 用户=${user.email}, 任务=${taskId}, 分析类型=${analysisType}, 金额=${amount}`)
 
     // 🔥 简化防重复扣费：使用简单的时间间隔检查
     const recentChargeCheck = await checkRecentCharges(user.id)
@@ -102,11 +102,12 @@ export async function POST(request: NextRequest) {
     }
 
     // 🔥 获取当前余额并检查是否足够
-    const { data: currentUsage, error: usageError } = await supabaseAdmin
+    const { data: currentUsageRow, error: usageError } = await supabaseAdmin
       .from('user_usage')
       .select('*')
       .eq('user_id', user.id)
       .single()
+    let currentUsage = currentUsageRow
 
     if (usageError) {
       console.error('❌ 获取用户使用情况失败:', usageError)
@@ -140,7 +141,7 @@ export async function POST(request: NextRequest) {
           }, { status: 500 })
         }
 
-        console.log('✅ 用户usage记录已创建:', newUsage)
+        console.warn('✅ 用户usage记录已创建:', newUsage)
         // 🔥 重要：使用新创建的记录
         currentUsage = newUsage
       } else {
@@ -158,7 +159,7 @@ export async function POST(request: NextRequest) {
       }, { status: 500 })
     }
 
-    console.log('📊 用户usage原始数据:', currentUsage)
+    console.warn('📊 用户usage原始数据:', currentUsage)
 
     // 兼容处理：支持两种字段命名方式（下划线和驼峰）
     const freeLimit = currentUsage.free_reports_limit || 0
@@ -171,7 +172,7 @@ export async function POST(request: NextRequest) {
     const paidRemaining = Math.max(0, paidPurchased - paidUsed)
     const totalRemaining = freeRemaining + paidRemaining
 
-    console.log(`📊 当前余额: 免费=${freeRemaining}(${freeLimit}-${freeUsed}), 付费=${paidRemaining}(${paidPurchased}-${paidUsed}), 总计=${totalRemaining}`)
+    console.warn(`📊 当前余额: 免费=${freeRemaining}(${freeLimit}-${freeUsed}), 付费=${paidRemaining}(${paidPurchased}-${paidUsed}), 总计=${totalRemaining}`)
 
     // 检查余额是否足够
     if (totalRemaining < amount) {
@@ -195,7 +196,7 @@ export async function POST(request: NextRequest) {
       // 使用免费次数
       const newFreeUsed = freeUsed + amount
       updateData.free_reports_used = newFreeUsed
-      console.log(`💳 使用免费次数扣费: ${amount}次 (${freeUsed} → ${newFreeUsed})`)
+      console.warn(`💳 使用免费次数扣费: ${amount}次 (${freeUsed} → ${newFreeUsed})`)
     } else {
       // 先用完免费次数，再用付费次数
       const useFree = freeRemaining
@@ -207,11 +208,11 @@ export async function POST(request: NextRequest) {
       updateData.free_reports_used = newFreeUsed
       updateData.paid_reports_used = newPaidUsed
       
-      console.log(`💳 混合扣费: 免费=${useFree}次 (${freeUsed} → ${newFreeUsed}), 付费=${usePaid}次 (${paidUsed} → ${newPaidUsed})`)
+      console.warn(`💳 混合扣费: 免费=${useFree}次 (${freeUsed} → ${newFreeUsed}), 付费=${usePaid}次 (${paidUsed} → ${newPaidUsed})`)
     }
 
     // 🔥 原子性更新使用情况
-    console.log('🔄 准备更新数据:', updateData)
+    console.warn('🔄 准备更新数据:', updateData)
     
     const { data: updateResult, error: updateError } = await supabaseAdmin
       .from('user_usage')
@@ -228,9 +229,9 @@ export async function POST(request: NextRequest) {
       }, { status: 500 })
     }
 
-    console.log('✅ 更新结果:', updateResult)
+    console.warn('✅ 更新结果:', updateResult)
 
-    console.log(`✅ 扣费成功: 用户=${user.email}, 任务=${taskId}, 扣除=${amount}次`)
+    console.warn(`✅ 扣费成功: 用户=${user.email}, 任务=${taskId}, 扣除=${amount}次`)
 
     return NextResponse.json({
       success: true,

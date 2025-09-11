@@ -1,13 +1,26 @@
 import Redis from 'ioredis'
 
+function createRedis(): Redis {
+  const url = process.env.REDIS_URL
+  if (url) {
+    return new Redis(url, {
+      maxRetriesPerRequest: 3,
+      lazyConnect: true,
+      enableReadyCheck: false,
+    })
+  }
+  return new Redis({
+    host: process.env.REDIS_HOST || 'localhost',
+    port: parseInt(process.env.REDIS_PORT || '6379'),
+    password: process.env.REDIS_PASSWORD,
+    maxRetriesPerRequest: 3,
+    lazyConnect: true,
+    enableReadyCheck: false,
+  })
+}
+
 // Redis client for rate limiting
-const redis = new Redis({
-  host: process.env.REDIS_HOST || 'localhost',
-  port: parseInt(process.env.REDIS_PORT || '6379'),
-  password: process.env.REDIS_PASSWORD,
-  retryDelayOnFailover: 100,
-  maxRetriesPerRequest: 3,
-})
+const redis = createRedis()
 
 export interface RateLimitConfig {
   windowMs: number // Time window in milliseconds

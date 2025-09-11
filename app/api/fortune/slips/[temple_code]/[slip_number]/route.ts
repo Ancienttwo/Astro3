@@ -48,7 +48,7 @@ interface RouteParams {
 export async function GET(
   request: NextRequest,
   { params }: RouteParams
-): Promise<NextResponse<APIResponse<FortuneSlip>>> {
+): Promise<NextResponse> {
   try {
     const { temple_code, slip_number } = await params;
     const { searchParams } = new URL(request.url);

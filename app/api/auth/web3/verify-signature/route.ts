@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { ethers } from 'ethers'
+import { verifyMessage, isAddress } from 'viem'
 import * as jwt from 'jsonwebtoken'
 
 export async function POST(request: Request) {
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
 
     const normalizedAddress = address.toLowerCase()
 
-    // Verify signature using ethers
+    // Verify signature using viem
     try {
       console.log('🔐 验证签名数据:', {
         messageLength: message.length,
@@ -35,10 +35,19 @@ export async function POST(request: Request) {
       });
       
       // 验证签名
-      let recoveredAddress: string;
       try {
-        recoveredAddress = ethers.verifyMessage(message, signature);
-        console.log('🔐 恢复的地址:', recoveredAddress.toLowerCase());
+        const ok = await verifyMessage({
+          address: normalizedAddress as `0x${string}`,
+          message,
+          signature: (signature.startsWith('0x') ? signature : `0x${signature}`) as `0x${string}`,
+        })
+        if (!ok) {
+          console.error('❌ 签名验证失败: viem 验证不通过');
+          return NextResponse.json(
+            { error: 'Invalid signature' },
+            { status: 400 }
+          )
+        }
       } catch (ethersError) {
         console.error('❌ 签名验证失败:', ethersError);
         return NextResponse.json(
@@ -48,19 +57,6 @@ export async function POST(request: Request) {
       }
       
       console.log('🔐 期望的地址:', normalizedAddress);
-      
-      if (recoveredAddress.toLowerCase() !== normalizedAddress) {
-        console.error('❌ 签名验证失败: 地址不匹配');
-        console.error('❌ 详细信息:', {
-          recovered: recoveredAddress.toLowerCase(),
-          expected: normalizedAddress,
-          match: recoveredAddress.toLowerCase() === normalizedAddress
-        });
-        return NextResponse.json(
-          { error: 'Invalid signature - address mismatch' },
-          { status: 400 }
-        )
-      }
 
       console.log('✅ 签名验证成功:', normalizedAddress)
 

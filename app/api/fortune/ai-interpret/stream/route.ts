@@ -17,6 +17,7 @@ import {
   type UserContext,
   type FortuneSlipData
 } from '@/lib/services/ai-interpretation-service';
+import { checkRateLimitRedis } from '@/lib/rate-limit-redis'
 
 // 流式响应事件类型
 type StreamEventType = 'start' | 'chunk' | 'complete' | 'error' | 'usage';
@@ -61,17 +62,31 @@ async function getFortuneSlipData(
 
     if (error || !data) return null;
 
+    type FortuneSlipRow = {
+      id: string;
+      slip_number: number;
+      fortune_level?: string;
+      categories?: string[];
+      title?: string;
+      content?: string;
+      basic_interpretation?: string;
+      historical_context?: string;
+      symbolism?: string;
+      [key: string]: any;
+    };
+    const row = data as unknown as FortuneSlipRow;
+
     return {
-      id: data.id,
-      slip_number: data.slip_number,
+      id: row.id,
+      slip_number: row.slip_number,
       temple_name: templeData.temple_name,
-      fortune_level: data.fortune_level || 'average',
-      categories: data.categories || [],
-      title: data[`title${languageSuffix}`] || data.title || 'Unknown Title',
-      content: data[`content${languageSuffix}`] || data.content || 'No content',
-      basic_interpretation: data[`basic_interpretation${languageSuffix}`] || data.basic_interpretation || 'No interpretation',
-      historical_context: data[`historical_context${languageSuffix}`] || data.historical_context,
-      symbolism: data[`symbolism${languageSuffix}`] || data.symbolism,
+      fortune_level: row.fortune_level || 'average',
+      categories: row.categories || [],
+      title: row[`title${languageSuffix}`] || row.title || 'Unknown Title',
+      content: row[`content${languageSuffix}`] || row.content || 'No content',
+      basic_interpretation: row[`basic_interpretation${languageSuffix}`] || row.basic_interpretation || 'No interpretation',
+      historical_context: row[`historical_context${languageSuffix}`] || row.historical_context,
+      symbolism: row[`symbolism${languageSuffix}`] || row.symbolism,
       language
     };
   } catch (error) {
@@ -94,6 +109,17 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   const requestId = `stream_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   
   try {
+    // 速率限制：流式接口
+    const rl = await checkRateLimitRedis(request as any, {
+      maxAttempts: 10,
+      windowMs: 60 * 1000,
+      blockDurationMs: 5 * 60 * 1000,
+      bucket: 'ai_interpret_stream'
+    })
+    if (!rl.allowed) {
+      return new NextResponse('Too Many Requests', { status: 429 })
+    }
+
     // 解析请求参数
     const url = new URL(request.url);
     const slip_number = parseInt(url.searchParams.get('slip_number') || '0');
@@ -165,7 +191,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           const aiInterpretation = await aiService.generateStreamingInterpretation(
             level,
             fortuneSlip,
-            userContext,
             (chunk: string) => {
               // 每收到一个chunk就发送给客户端
               const chunkEvent: StreamEvent = {

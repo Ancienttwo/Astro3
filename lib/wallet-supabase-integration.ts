@@ -10,7 +10,7 @@
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import jwt from 'jsonwebtoken'
-import { ethers } from 'ethers'
+import { verifyMessage } from 'viem'
 
 export interface Web3AuthResult {
   user: UnifiedWeb3User
@@ -112,8 +112,12 @@ export class WalletSupabaseIntegration {
     expectedAddress: string
   ): Promise<boolean> {
     try {
-      const recoveredAddress = ethers.verifyMessage(message, signature)
-      return recoveredAddress.toLowerCase() === expectedAddress.toLowerCase()
+      const ok = await verifyMessage({
+        address: expectedAddress as `0x${string}`,
+        message,
+        signature: (signature.startsWith('0x') ? signature : `0x${signature}`) as `0x${string}`,
+      })
+      return ok
     } catch (error) {
       console.error('钱包签名验证失败:', error)
       return false

@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { invalidateByExactPath } from '@/lib/edge/invalidate'
+import { supabaseReadonly } from '@/lib/supabase-optimized';
 
 // 获取所有分类
 export async function GET(request: NextRequest) {
   try {
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await supabaseReadonly
       .from('translation_categories')
       .select('*')
       .order('sort_order', { ascending: true });
@@ -70,6 +72,12 @@ export async function POST(request: NextRequest) {
       console.error('创建翻译分类失败:', error);
       return NextResponse.json({ error: '创建翻译分类失败' }, { status: 500 });
     }
+
+    try {
+      await invalidateByExactPath('/api/translations/categories','user')
+      await invalidateByExactPath('/api/translations/stats','user')
+      await invalidateByExactPath('/api/translations','user')
+    } catch {}
 
     return NextResponse.json(data);
   } catch (error) {

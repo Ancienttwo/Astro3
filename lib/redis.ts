@@ -5,42 +5,27 @@ let redis: Redis | null = null;
 
 // 获取Redis连接
 export function getRedisClient(): Redis | null {
-  // 如果没有配置Redis URL，返回null（降级到内存缓存）
+  // 如果没有配置Redis URL
   if (!process.env.REDIS_URL && !process.env.REDIS_CLOUD_URL) {
-    console.warn('Redis URL not configured, falling back to in-memory cache');
+    if (process.env.NODE_ENV === 'production') {
+      console.error('❌ Redis URL not configured in production');
+      return null;
+    }
+    console.warn('Redis URL not configured, falling back to in-memory cache (non-production)');
     return null;
   }
 
   if (!redis) {
     try {
-      const redisUrl = process.env.REDIS_URL || process.env.REDIS_CLOUD_URL;
+      const redisUrl = (process.env.REDIS_URL || process.env.REDIS_CLOUD_URL)!;
       
-      // 构建Redis配置
+      // 构建Redis配置（仅使用ioredis支持的安全选项）
       let redisConfig: any = {
-        // 连接配置
-        retryDelayOnFailover: 100,
         enableReadyCheck: false,
-        maxRetriesPerRequest: 5, // 增加重试次数
-        lazyConnect: true,
-        
-        // 连接池配置
-        family: 4,
-        keepAlive: true,
-        
-        // 重试配置
-        retryConnectOnFailure: true,
-        connectTimeout: 15000, // 增加连接超时时间
-        commandTimeout: 10000, // 增加命令超时时间
-        
-        // 新增：连接重试配置
-        retryDelayOnClusterDown: 300,
-        retryDelayOnFailover: 100,
         maxRetriesPerRequest: 5,
-        
-        // 新增：keepalive配置
-        keepAlive: 30000,
-        
-        // 新增：断线重连配置
+        lazyConnect: true,
+        family: 4,
+        connectTimeout: 15000,
         autoResubscribe: true,
         autoResendUnfulfilledCommands: true,
       };
@@ -182,12 +167,13 @@ class MemoryCache implements CacheInterface {
 // 获取缓存实例（Redis优先，降级到内存缓存）
 export function getCache(): CacheInterface {
   const redisClient = getRedisClient();
-  
   if (redisClient) {
     return new RedisCache(redisClient);
-  } else {
-    return new MemoryCache();
   }
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('Redis is required in production but not configured');
+  }
+  return new MemoryCache();
 }
 
 // 缓存键生成器
@@ -210,7 +196,7 @@ export const CacheKeys = {
 
 // 缓存装饰器函数
 export function withCache<T>(
-  cacheKey: string,
+  cacheKey: string | ((...args: any[]) => string),
   ttl: number = 3600
 ) {
   return function(target: any, propertyName: string, descriptor: PropertyDescriptor) {
@@ -218,7 +204,7 @@ export function withCache<T>(
     
     descriptor.value = async function(...args: any[]) {
       const cache = getCache();
-      const key = typeof cacheKey === 'function' ? cacheKey(...args) : cacheKey;
+      const key = typeof cacheKey === 'function' ? (cacheKey as (...a: any[]) => string)(...args) : cacheKey;
       
       // 尝试从缓存获取
       const cached = await cache.get(key);

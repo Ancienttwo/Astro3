@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { CacheManager } from '@/lib/redis-cache'
+import { invalidateByExactPath } from '@/lib/edge/invalidate'
 
 export async function POST(req: NextRequest) {
   try {
@@ -68,6 +70,24 @@ export async function POST(req: NextRequest) {
     }
 
     console.log('注册码使用成功:', registrationCode.toUpperCase())
+
+    // 缓存失效：用户用量与管理端统计
+    try {
+      if (userId) {
+        await CacheManager.clearUserCache(userId)
+      } else if (userEmail) {
+        const { data: userByEmail } = await supabase
+          .from('users')
+          .select('id')
+          .eq('email', userEmail.toLowerCase())
+          .single()
+        if (userByEmail?.id) {
+          await CacheManager.clearUserCache(userByEmail.id)
+        }
+      }
+    } catch {}
+    try { await invalidateByExactPath('/api/user-usage','user') } catch {}
+    try { await invalidateByExactPath('/api/admin/registration-codes-stats','user') } catch {}
 
     return NextResponse.json({ 
       success: true, 

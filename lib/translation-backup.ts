@@ -39,7 +39,7 @@ export class TranslationBackupManager {
           version,
           timestamp,
           total_translations: translations.length,
-          categories: [...new Set(translations.map(t => t.category_name))],
+          categories: [...new Set(translations.map((t: any) => t.category_name))],
           description
         } as BackupMetadata,
         translations,

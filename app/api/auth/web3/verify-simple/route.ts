@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { ethers } from 'ethers'
+import { verifyMessage } from 'viem'
 import { web3SessionManager } from '@/lib/web3-sessions'
 
 interface Web3VerifyRequest {
@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     let requestBody: Web3VerifyRequest
     try {
       requestBody = await request.json()
-    } catch (error) {
+    } catch (error: any) {
       return NextResponse.json({
         success: false,
         error: '请求体格式无效'
@@ -70,15 +70,18 @@ export async function POST(request: NextRequest) {
     
     // 验证签名
     try {
-      const recoveredAddress = ethers.verifyMessage(session.message, signature)
-      
-      if (recoveredAddress.toLowerCase() !== walletAddress.toLowerCase()) {
+      const ok = await verifyMessage({
+        address: walletAddress as `0x${string}`,
+        message: session.message,
+        signature: (signature.startsWith('0x') ? signature : `0x${signature}`) as `0x${string}`,
+      })
+      if (!ok) {
         return NextResponse.json({
           success: false,
           error: '签名验证失败'
         }, { status: 401 })
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('签名验证错误:', error)
       return NextResponse.json({
         success: false,
@@ -204,11 +207,11 @@ export async function POST(request: NextRequest) {
       
     } catch (error) {
       console.error('❌ Web3 Supabase认证详细错误:', {
-        error: error,
+        error: error as any,
         walletAddress: walletAddress,
         email: email,
-        errorMessage: error?.message,
-        errorCode: error?.code
+        errorMessage: (error as any)?.message,
+        errorCode: (error as any)?.code
       })
       
       // 如果Supabase认证失败，回退到JWT模式，但仍需在数据库中创建用户记录
@@ -258,6 +261,8 @@ export async function POST(request: NextRequest) {
       })
     }
     
+    // 兜底返回，避免类型检查"未返回"错误
+    return NextResponse.json({ success: false, error: '认证失败' }, { status: 500 })
   } catch (error: any) {
     console.error('Web3 verify error:', error)
     

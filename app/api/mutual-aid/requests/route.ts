@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { z } from 'zod'
 import { getCurrentUnifiedUser } from '@/lib/auth'
+import { invalidateByExactPath } from '@/lib/edge/invalidate'
+import { checkRateLimitRedis } from '@/lib/rate-limit-redis'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -69,6 +71,14 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
+    // 限流：防止重复刷提交
+    const rl = await checkRateLimitRedis(request as any, {
+      maxAttempts: 10,
+      windowMs: 60 * 1000,
+      blockDurationMs: 10 * 60 * 1000,
+      bucket: 'mutual_aid_request_post'
+    })
+    if (!rl.allowed) return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 })
     // 使用现有认证检查
     const currentUser = await getCurrentUnifiedUser(request)
     if (!currentUser) {
@@ -109,6 +119,13 @@ export async function POST(request: NextRequest) {
       console.error('创建请求失败:', insertError)
       return NextResponse.json({ error: '提交请求失败' }, { status: 500 })
     }
+
+    try {
+      await invalidateByExactPath('/api/mutual-aid/requests','user')
+      await invalidateByExactPath('/api/mutual-aid/requests/my','user')
+      await invalidateByExactPath('/api/mutual-aid/validations','user')
+      await invalidateByExactPath('/api/mutual-aid/user/stats','user')
+    } catch {}
 
     return NextResponse.json({
       success: true,

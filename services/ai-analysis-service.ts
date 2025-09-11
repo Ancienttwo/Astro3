@@ -16,9 +16,9 @@ import type {
   AnalysisQueryParams,
   AnalysisListResponse,
   APIResponse,
-  AnalysisType,
-  ANALYSIS_TYPE_LABELS
+  AnalysisType
 } from '@/types/fatebook';
+import { ANALYSIS_TYPE_LABELS } from '@/types/fatebook';
 
 /**
  * AI分析服务错误类

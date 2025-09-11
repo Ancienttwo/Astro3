@@ -3,11 +3,10 @@ import { ChatService } from '@/lib/services/database'
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const resolvedParams = await params
-    const conversationId = resolvedParams.id
+    const conversationId = params.id
 
     if (!conversationId) {
       return NextResponse.json(
@@ -32,11 +31,10 @@ export async function DELETE(
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const resolvedParams = await params
-    const conversationId = resolvedParams.id
+    const conversationId = params.id
 
     if (!conversationId) {
       return NextResponse.json(

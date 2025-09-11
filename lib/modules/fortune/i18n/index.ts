@@ -1,5 +1,4 @@
 // lib/modules/fortune/i18n/index.ts - Fortune Module Internationalization
-import { createI18n } from '@/lib/utils/i18n';
 
 // Supported languages for Fortune module
 export type FortuneLanguage = 

@@ -8,9 +8,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { 
   withMultilingualSupport, 
-  MultilingualAPIMiddleware,
-  type SupportedLanguage 
+  MultilingualAPIMiddleware
 } from '@/lib/middleware/multilingual-api';
+
+type SupportedLanguage = 'zh-CN' | 'zh-TW' | 'en-US';
 
 // 测试数据结构
 interface TestResult {
@@ -122,7 +123,19 @@ async function handleGetRequest(
     }
 
     // 生成测试摘要
-    const summary = {
+    const summary: {
+      total_tests: number;
+      successful_translations: number;
+      failed_translations: number;
+      average_data_quality: {
+        title_coverage: string;
+        content_coverage: string;
+        interpretation_coverage: string;
+        historical_context_coverage: string;
+        symbolism_coverage: string;
+      };
+      recommendations: string[];
+    } = {
       total_tests: testResults.length,
       successful_translations: testResults.filter(r => r.has_translation).length,
       failed_translations: testResults.filter(r => !r.has_translation).length,

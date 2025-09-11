@@ -1,4 +1,6 @@
 "use client";
+// @ts-expect-error next-dynamic-flag
+export const dynamic = 'force-dynamic'
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from "@/components/ui/button";
@@ -8,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Solar } from 'lunar-typescript';
+import { Solar } from '@/lib/lunar';
 import { User, Sparkles, Save, BarChart, Eye, Star, Clock, Bot, RefreshCw, Brain, Home, Book, ArrowLeft, Menu, Lightbulb, ChevronDown } from 'lucide-react';
 import Logo from '@/components/Logo';
 import type { RecordData } from '@/types/legacy';

@@ -181,9 +181,10 @@ class Web3SessionManager {
 export const web3SessionManager = new Web3SessionManager()
 
 // 定期清理过期会话
-if (typeof global !== 'undefined') {
-  if (!global.web3CleanupInterval) {
-    global.web3CleanupInterval = setInterval(() => {
+if (typeof globalThis !== 'undefined') {
+  const g = globalThis as any;
+  if (!g.web3CleanupInterval) {
+    g.web3CleanupInterval = setInterval(() => {
       web3SessionManager.cleanExpiredSessions()
     }, 5 * 60 * 1000) // 每5分钟清理一次
   }

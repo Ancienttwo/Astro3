@@ -1,7 +1,5 @@
-'use client'
-
-import AuthPageClient from '@/app/auth/AuthPageClient'
+import { redirect } from 'next/navigation'
 
 export default function JapaneseAuthPage() {
-  return <AuthPageClient />
+  redirect('/privy-auth')
 }

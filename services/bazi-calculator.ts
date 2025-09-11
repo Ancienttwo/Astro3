@@ -1,4 +1,4 @@
-import { Solar } from 'lunar-typescript';
+import { Solar } from '@/lib/lunar';
 import { HIDDEN_STEMS } from '@/lib/zodiac/hidden-stems';
 import { TEN_GODS_RELATIONS } from '@/lib/zodiac/ten-gods';
 import { HeavenlyStem } from '@/lib/zodiac/stems';

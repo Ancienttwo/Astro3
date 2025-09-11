@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
-import { ethers } from 'ethers';
+import { CacheManager } from '@/lib/redis-cache'
+import { invalidateByExactPath } from '@/lib/edge/invalidate'
+import { isAddress } from 'viem';
 
 // 完成任务并领取奖励
 export async function POST(request: NextRequest) {
@@ -15,7 +17,7 @@ export async function POST(request: NextRequest) {
       try {
         const web3User = JSON.parse(decodeURIComponent(atob(web3UserHeader)));
         walletAddress = web3User.walletAddress?.toLowerCase();
-        if (!ethers.isAddress(walletAddress)) {
+        if (!isAddress(walletAddress as `0x${string}`)) {
           walletAddress = null;
         }
       } catch (e) {
@@ -133,6 +135,18 @@ export async function POST(request: NextRequest) {
       console.error('Error updating task status:', updateError);
       return NextResponse.json({ error: 'Failed to update task status' }, { status: 500 });
     }
+
+    // 缓存失效：用户积分、排行榜
+    try {
+      if (walletAddress) {
+        await CacheManager.clearUserCache('web3_'+walletAddress, walletAddress)
+      } else if (userId) {
+        await CacheManager.clearUserCache(userId)
+      }
+      await CacheManager.clearGlobalCache()
+      await invalidateByExactPath('/api/points/leaderboard', 'user')
+      await invalidateByExactPath('/api/airdrop/leaderboard', 'user')
+    } catch {}
 
     return NextResponse.json({
       success: true,

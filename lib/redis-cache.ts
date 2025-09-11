@@ -1,16 +1,28 @@
 // Redis缓存策略 - 用户积分状态缓存
 import Redis from 'ioredis';
 
-// Redis连接配置
-const redis = new Redis({
-  host: process.env.REDIS_HOST || 'localhost',
-  port: parseInt(process.env.REDIS_PORT || '6379'),
-  password: process.env.REDIS_PASSWORD,
-  db: parseInt(process.env.REDIS_DB || '0'),
-  maxRetriesPerRequest: 3,
-  retryDelayOnFailover: 100,
-  lazyConnect: true,
-});
+// 统一创建Redis（优先 REDIS_URL）
+function createRedis(): Redis {
+  const url = process.env.REDIS_URL
+  if (url) {
+    return new Redis(url, {
+      maxRetriesPerRequest: 3,
+      lazyConnect: true,
+      enableReadyCheck: false,
+    })
+  }
+  return new Redis({
+    host: process.env.REDIS_HOST || 'localhost',
+    port: parseInt(process.env.REDIS_PORT || '6379'),
+    password: process.env.REDIS_PASSWORD,
+    db: parseInt(process.env.REDIS_DB || '0'),
+    maxRetriesPerRequest: 3,
+    lazyConnect: true,
+    enableReadyCheck: false,
+  })
+}
+
+const redis = createRedis();
 
 // 缓存键前缀
 export const CACHE_KEYS = {

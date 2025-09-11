@@ -1,4 +1,4 @@
-'use client'
+"use client"
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -7,12 +7,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Separator } from '@/components/ui/separator'
 import { Loader2, Wallet, AlertTriangle, CheckCircle, ArrowLeft, User } from 'lucide-react'
 import { toast } from 'sonner'
-import {
-  connectWallet,
-  generateNonce,
-  generateSignMessage,
-  requestWalletSignature
-} from '@/lib/web3-auth'
+import { useAccount, useConnect, useSignMessage } from 'wagmi'
 import { Web3Auth } from '@/lib/dual-auth-system'
 
 interface WalletRegistrationProps {
@@ -25,6 +20,9 @@ export default function WalletRegistration({ onSuccess, onBack }: WalletRegistra
   const [walletAddress, setWalletAddress] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const { address } = useAccount()
+  const { connect, connectors } = useConnect()
+  const { signMessageAsync } = useSignMessage()
 
   const handleStartRegistration = async () => {
     setIsLoading(true)
@@ -33,25 +31,32 @@ export default function WalletRegistration({ onSuccess, onBack }: WalletRegistra
     try {
       setStep('connect')
       
-      // 1. 连接钱包
-      const address = await connectWallet()
-      setWalletAddress(address)
+      // 1. 连接钱包（wagmi）
+      const preferred = ['injected', 'walletConnect', 'coinbaseWallet']
+      const list = connectors.sort((a, b) => preferred.indexOf(a.id) - preferred.indexOf(b.id))
+      const connector = list[0] || connectors[0]
+      if (!connector) throw new Error('No wallet connector available')
+      const res = await connect({ connector })
+      const addr = (res?.accounts?.[0] || address) as string
+      const resolvedAddress = addr || address
+      if (!resolvedAddress) throw new Error('Failed to get wallet address')
+      setWalletAddress(resolvedAddress)
       toast.success('钱包连接成功！')
       
       setStep('sign')
       
       // 2. 生成签名消息
-      const nonce = generateNonce()
-      const message = generateSignMessage(address, nonce)
+      const nonce = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2)
+      const message = `${window.location.host} wants you to sign in with your Ethereum account:\n${resolvedAddress}\n\nRegister Web3 account at AstroZi.\n\nURI: https://${window.location.host}\nVersion: 1\nChain ID: 56\nNonce: ${nonce}\nIssued At: ${new Date().toISOString()}`
       
       // 3. 请求用户签名
-      const signature = await requestWalletSignature(address, message)
+      const signature = await signMessageAsync({ message })
       toast.success('签名成功！')
       
       setStep('register')
       
       // 4. 创建Web3用户账户
-      const user = await Web3Auth.register(address, signature, message)
+      const user = await Web3Auth.register(resolvedAddress, signature, message)
       toast.success('Web3账户创建成功！')
       
       // 5. 调用成功回调

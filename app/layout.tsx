@@ -12,6 +12,9 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import SEOHead from "@/components/SEOHead";
 import { generateWebsiteStructuredData, generateOrganizationStructuredData } from "@/lib/seo/structured-data";
 import { Providers } from "@/components/Providers";
+import {NextIntlClientProvider} from 'next-intl';
+import { zhDict } from '@/lib/i18n/dictionaries';
+import { unstable_setRequestLocale } from 'next-intl/server';
 
 // 统一配置架构导入
 import { APP_CONFIG } from "@/lib/config/app-config";
@@ -57,11 +60,18 @@ export const viewport = {
   themeColor: "#f59e0b",
 };
 
+// 先保持全局动态渲染；后续逐页迁移到 Suspense/SSG 再移除此设置
+// Remove global dynamic; pages that need CSR are marked individually
+
+// 默认使用静态渲染；具体语言子树在各自 layout 中设置 locale
+
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // Pin default locale for static rendering of non-prefixed (ZH) pages.
+  unstable_setRequestLocale('zh');
   // 应用CSS变量到根元素
   const cssVariablesStyle = Object.entries(CSS_VARIABLES).reduce((acc, [key, value]) => {
     acc[key as any] = value;
@@ -73,7 +83,8 @@ export default function RootLayout({
       <head>
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#f59e0b" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
+        {/* Use web app capable meta for Android; iOS now prefers manifest display */}
+        <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content={APP_CONFIG.ui.branding.productName} />
         
@@ -99,20 +110,23 @@ export default function RootLayout({
         
         <ErrorBoundary>
           <Providers>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="light"
-              enableSystem
-              disableTransitionOnChange
-            >
-                <SettingsProvider>
-                    <CardControlProvider>
-                      <AuthGuard>
-                        {children}
-                      </AuthGuard>
-                    </CardControlProvider>
-                </SettingsProvider>
-            </ThemeProvider>
+            {/* Root provides zh messages for default (no prefix) pages; locale-specific layouts override */}
+            <NextIntlClientProvider locale={'zh'} messages={zhDict as any}>
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="light"
+                enableSystem
+                disableTransitionOnChange
+              >
+                  <SettingsProvider>
+                      <CardControlProvider>
+                        <AuthGuard>
+                          {children}
+                        </AuthGuard>
+                      </CardControlProvider>
+                  </SettingsProvider>
+              </ThemeProvider>
+            </NextIntlClientProvider>
           </Providers>
         </ErrorBoundary>
         

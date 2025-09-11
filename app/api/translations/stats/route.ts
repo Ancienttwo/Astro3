@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { supabaseReadonly } from '@/lib/supabase-optimized';
 
 // 获取翻译统计
 export async function GET(request: NextRequest) {
   try {
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await supabaseReadonly
       .from('translation_dashboard')
       .select('*');
 

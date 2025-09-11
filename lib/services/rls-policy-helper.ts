@@ -58,8 +58,12 @@ export class RLSPolicyHelper {
     console.log('🔍 测试Web3用户RLS访问权限:', userId)
 
     try {
+      if (!this.supabase) {
+        console.warn('Supabase 未初始化，跳过RLS测试')
+        return false
+      }
       // 首先检查当前Supabase session状态
-      const { data: sessionData, error: sessionError } = await this.supabase!.auth.getSession()
+      const { data: sessionData, error: sessionError } = await this.supabase.auth.getSession()
       console.log('🔍 当前Supabase session状态:', {
         hasSession: !!sessionData?.session,
         hasUser: !!sessionData?.session?.user,
@@ -68,7 +72,7 @@ export class RLSPolicyHelper {
         sessionError: sessionError?.message
       })
       // 1. 测试用户表访问
-      const { data: userAccess, error: userError } = await this.supabase!
+      const { data: userAccess, error: userError } = await this.supabase
         .from('users')
         .select('id, email, wallet_address, auth_type')
         .eq('id', userId)
@@ -127,13 +131,17 @@ export class RLSPolicyHelper {
    * 测试用户数据表的访问权限
    */
   private async testUserDataTableAccess(userId: string): Promise<boolean> {
+    if (!this.supabase) {
+      console.warn('Supabase 未初始化，跳过用户数据表访问测试')
+      return false
+    }
     const dataTables = ['charts', 'user_charts', 'readings', 'user_data', 'profiles']
     let allTestsPassed = true
 
     for (const tableName of dataTables) {
       try {
         // 尝试访问表（如果存在）
-        const { data, error } = await this.supabase
+      const { data, error } = await this.supabase
           .from(tableName)
           .select('*')
           .limit(1)
@@ -169,6 +177,9 @@ export class RLSPolicyHelper {
     console.log('🔒 获取Web3用户的安全数据:', userId)
 
     try {
+      if (!this.supabase) {
+        throw new WalletIntegrationError('Supabase not initialized', 'USER_CREATE_FAILED', { userId })
+      }
       // 使用用户的JWT上下文进行查询，自动应用RLS
       const { data: userData, error: userError } = await this.supabase
         .from('user_profile_secure') // 使用安全视图
@@ -258,7 +269,7 @@ export class RLSPolicyHelper {
 
     try {
       // 1. 尝试查询所有用户（应该只返回当前用户）
-      const { data: allUsers, error: allUsersError } = await this.supabase
+      const { data: allUsers, error: allUsersError } = await this.supabase!
         .from('users')
         .select('id, auth_type')
 
@@ -328,7 +339,7 @@ export class RLSPolicyHelper {
     console.log('📋 获取Web3用户审计日志:', userId)
 
     try {
-      const { data: auditLogs, error } = await this.supabase
+      const { data: auditLogs, error } = await this.supabase!
         .from('web3_audit_log')
         .select('*')
         .eq('user_id', userId)
@@ -357,6 +368,10 @@ export class RLSPolicyHelper {
     console.log('🧪 执行RLS测试函数')
 
     try {
+      if (!this.supabase) {
+        console.warn('Supabase 未初始化，跳过RLS测试')
+        return []
+      }
       const { data: testResults, error } = await this.supabase
         .rpc('test_web3_rls')
 
@@ -379,6 +394,10 @@ export class RLSPolicyHelper {
    */
   async isWeb3User(): Promise<boolean> {
     try {
+      if (!this.supabase) {
+        console.warn('Supabase 未初始化，无法检查Web3用户状态')
+        return false
+      }
       const { data, error } = await this.supabase
         .rpc('is_web3_user')
 
@@ -400,6 +419,10 @@ export class RLSPolicyHelper {
    */
   async getUserWalletAddress(): Promise<string | null> {
     try {
+      if (!this.supabase) {
+        console.warn('Supabase 未初始化，无法获取钱包地址')
+        return null
+      }
       const { data, error } = await this.supabase
         .rpc('get_user_wallet_address')
 

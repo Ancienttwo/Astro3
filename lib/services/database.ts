@@ -1,4 +1,42 @@
-import { supabase, ZiweiChart, BaziChart, ChatConversation } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
+// 轻量类型定义（避免跨模块导出依赖）
+export interface ZiweiChart {
+  id: string
+  user_id: string
+  username?: string
+  birth_year: number
+  birth_month: number
+  birth_day: number
+  birth_hour: number
+  gender: 'male' | 'female'
+  chart_data: unknown
+  lunar_date?: string
+  created_at?: string
+  updated_at?: string
+}
+
+export interface BaziChart {
+  id: string
+  user_id: string
+  username?: string
+  birth_year: number
+  birth_month: number
+  birth_day: number
+  birth_hour: number
+  gender: 'male' | 'female'
+  chart_data: unknown
+  lunar_date?: string
+  created_at?: string
+  updated_at?: string
+}
+
+export interface ChatConversation {
+  id: string
+  user_id: string
+  title?: string
+  created_at?: string
+  updated_at?: string
+}
 import { randomUUID } from 'crypto'
 
 // 用户服务

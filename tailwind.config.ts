@@ -11,7 +11,10 @@ const config: Config = {
   theme: {
   	extend: {
   		fontFamily: {
-  			'rajdhani': ['var(--font-rajdhani)', 'sans-serif'],
+  			rajdhani: [
+  				'var(--font-rajdhani)',
+  				'sans-serif'
+  			]
   		},
   		colors: {
   			background: 'hsl(var(--background))',

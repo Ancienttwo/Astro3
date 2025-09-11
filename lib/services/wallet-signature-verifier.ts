@@ -5,7 +5,7 @@
  * 确保签名的有效性和安全性
  */
 
-import { ethers } from 'ethers'
+import { verifyMessage } from 'viem'
 import { WalletSignatureParams, WalletIntegrationError } from '../types/wallet-integration'
 
 export class WalletSignatureVerifier {
@@ -30,8 +30,20 @@ export class WalletSignatureVerifier {
       // 验证输入参数
       this.validateInputs(params)
 
-      // 使用ethers.js验证签名
-      const recoveredAddress = ethers.verifyMessage(message, signature)
+      // 使用 viem 验证签名
+      const isValid = await verifyMessage({
+        address: walletAddress as `0x${string}`,
+        message,
+        signature: (signature.startsWith('0x') ? signature : `0x${signature}`) as `0x${string}`,
+      })
+      if (!isValid) {
+        console.error('❌ 签名验证失败: viem 验证不通过')
+        throw new WalletIntegrationError(
+          'Signature verification failed',
+          'SIGNATURE_INVALID'
+        )
+      }
+      const recoveredAddress = walletAddress
       const normalizedRecovered = recoveredAddress.toLowerCase()
       const normalizedExpected = walletAddress.toLowerCase()
 
@@ -63,9 +75,9 @@ export class WalletSignatureVerifier {
         throw error
       }
 
-      // 处理ethers.js的验证错误
+      // 处理验证错误
       if (error instanceof Error) {
-        if (error.message.includes('invalid signature')) {
+        if (error.message.toLowerCase().includes('signature')) {
           throw new WalletIntegrationError(
             'Invalid signature format',
             'SIGNATURE_INVALID',
@@ -73,7 +85,7 @@ export class WalletSignatureVerifier {
           )
         }
         
-        if (error.message.includes('invalid hex string')) {
+        if (error.message.toLowerCase().includes('hex')) {
           throw new WalletIntegrationError(
             'Invalid signature hex format',
             'SIGNATURE_INVALID',

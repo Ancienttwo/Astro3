@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getCache, CacheKeys } from '@/lib/redis'
+import { invalidateByExactPath } from '@/lib/edge/invalidate'
 import { getCurrentUnifiedUser } from '@/lib/auth'
 
 // 环境变量检查 - 开发和生产环境都需要配置
@@ -422,6 +423,10 @@ export async function POST(request: NextRequest) {
     const cacheKey = CacheKeys.charts(userContext.id)
     await cache.del(cacheKey)
     
+    try {
+      await invalidateByExactPath('/api/charts', 'astrology')
+    } catch {}
+
     return NextResponse.json({
       success: true,
       data: formattedChart
@@ -479,7 +484,7 @@ export async function PUT(request: NextRequest) {
         .eq('user_id', userContext.id)
       
       // 根据认证类型进行严格过滤
-      if (['web3', 'walletconnect', 'web3auth'].includes(userContext.auth_type)) {
+      if (['web3', 'walletconnect', 'web3auth'].includes(userContext.auth_type as string)) {
         fetchQuery = fetchQuery.in('auth_type', ['web3', 'walletconnect', 'web3auth'])
       } else {
         fetchQuery = fetchQuery.or('auth_type.is.null,auth_type.eq.web2')
@@ -520,7 +525,7 @@ export async function PUT(request: NextRequest) {
       .eq('user_id', userContext.id)
     
     // 根据认证类型进行严格过滤
-    if (['web3', 'walletconnect', 'web3auth'].includes(userContext.auth_type)) {
+    if (['web3', 'walletconnect', 'web3auth'].includes(userContext.auth_type as string)) {
       updateQuery = updateQuery.in('auth_type', ['web3', 'walletconnect', 'web3auth'])
     } else {
       updateQuery = updateQuery.or('auth_type.is.null,auth_type.eq.web2')
@@ -577,6 +582,11 @@ export async function PUT(request: NextRequest) {
     }
 
     
+    try {
+      await invalidateByExactPath('/api/charts', 'astrology')
+      await invalidateByExactPath(`/api/charts/${id}`, 'astrology')
+    } catch {}
+
     return NextResponse.json({
       success: true,
       data: formattedChart
@@ -628,7 +638,7 @@ export async function DELETE(request: NextRequest) {
       .eq('user_id', userContext.id)
     
     // 根据认证类型进行严格过滤
-    if (['web3', 'walletconnect', 'web3auth'].includes(userContext.auth_type)) {
+    if (['web3', 'walletconnect', 'web3auth'].includes(userContext.auth_type as string)) {
       deleteQuery = deleteQuery.in('auth_type', ['web3', 'walletconnect', 'web3auth'])
     } else {
       deleteQuery = deleteQuery.or('auth_type.is.null,auth_type.eq.web2')
@@ -646,6 +656,11 @@ export async function DELETE(request: NextRequest) {
     const cacheKey = CacheKeys.charts(userContext.id)
     await cache.del(cacheKey)
     
+    try {
+      await invalidateByExactPath('/api/charts', 'astrology')
+      await invalidateByExactPath(`/api/charts/${id}`, 'astrology')
+    } catch {}
+
     return NextResponse.json({
       success: true,
       message: '删除成功'

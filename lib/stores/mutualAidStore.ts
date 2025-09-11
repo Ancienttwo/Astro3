@@ -113,7 +113,7 @@ export interface Transaction {
 }
 
 export interface UIState {
-  theme: 'light' | 'dark';
+  theme: 'light' | 'dark' | 'system';
   language: 'zh' | 'en';
   sidebarOpen: boolean;
   currentModal?: string;
@@ -175,7 +175,7 @@ export interface MutualAidStore {
   claimMilestoneReward: (milestone: number) => void;
   
   // UI actions
-  setTheme: (theme: 'light' | 'dark') => void;
+  setTheme: (theme: 'light' | 'dark' | 'system') => void;
   setLanguage: (language: 'zh' | 'en') => void;
   setSidebarOpen: (open: boolean) => void;
   setCurrentModal: (modal?: string) => void;

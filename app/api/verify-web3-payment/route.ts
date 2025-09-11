@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { ethers } from 'ethers'
+import { createPublicClient, http, parseEther } from 'viem'
+import { bsc } from 'viem/chains'
 
 const BSC_RPC_URL = 'https://bsc-dataseed1.binance.org/'
 const RECIPIENT_ADDRESS = '0xa047FFa6923BfE296B633A7b88f37dFcaAB93Cf3'
@@ -15,11 +16,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 连接到BSC网络
-    const provider = new ethers.JsonRpcProvider(BSC_RPC_URL)
+    // 连接到BSC网络（viem）
+    const client = createPublicClient({ chain: bsc, transport: http(BSC_RPC_URL) })
     
     // 获取交易详情
-    const transaction = await provider.getTransaction(txHash)
+    const transaction = await client.getTransaction({ hash: txHash as `0x${string}` })
     
     if (!transaction) {
       return NextResponse.json(
@@ -29,9 +30,9 @@ export async function POST(request: NextRequest) {
     }
 
     // 验证交易状态
-    const receipt = await provider.getTransactionReceipt(txHash)
+    const receipt = await client.getTransactionReceipt({ hash: txHash as `0x${string}` })
     
-    if (!receipt || receipt.status !== 1) {
+    if (!receipt || receipt.status !== 'success') {
       return NextResponse.json(
         { error: 'Transaction failed or pending' },
         { status: 400 }
@@ -39,7 +40,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 验证收款地址
-    if (transaction.to?.toLowerCase() !== RECIPIENT_ADDRESS.toLowerCase()) {
+    if ((transaction.to as string | null)?.toLowerCase() !== RECIPIENT_ADDRESS.toLowerCase()) {
       return NextResponse.json(
         { error: 'Invalid recipient address' },
         { status: 400 }
@@ -47,7 +48,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 验证金额 (BNB支付)
-    const expectedAmountWei = ethers.parseEther(amount)
+    const expectedAmountWei = parseEther(amount)
     if (transaction.value < expectedAmountWei) {
       return NextResponse.json(
         { error: 'Insufficient payment amount' },
@@ -57,7 +58,7 @@ export async function POST(request: NextRequest) {
 
     // 验证交易时间（防止重放攻击）
     const currentTime = Math.floor(Date.now() / 1000)
-    const transactionTime = (await provider.getBlock(receipt.blockNumber!))?.timestamp || 0
+    const transactionTime = (await client.getBlock({ blockNumber: receipt.blockNumber }))?.timestamp || 0
     
     if (currentTime - transactionTime > 3600) { // 1小时内的交易
       return NextResponse.json(

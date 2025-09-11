@@ -14,9 +14,10 @@ import {
   withMultilingualSupport, 
   MultilingualAPIMiddleware,
   generateCacheKey,
-  ResponseCacheMiddleware,
-  type SupportedLanguage 
+  ResponseCacheMiddleware
 } from '@/lib/middleware/multilingual-api';
+
+type SupportedLanguage = 'zh-CN' | 'zh-TW' | 'en-US';
 
 // 签文详细信息接口
 export interface FortuneSlipV2 {

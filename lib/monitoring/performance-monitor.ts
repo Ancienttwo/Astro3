@@ -1,5 +1,5 @@
 // 性能监控工具 - Web Vitals + 自定义指标
-import { getCLS, getFID, getFCP, getLCP, getTTFB } from 'web-vitals';
+import React from 'react'
 
 export interface PerformanceMetric {
   name: string;
@@ -31,7 +31,16 @@ class PerformanceMonitor {
     }
   }
 
-  private initWebVitals() {
+  private async initWebVitals() {
+    // 动态加载 web-vitals，避免构建时缺少依赖导致的类型错误
+    let webVitals: any
+    try {
+      webVitals = await import('web-vitals')
+    } catch {
+      // 未安装 web-vitals 时跳过
+      return
+    }
+
     const reportMetric = (metric: any) => {
       const performanceMetric: PerformanceMetric = {
         name: metric.name,
@@ -46,11 +55,11 @@ class PerformanceMonitor {
     };
 
     // 核心Web Vitals指标
-    getCLS(reportMetric);  // Cumulative Layout Shift
-    getFID(reportMetric);  // First Input Delay
-    getFCP(reportMetric);  // First Contentful Paint
-    getLCP(reportMetric);  // Largest Contentful Paint
-    getTTFB(reportMetric); // Time to First Byte
+    webVitals.getCLS(reportMetric);  // Cumulative Layout Shift
+    webVitals.getFID(reportMetric);  // First Input Delay
+    webVitals.getFCP(reportMetric);  // First Contentful Paint
+    webVitals.getLCP(reportMetric);  // Largest Contentful Paint
+    webVitals.getTTFB(reportMetric); // Time to First Byte
   }
 
   private initCustomMetrics() {

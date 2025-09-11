@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useDesktopZoom } from '../hooks/useDesktopZoom'
 import DesktopZoomControl, { useZoomKeyboardShortcuts } from './DesktopZoomControl'
 
@@ -24,6 +24,8 @@ export default function ZoomableLayout({
   onlyDesktop = true
 }: ZoomableLayoutProps) {
   const { scale } = useDesktopZoom()
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
   const { handleKeyDown } = useZoomKeyboardShortcuts()
 
   // 键盘快捷键支持
@@ -43,13 +45,8 @@ export default function ZoomableLayout({
     return () => window.removeEventListener('keydown', keyDownHandler)
   }, [enableKeyboardShortcuts, handleKeyDown])
 
-  // 检测是否为桌面端
-  const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 768
-
-  // 如果设置为仅桌面端且当前不是桌面端，则不应用缩放
-  if (onlyDesktop && !isDesktop) {
-    return <>{children}</>
-  }
+  // 检测是否为桌面端（仅在挂载后判断，避免SSR/CSR不一致）
+  const isDesktop = mounted && typeof window !== 'undefined' ? window.innerWidth >= 768 : false
 
   return (
     <>
@@ -67,7 +64,7 @@ export default function ZoomableLayout({
       </div>
 
       {/* 缩放控制器 */}
-      {showZoomControl && isDesktop && (
+      {mounted && showZoomControl && isDesktop && (
         <DesktopZoomControl 
           position={zoomControlPosition}
           autoHide={false}

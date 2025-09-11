@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { verifyWeb3Auth } from '@/lib/auth';
+import { getMutualAidUser } from '@/lib/mutual-aid-auth';
 import { z } from 'zod';
+import { invalidateByExactPath } from '@/lib/edge/invalidate'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -101,15 +102,15 @@ export async function GET(
     let canValidate = false;
 
     try {
-      const authResult = await verifyWeb3Auth(request);
-      if (authResult.success) {
-        isOwner = requestData.requester_id === authResult.userId;
+      const user = await getMutualAidUser(request as any);
+      if (user) {
+        isOwner = requestData.requester_id === user.id;
         
         // 检查是否是管理员
         const { data: adminData } = await supabase
           .from('user_profiles')
           .select('role')
-          .eq('id', authResult.userId)
+          .eq('id', user.id)
           .single();
         
         isAdmin = adminData?.role === 'admin';
@@ -119,11 +120,11 @@ export async function GET(
           const { data: validatorData } = await supabase
             .from('user_profiles')
             .select('reputation_score, validation_accuracy, is_active_validator')
-            .eq('id', authResult.userId)
+            .eq('id', user.id)
             .single();
 
           const hasValidated = requestData.validations?.some(
-            (v: any) => v.validator_id === authResult.userId
+            (v: any) => v.validator_id === user.id
           );
 
           canValidate = validatorData && 
@@ -251,9 +252,9 @@ export async function PUT(
     const body = await request.json();
     const validatedData = UpdateRequestSchema.parse(body);
 
-    // 验证Web3身份
-    const authResult = await verifyWeb3Auth(request);
-    if (!authResult.success) {
+    // 认证用户
+    const user = await getMutualAidUser(request as any);
+    if (!user) {
       return NextResponse.json(
         {
           success: false,
@@ -287,11 +288,11 @@ export async function PUT(
     }
 
     // 检查权限
-    const isOwner = requestData.requester_id === authResult.userId;
+    const isOwner = requestData.requester_id === user.id;
     const { data: userData } = await supabase
       .from('user_profiles')
       .select('role')
-      .eq('id', authResult.userId)
+      .eq('id', user.id)
       .single();
     
     const isAdmin = userData?.role === 'admin';
@@ -356,10 +357,18 @@ export async function PUT(
           request_id: requestId,
           from_status: requestData.status,
           to_status: validatedData.status,
-          changed_by: authResult.userId,
+          changed_by: user.id,
           reason: validatedData.adminNotes,
         });
     }
+
+    try {
+      await invalidateByExactPath('/api/mutual-aid/requests','user')
+      await invalidateByExactPath('/api/mutual-aid/requests/my','user')
+      await invalidateByExactPath(`/api/mutual-aid/requests/${requestId}`,'user')
+      await invalidateByExactPath('/api/mutual-aid/validations','user')
+      await invalidateByExactPath('/api/mutual-aid/validations/history','user')
+    } catch {}
 
     return NextResponse.json({
       success: true,
@@ -394,8 +403,8 @@ export async function DELETE(
     const requestId = params.id;
 
     // 验证Web3身份
-    const authResult = await verifyWeb3Auth(request);
-    if (!authResult.success) {
+    const user = await getMutualAidUser(request as any);
+    if (!user) {
       return NextResponse.json(
         {
           success: false,
@@ -429,7 +438,7 @@ export async function DELETE(
     }
 
     // 检查是否是申请者
-    if (requestData.requester_id !== authResult.userId) {
+    if (requestData.requester_id !== user.id) {
       return NextResponse.json(
         {
           success: false,
@@ -477,9 +486,17 @@ export async function DELETE(
         request_id: requestId,
         from_status: requestData.status,
         to_status: 'cancelled',
-        changed_by: authResult.userId,
+        changed_by: user.id,
         reason: '用户主动取消',
       });
+
+    try {
+      await invalidateByExactPath('/api/mutual-aid/requests','user')
+      await invalidateByExactPath('/api/mutual-aid/requests/my','user')
+      await invalidateByExactPath(`/api/mutual-aid/requests/${requestId}`,'user')
+      await invalidateByExactPath('/api/mutual-aid/validations','user')
+      await invalidateByExactPath('/api/mutual-aid/validations/history','user')
+    } catch {}
 
     return NextResponse.json({
       success: true,

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { invalidateAstrologyChart } from '@/lib/edge/invalidate'
 
 // 使用服务端角色的supabase客户端来绕过RLS
 const supabaseAdmin = createClient(
@@ -157,6 +158,13 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('✅ 用神信息保存成功:', chartId)
+
+    // 触发边缘缓存失效（如有）
+    try {
+      await invalidateAstrologyChart(chartId)
+    } catch (e) {
+      console.warn('⚠️ 边缘缓存失效失败（可忽略）:', (e as Error)?.message)
+    }
 
     return NextResponse.json({
       success: true,

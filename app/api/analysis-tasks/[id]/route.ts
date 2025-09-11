@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase'
+import { invalidateByExactPath } from '@/lib/edge/invalidate'
 
 const supabaseAdmin = getSupabaseAdmin()
 
@@ -50,10 +51,10 @@ async function authenticateRequest(request: NextRequest) {
 // 获取单个分析任务的详细信息
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await params
+    const { id } = params
     
     if (!id) {
       return NextResponse.json({ error: '缺少任务ID' }, { status: 400 })
@@ -103,10 +104,10 @@ export async function GET(
 // 删除任务（可选功能）
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const taskId = (await params).id
+    const taskId = params.id
     
     if (!taskId) {
       return NextResponse.json({ error: '缺少任务ID' }, { status: 400 })
@@ -135,6 +136,10 @@ export async function DELETE(
     }
 
     console.log(`✅ 任务已删除: ${taskId}`)
+    try {
+      await invalidateByExactPath('/api/analysis-tasks', 'astrology')
+      await invalidateByExactPath(`/api/analysis-tasks/${taskId}`, 'astrology')
+    } catch {}
     return NextResponse.json({ message: '任务已删除' })
 
   } catch (error) {

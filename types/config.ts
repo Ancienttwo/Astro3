@@ -1,24 +1,15 @@
 // types/config.ts - 统一配置架构类型定义
 
 // 重新导出配置相关类型，方便全局使用
-export type {
-  AppMode,
-  SupportedLanguage
-} from '@/lib/config/app-config';
+export type { AppMode, SupportedLanguage } from '@/lib/config/app-config';
+export type { DeploymentEnvironment, DeploymentTarget } from '@/lib/config/deployment-config';
+export type { ThemeConfig, ComponentStyleConfig } from '@/lib/config/ui-theme-config';
+export type { FeatureFlagKey } from '@/lib/config/feature-flags';
 
-export type {
-  DeploymentEnvironment,
-  DeploymentTarget
-} from '@/lib/config/deployment-config';
-
-export type {
-  ThemeConfig,
-  ComponentStyleConfig
-} from '@/lib/config/ui-theme-config';
-
-export type {
-  FeatureFlagKey
-} from '@/lib/config/feature-flags';
+// 引入类型以便在本文件中使用
+import type { AppMode, SupportedLanguage } from '@/lib/config/app-config';
+import type { DeploymentTarget } from '@/lib/config/deployment-config';
+import type { FeatureFlagKey } from '@/lib/config/feature-flags';
 
 // 全局配置上下文类型
 export interface GlobalConfigContext {

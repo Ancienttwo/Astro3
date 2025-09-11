@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe-server'
 import { supabase } from '@/lib/supabase'
 import Stripe from 'stripe'
+import { CacheManager } from '@/lib/redis-cache'
+import { invalidateByExactPath } from '@/lib/edge/invalidate'
 
 export async function POST(request: NextRequest) {
   const body = await request.text()
@@ -63,9 +65,13 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     let userId = metadata.userId
     
     if (!userId && session.customer_email) {
-      // 通过邮箱查找用户
-      const { data: userData } = await supabase.auth.admin.getUserByEmail(session.customer_email)
-      userId = userData?.user?.id
+      // 通过邮箱在应用用户表查找用户
+      const { data: userRow } = await supabase
+        .from('users')
+        .select('id')
+        .eq('email', session.customer_email.toLowerCase())
+        .single()
+      userId = userRow?.id || null
     }
 
     if (!userId) {
@@ -151,6 +157,16 @@ async function handleReportPurchase(userId: string, metadata: any, session: Stri
     if (historyError) throw historyError
 
     console.log(`用户 ${userId} 购买了 ${reportCount} 次AI报告`)
+
+    // 缓存失效：用户用量、相关边缘缓存
+    try {
+      await CacheManager.clearUserCache(userId)
+    } catch (e) {
+      console.warn('Failed to clear user cache after report purchase:', (e as Error)?.message)
+    }
+    try {
+      await invalidateByExactPath('/api/user-usage', 'user')
+    } catch {}
   } catch (error) {
     console.error('处理报告购买失败:', error)
     throw error
@@ -204,6 +220,15 @@ async function handleMembershipPurchase(userId: string, metadata: any, session: 
     if (historyError) throw historyError
 
     console.log(`用户 ${userId} 购买了 ${membershipType} 会员`)
+
+    // 缓存失效：会员状态、用户相关边缘缓存
+    try {
+      await CacheManager.clearUserCache(userId)
+    } catch (e) {
+      console.warn('Failed to clear user cache after membership purchase:', (e as Error)?.message)
+    }
+    try { await invalidateByExactPath('/api/membership/status', 'user') } catch {}
+    try { await invalidateByExactPath('/api/membership/status-unified', 'user') } catch {}
   } catch (error) {
     console.error('处理会员购买失败:', error)
     throw error

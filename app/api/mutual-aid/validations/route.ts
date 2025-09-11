@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { verifyWeb3Auth } from '@/lib/auth';
+import { getMutualAidUser } from '@/lib/mutual-aid-auth';
 import { z } from 'zod';
+import { invalidateByExactPath } from '@/lib/edge/invalidate'
+import { checkRateLimitRedis } from '@/lib/rate-limit-redis'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -39,16 +41,16 @@ const GetPendingValidationsSchema = z.object({
  */
 export async function GET(request: NextRequest) {
   try {
-    // 验证Web3身份
-    const authResult = await verifyWeb3Auth(request);
-    if (!authResult.success) {
+    // 认证用户
+    const user = await getMutualAidUser(request as any);
+    if (!user) {
       return NextResponse.json(
         {
           success: false,
           error: {
             code: 'AUTHENTICATION_REQUIRED',
-            message: '需要Web3身份验证',
-            details: authResult.error,
+            message: '需要身份验证',
+            details: 'No valid mutual-aid user',
           },
         },
         { status: 401 }
@@ -59,7 +61,7 @@ export async function GET(request: NextRequest) {
     const { data: validatorData, error: validatorError } = await supabase
       .from('user_profiles')
       .select('reputation_score, validation_accuracy, is_active_validator, total_validations')
-      .eq('id', authResult.userId)
+      .eq('id', user.id)
       .single();
 
     if (validatorError || !validatorData) {
@@ -143,7 +145,7 @@ export async function GET(request: NextRequest) {
         )
       `, { count: 'exact' })
       .eq('status', 'pending')
-      .neq('requester_id', authResult.userId); // 不能验证自己的申请
+      .neq('requester_id', user.id); // 不能验证自己的申请
 
     // 应用筛选条件
     if (category) {
@@ -172,7 +174,7 @@ export async function GET(request: NextRequest) {
     // 过滤掉用户已经验证过的请求
     const filteredRequests = requests?.filter(request => {
       const hasValidated = request.validations?.some(
-        (validation: any) => validation.validator_id === authResult.userId
+        (validation: any) => validation.validator_id === user.id
       );
       return !hasValidated;
     }) || [];
@@ -231,7 +233,7 @@ export async function GET(request: NextRequest) {
     const hasPrev = page > 1;
 
     // 获取验证者统计信息
-    const validatorStats = await getValidatorStats(authResult.userId);
+    const validatorStats = await getValidatorStats(user.id);
 
     return NextResponse.json({
       success: true,
@@ -280,20 +282,28 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
+    // 限流：提交验证
+    const rl = await checkRateLimitRedis(request as any, {
+      maxAttempts: 30,
+      windowMs: 60 * 1000,
+      blockDurationMs: 10 * 60 * 1000,
+      bucket: 'mutual_aid_validation_post'
+    })
+    if (!rl.allowed) return NextResponse.json({ success: false, error: { code: 'RATE_LIMITED', message: 'Too Many Requests' } }, { status: 429 })
     // 解析请求体
     const body = await request.json();
     const validatedData = SubmitValidationSchema.parse(body);
 
-    // 验证Web3身份
-    const authResult = await verifyWeb3Auth(request);
-    if (!authResult.success) {
+    // 用户认证
+    const user = await getMutualAidUser(request as any);
+    if (!user) {
       return NextResponse.json(
         {
           success: false,
           error: {
             code: 'AUTHENTICATION_REQUIRED',
-            message: '需要Web3身份验证',
-            details: authResult.error,
+            message: '需要身份验证',
+            details: 'No valid mutual-aid user',
           },
         },
         { status: 401 }
@@ -304,7 +314,7 @@ export async function POST(request: NextRequest) {
     const { data: validatorData, error: validatorError } = await supabase
       .from('user_profiles')
       .select('reputation_score, validation_accuracy, is_active_validator')
-      .eq('id', authResult.userId)
+      .eq('id', user.id)
       .single();
 
     if (validatorError || !validatorData) {
@@ -374,7 +384,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 验证不是自己的申请
-    if (requestData.requester_id === authResult.userId) {
+    if (requestData.requester_id === user.id) {
       return NextResponse.json(
         {
           success: false,
@@ -392,7 +402,7 @@ export async function POST(request: NextRequest) {
       .from('mutual_aid_validations')
       .select('id')
       .eq('request_id', validatedData.requestId)
-      .eq('validator_id', authResult.userId)
+      .eq('validator_id', user.id)
       .single();
 
     if (existingValidation) {
@@ -413,7 +423,7 @@ export async function POST(request: NextRequest) {
       .from('mutual_aid_validations')
       .insert({
         request_id: validatedData.requestId,
-        validator_id: authResult.userId,
+        validator_id: user.id,
         vote: validatedData.vote,
         confidence_score: validatedData.confidenceScore,
         reason: validatedData.reason,
@@ -478,10 +488,17 @@ export async function POST(request: NextRequest) {
     const totalReward = reward * bonusMultiplier;
 
     // 发放验证奖励
-    await awardValidationReward(authResult.userId, totalReward, validation.id);
+    await awardValidationReward(user.id, totalReward, validation.id);
 
     // 更新验证者统计
-    await updateValidatorStats(authResult.userId, validatedData.vote === 'approve');
+    await updateValidatorStats(user.id, validatedData.vote === 'approve');
+
+    try {
+      await invalidateByExactPath('/api/mutual-aid/validations','user')
+      await invalidateByExactPath('/api/mutual-aid/validations/history','user')
+      await invalidateByExactPath('/api/mutual-aid/requests','user')
+      await invalidateByExactPath(`/api/mutual-aid/requests/${validatedData.requestId}`,'user')
+    } catch {}
 
     return NextResponse.json({
       success: true,

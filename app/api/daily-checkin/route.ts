@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { DailyCheckinService } from '@/lib/services/daily-checkin-service'
+import { CacheManager } from '@/lib/redis-cache'
+import { invalidateByExactPath } from '@/lib/edge/invalidate'
+import { checkRateLimitRedis } from '@/lib/rate-limit-redis'
 import { CreditManager, UserIdentifier } from '@/lib/services/credit-manager'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -55,6 +58,16 @@ export async function GET(request: NextRequest) {
 // 执行签到
 export async function POST(request: NextRequest) {
   try {
+    // 速率限制：防止频繁签到请求
+    const rl = await checkRateLimitRedis(request as any, {
+      maxAttempts: 10,
+      windowMs: 60 * 1000,
+      blockDurationMs: 10 * 60 * 1000,
+      bucket: 'daily_checkin_web2'
+    })
+    if (!rl.allowed) {
+      return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 })
+    }
     // 获取用户认证
     const authHeader = request.headers.get('Authorization')
     if (!authHeader?.startsWith('Bearer ')) {
@@ -76,6 +89,14 @@ export async function POST(request: NextRequest) {
     }
 
     const result = await DailyCheckinService.performCheckin(userIdentifier)
+
+    // 缓存失效：用户用量相关
+    try {
+      await CacheManager.clearUserCache(user.id)
+    } catch (e) {
+      console.warn('Failed to clear user cache after checkin:', (e as Error)?.message)
+    }
+    try { await invalidateByExactPath('/api/user-usage', 'user') } catch {}
 
     // 转换为旧格式兼容性
     return NextResponse.json({

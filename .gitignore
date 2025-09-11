@@ -66,4 +66,4 @@ tmp/
 # macOS
 .DS_Store
 .AppleDouble
-.LSOverride 
+.LSOverride .env.local

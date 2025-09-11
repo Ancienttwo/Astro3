@@ -1,4 +1,4 @@
-'use client'
+"use client"
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
@@ -8,15 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Loader2, Wallet, Shield, AlertTriangle, CheckCircle, ExternalLink } from 'lucide-react'
 import { toast } from 'sonner'
-import {
-  connectWallet,
-  generateNonce,
-  generateSignMessage,
-  requestWalletSignature,
-  detectWalletEnvironment,
-  switchToBSC,
-  BSC_CONFIG
-} from '@/lib/web3-auth'
+import { useAccount, useConnect, useSignMessage, useDisconnect } from 'wagmi'
 
 export interface WalletConnectRequest {
   walletAddress: string
@@ -41,9 +33,17 @@ export default function WalletConnector({ onConnect, isLoading = false, mode = '
   }>({ hasMetaMask: false, hasBinanceWallet: false, isMobile: false })
   const [isConnecting, setIsConnecting] = useState(false)
   const [error, setError] = useState<string>('')
+  const { address, isConnected } = useAccount()
+  const { connect, connectors } = useConnect()
+  const { disconnect } = useDisconnect()
+  const { signMessageAsync } = useSignMessage()
 
   useEffect(() => {
-    const env = detectWalletEnvironment()
+    const env = {
+      hasMetaMask: typeof window !== 'undefined' && !!(window as any)?.ethereum?.isMetaMask,
+      hasBinanceWallet: typeof window !== 'undefined' && !!(window as any).BinanceChain,
+      isMobile: typeof navigator !== 'undefined' && /Mobi|Android/i.test(navigator.userAgent)
+    }
     setWalletEnv(env)
     console.log('钱包环境检测:', env)
   }, [])
@@ -55,26 +55,33 @@ export default function WalletConnector({ onConnect, isLoading = false, mode = '
     try {
       setStep('connect')
       
-      // 连接钱包并获取地址
-      const address = await connectWallet()
-      setWalletAddress(address)
+      // 连接钱包并获取地址（wagmi）
+      const preferred = ['injected', 'walletConnect', 'coinbaseWallet']
+      const list = connectors.sort((a, b) => preferred.indexOf(a.id) - preferred.indexOf(b.id))
+      const connector = list[0] || connectors[0]
+      if (!connector) throw new Error('No wallet connector available')
+      const res = await connect({ connector })
+      const addr = (res?.accounts?.[0] || address) as string
+      const resolvedAddress = addr || address
+      if (!resolvedAddress) throw new Error('Failed to get wallet address')
+      setWalletAddress(resolvedAddress)
       toast.success('Wallet connected successfully!')
       
       setStep('sign')
       
-      // 生成签名消息
-      const nonce = generateNonce()
-      const message = generateSignMessage(address, nonce)
+      // 生成签名消息（内联生成 nonce/SIWE 简版消息）
+      const nonce = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2)
+      const message = `${window.location.host} wants you to sign in with your Ethereum account:\n${resolvedAddress}\n\nSign in to AstroZi.\n\nURI: https://${window.location.host}\nVersion: 1\nChain ID: 56\nNonce: ${nonce}\nIssued At: ${new Date().toISOString()}`
       
-      // 请求用户签名
-      const signature = await requestWalletSignature(address, message)
+      // 请求用户签名（wagmi）
+      const signature = await signMessageAsync({ message })
       toast.success('Signature successful!')
       
       setStep('confirm')
       
       // 构建连接请求
       const connectRequest: WalletConnectRequest = {
-        walletAddress: address,
+        walletAddress: resolvedAddress,
         signature,
         message,
         nonce

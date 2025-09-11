@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
-import { ethers } from 'ethers';
+import { isAddress } from 'viem';
+import { CacheManager } from '@/lib/redis-cache'
+import { invalidateByExactPath } from '@/lib/edge/invalidate'
 
 // 筊杯投掷结果处理 API
 export async function POST(request: NextRequest) {
@@ -13,7 +15,7 @@ export async function POST(request: NextRequest) {
       try {
         const web3User = JSON.parse(decodeURIComponent(atob(web3UserHeader)));
         walletAddress = web3User.walletAddress?.toLowerCase();
-        if (!ethers.isAddress(walletAddress)) {
+        if (!isAddress(walletAddress as `0x${string}`)) {
           walletAddress = null;
         }
       } catch (e) {
@@ -147,6 +149,16 @@ export async function POST(request: NextRequest) {
       response.data.canMintNFT = true;
       response.data.completedTasks = await getCompletedTasks(walletAddress);
     }
+
+    // 缓存失效：用户相关与可缓存的公共读取
+    try {
+      await CacheManager.clearUserCache('web3_'+walletAddress, walletAddress)
+      await CacheManager.clearGlobalCache()
+      await invalidateByExactPath(`/api/guandi/draw?wallet_address=${walletAddress}`,'astrology')
+      await invalidateByExactPath(`/api/guandi/gallery?wallet_address=${walletAddress}`,'astrology')
+      await invalidateByExactPath('/api/points/leaderboard','user')
+      await invalidateByExactPath('/api/airdrop/leaderboard','user')
+    } catch {}
 
     return NextResponse.json(response);
 
@@ -370,7 +382,8 @@ async function getCompletedTasks(walletAddress: string): Promise<string[]> {
       'guandi_collect_points'
     ]);
 
-  return completedTasks?.map(t => t.tasks?.task_key).filter(Boolean) || [];
+  const keys = completedTasks?.map((t: { tasks?: { task_key?: string } }) => t.tasks?.task_key) || [];
+  return keys.filter((k): k is string => typeof k === 'string');
 }
 
 // 获取结果消息

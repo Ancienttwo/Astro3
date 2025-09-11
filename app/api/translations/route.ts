@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { invalidateByExactPath } from '@/lib/edge/invalidate'
+import { supabaseReadonly } from '@/lib/supabase-optimized';
 
 // 获取翻译列表
 export async function GET(request: NextRequest) {
@@ -13,7 +15,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = (page - 1) * limit;
 
-    let query = supabaseAdmin
+    let query = supabaseReadonly
       .from('translation_overview')
       .select('*', { count: 'exact' });
 
@@ -125,6 +127,13 @@ export async function POST(request: NextRequest) {
       console.error('创建翻译失败:', error);
       return NextResponse.json({ error: '创建翻译失败' }, { status: 500 });
     }
+
+    try {
+      await invalidateByExactPath('/api/translations','user')
+      await invalidateByExactPath('/api/translations/stats','user')
+      await invalidateByExactPath('/api/translations/categories','user')
+      await invalidateByExactPath('/api/translations/export','user')
+    } catch {}
 
     return NextResponse.json(data);
   } catch (error) {

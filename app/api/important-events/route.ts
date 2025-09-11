@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
+import { invalidateByExactPath } from '@/lib/edge/invalidate'
 
 export async function GET(request: NextRequest) {
   try {
@@ -37,7 +38,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ 
       success: true, 
-      events: profile.important_events || [] 
+      events: (profile?.important_events as any[]) || [] 
     })
   } catch (error) {
     console.error('获取重要事件记录失败:', error)
@@ -107,7 +108,7 @@ export async function POST(request: NextRequest) {
       }
     } else {
       // 更新现有档案
-      const currentEvents = profile.important_events || []
+      const currentEvents = (profile?.important_events as any[]) || []
       const updatedEvents = [...currentEvents, newEvent]
 
       const { error: updateError } = await supabase
@@ -120,6 +121,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    try { await invalidateByExactPath('/api/important-events','user') } catch {}
     return NextResponse.json({ 
       success: true, 
       event: newEvent 
@@ -166,7 +168,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // 过滤掉要删除的事件
-    const currentEvents = profile.important_events || []
+    const currentEvents = (profile?.important_events as any[]) || []
     const filteredEvents = currentEvents.filter((event: any) => event.id !== eventId)
 
     // 更新数据库
@@ -179,6 +181,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to delete event' }, { status: 500 })
     }
 
+    try { await invalidateByExactPath('/api/important-events','user') } catch {}
     return NextResponse.json({ 
       success: true, 
       deletedEventId: eventId 

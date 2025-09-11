@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { invalidateByExactPath } from '@/lib/edge/invalidate'
 
 // 使用服务端角色的supabase客户端来绕过RLS
 const supabaseAdmin = createClient(
@@ -121,6 +122,10 @@ export async function POST(request: NextRequest) {
       }
 
       console.log('✅ 用神信息保存成功')
+      try {
+        await invalidateByExactPath('/api/charts','astrology')
+        await invalidateByExactPath(`/api/charts/${chartId}`,'astrology')
+      } catch {}
 
       return NextResponse.json({
         success: true,

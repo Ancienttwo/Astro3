@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { CacheManager } from '@/lib/redis-cache'
+import { invalidateByExactPath } from '@/lib/edge/invalidate'
 import { verifyAuthToken } from '@/lib/api-auth';
-import { ethers } from 'ethers';
+import { isAddress } from 'viem';
 
 // 获取积分商城商品列表
 export async function GET(request: NextRequest) {
@@ -31,10 +33,10 @@ export async function GET(request: NextRequest) {
       data: {
         items: items || [],
         categories: {
-          ai_reports: items?.filter(item => item.item_type === 'ai_reports') || [],
-          premium_features: items?.filter(item => item.item_type === 'premium_features') || [],
-          airdrop_boost: items?.filter(item => item.item_type === 'airdrop_boost') || [],
-          nft_badge: items?.filter(item => item.item_type === 'nft_badge') || []
+          ai_reports: (items || []).filter((item: any) => item.item_type === 'ai_reports'),
+          premium_features: (items || []).filter((item: any) => item.item_type === 'premium_features'),
+          airdrop_boost: (items || []).filter((item: any) => item.item_type === 'airdrop_boost'),
+          nft_badge: (items || []).filter((item: any) => item.item_type === 'nft_badge')
         }
       }
     });
@@ -99,7 +101,7 @@ export async function POST(request: NextRequest) {
       const web3User = JSON.parse(decodeURIComponent(atob(web3UserHeader)));
       const walletAddress = web3User.walletAddress?.toLowerCase();
 
-      if (!walletAddress || !ethers.isAddress(walletAddress)) {
+      if (!walletAddress || !isAddress(walletAddress as `0x${string}`)) {
         return NextResponse.json({ error: 'Invalid wallet address' }, { status: 400 });
       }
 
@@ -165,6 +167,16 @@ export async function POST(request: NextRequest) {
 
     if (!redemptionResult.success) {
       return NextResponse.json({ error: redemptionResult.error }, { status: 500 });
+    }
+
+    // 缓存失效：仅对Web3用户进行清理（消费积分/增发道具后）
+    if (userType === 'web3') {
+      try {
+        await CacheManager.clearUserCache('web3_'+userIdentifier, userIdentifier)
+        await CacheManager.clearGlobalCache()
+        await invalidateByExactPath('/api/points/leaderboard','user')
+        await invalidateByExactPath('/api/airdrop/leaderboard','user')
+      } catch {}
     }
 
     return NextResponse.json({

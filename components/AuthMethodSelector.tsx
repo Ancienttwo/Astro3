@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Wallet, Mail, Gift } from 'lucide-react'
+import { Wallet, KeyRound, Gift } from 'lucide-react'
 import Link from 'next/link'
 
 interface AuthMethodSelectorProps {
@@ -12,7 +12,7 @@ interface AuthMethodSelectorProps {
 }
 
 export default function AuthMethodSelector({ language }: AuthMethodSelectorProps) {
-  const [selectedMethod, setSelectedMethod] = useState<'web3' | 'email' | null>(null)
+  const [selectedMethod, setSelectedMethod] = useState<'web3' | 'privy' | null>(null)
 
   const content = {
     zh: {
@@ -30,14 +30,14 @@ export default function AuthMethodSelector({ language }: AuthMethodSelectorProps
         cta: "连接钱包"
       },
       email: {
-        title: "邮箱密码登录",
-        description: "传统邮箱注册，适合不熟悉钱包的用户",
+        title: "Privy 登录",
+        description: "通过 Privy 的社交登录创建账号（Web2 入口）",
         features: [
-          "📧 邮箱密码登录",
-          "🔑 Google Login",
-          "🔄 支持密码重置"
+          "🔑 Google/Twitter/Discord/GitHub/Apple",
+          "🪪 自动创建嵌入式钱包（可选）",
+          "🔒 安全合规，一键登录"
         ],
-        cta: "邮箱注册"
+        cta: "使用 Privy 登录"
       },
       comparison: {
         feature: "功能对比",
@@ -62,14 +62,14 @@ export default function AuthMethodSelector({ language }: AuthMethodSelectorProps
         cta: "Connect Wallet"
       },
       email: {
-        title: "Email Password Login",
-        description: "Traditional email registration, suitable for users unfamiliar with wallets",
+        title: "Privy Login",
+        description: "Sign in with Privy social login (Web2 entry)",
         features: [
-          "📧 Email & Password",
-          "🔑 Google Login",
-          "🔄 Password Recovery"
+          "🔑 Google/Twitter/Discord/GitHub/Apple",
+          "🪪 Auto-create embedded wallet (optional)",
+          "🔒 Secure, one-click login"
         ],
-        cta: "Email Register"
+        cta: "Continue with Privy"
       },
       comparison: {
         feature: "Feature Comparison",
@@ -144,17 +144,17 @@ export default function AuthMethodSelector({ language }: AuthMethodSelectorProps
           </CardContent>
         </Card>
 
-        {/* Email Method */}
+        {/* Privy Method */}
         <Card 
           className={`backdrop-blur-md border-2 transition-all duration-300 rounded-2xl shadow-2xl hover:shadow-[0_0_30px_rgba(147,51,234,0.2)] hover:-translate-y-2 bg-black/20 border-purple-400/30 hover:border-purple-400/50 cursor-pointer ${
-            selectedMethod === 'email' ? 'border-purple-400 shadow-[0_0_30px_rgba(147,51,234,0.3)]' : ''
+            selectedMethod === 'privy' ? 'border-purple-400 shadow-[0_0_30px_rgba(147,51,234,0.3)]' : ''
           }`}
-          onClick={() => setSelectedMethod('email')}
+          onClick={() => setSelectedMethod('privy')}
         >
           <CardHeader>
             <div className="flex items-center space-x-4">
               <div className="w-16 h-16 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 flex items-center justify-center shadow-xl">
-                <Mail className="w-8 h-8 text-white" />
+                <KeyRound className="w-8 h-8 text-white" />
               </div>
               <div>
                 <CardTitle className="text-purple-300 font-rajdhani text-xl">{t.email.title}</CardTitle>
@@ -174,9 +174,9 @@ export default function AuthMethodSelector({ language }: AuthMethodSelectorProps
               ))}
             </div>
             
-            <Link href={language === 'zh' ? '/auth' : '/en/auth'}>
+            <Link href={language === 'zh' ? '/privy-auth' : '/en/privy-auth'}>
               <Button className="w-full py-4 text-lg font-bold rounded-xl shadow-2xl transform hover:scale-105 transition-all duration-300 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white border-2 border-purple-500 hover:shadow-[0_0_30px_rgba(147,51,234,0.5)] font-rajdhani">
-                <Mail className="w-5 h-5 mr-2" />
+                <KeyRound className="w-5 h-5 mr-2" />
                 {t.email.cta}
               </Button>
             </Link>

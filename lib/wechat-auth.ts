@@ -182,7 +182,7 @@ export class WechatAuth {
   validateState(state: string): boolean {
     // 这里可以实现更复杂的状态验证逻辑
     // 比如检查状态是否过期、是否在有效列表中等
-    return state && state.length === 32
+    return !!state && state.length === 32
   }
 }
 

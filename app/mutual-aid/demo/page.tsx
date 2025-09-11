@@ -42,7 +42,6 @@ import {
   Database,
   Wifi,
   WifiOff,
-  Sync,
   RefreshCw,
   CheckCircle,
   AlertTriangle,
@@ -241,7 +240,7 @@ export default function StateManagementDemoPage() {
                   {syncState.isSyncing ? (
                     <RefreshCw className="w-6 h-6 text-blue-600 animate-spin" />
                   ) : (
-                    <Sync className="w-6 h-6 text-gray-600" />
+                    <RefreshCw className="w-6 h-6 text-gray-600" />
                   )}
                 </div>
                 <p className="text-sm font-medium">
@@ -558,7 +557,7 @@ export default function StateManagementDemoPage() {
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Sync className="w-5 h-5" />
+                      <RefreshCw className="w-5 h-5" />
                       同步状态
                     </CardTitle>
                   </CardHeader>

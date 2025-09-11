@@ -165,7 +165,7 @@ export async function POST(request: NextRequest) {
       }
 
       // 使用admin权限生成magiclink（包含真正的JWT）
-      const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+      const { data: linkResp, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
         type: 'magiclink',
         email: virtualEmail,
         options: {
@@ -173,32 +173,34 @@ export async function POST(request: NextRequest) {
         }
       })
 
-      if (linkError || !linkData) {
+      let actionLink: string | null = (linkResp as any)?.properties?.action_link || (linkResp as any)?.action_link || null;
+
+      if (linkError || !actionLink) {
         console.error('❌ 生成magiclink失败:', linkError)
         // 如果magiclink失败，尝试recovery方式
         console.log('🔄 尝试使用recovery方式生成token...')
         
-        const { data: recoveryData, error: recoveryError } = await supabaseAdmin.auth.admin.generateLink({
+        const { data: recoveryResp, error: recoveryError } = await supabaseAdmin.auth.admin.generateLink({
           type: 'recovery',
           email: virtualEmail
         })
         
-        if (recoveryError || !recoveryData) {
+        actionLink = (recoveryResp as any)?.properties?.action_link || (recoveryResp as any)?.action_link || null;
+
+        if (recoveryError || !actionLink) {
           console.error('❌ 生成recovery链接也失败:', recoveryError)
           throw new Error(`生成JWT失败: ${linkError?.message || recoveryError?.message}`)
         }
-        
-        linkData = recoveryData
       }
 
       // 从链接中提取真正的JWT token
-      const url = new URL(linkData.action_link)
+      const url = new URL(actionLink!)
       const accessToken = url.searchParams.get('access_token')
       const refreshToken = url.searchParams.get('refresh_token')
 
       if (!accessToken) {
         console.error('❌ 无法从链接中提取access token')
-        console.log('🔍 完整链接信息:', linkData.action_link)
+        console.log('🔍 完整链接信息:', actionLink)
         throw new Error('无法提取JWT token')
       }
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { withEmailRateLimit } from '@/lib/email-rate-limiter'
 import { smtpEmailService } from '@/lib/smtp-config'
 
 const supabaseAdmin = createClient(
@@ -20,6 +21,10 @@ const supabaseAdmin = createClient(
 export async function POST(request: NextRequest) {
   try {
     const { email, userId } = await request.json()
+
+    // 速率限制：验证邮件
+    const rl = await withEmailRateLimit('verification_email')(request, email?.toLowerCase?.())
+    if (!rl.allowed) return rl.response!
 
     if (!email || !userId) {
       return NextResponse.json({ error: '缺少必需参数' }, { status: 400 })

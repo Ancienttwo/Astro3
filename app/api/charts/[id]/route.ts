@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getCache, CacheKeys } from '@/lib/redis'
+import { invalidateByExactPath } from '@/lib/edge/invalidate'
 
 // 环境变量检查
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -43,7 +44,7 @@ export async function GET(
       )
     }
 
-    const { id } = await params
+    const { id } = params
     
     const { data, error } = await supabaseAdmin
       .from('user_charts')
@@ -126,7 +127,7 @@ export async function PUT(
       )
     }
 
-    const { id } = await params
+    const { id } = params
     const body = await request.json()
     const { name, birth_year, birth_month, birth_day, birth_hour, gender } = body
     
@@ -224,6 +225,11 @@ export async function PUT(
 
     console.log('✅ 更新命盘成功:', id)
     
+    try {
+      await invalidateByExactPath('/api/charts', 'astrology')
+      await invalidateByExactPath(`/api/charts/${id}`, 'astrology')
+    } catch {}
+
     return NextResponse.json({ 
       success: true, 
       data: formattedChart,
@@ -265,7 +271,7 @@ export async function DELETE(
       )
     }
 
-    const { id } = await params
+    const { id } = params
     
     const { error } = await supabaseAdmin
       .from('user_charts')
@@ -289,6 +295,11 @@ export async function DELETE(
     await cache.del(cacheKey)
     console.log(`🗑️ Charts cache cleared for user ${user.id}`)
     
+    try {
+      await invalidateByExactPath('/api/charts', 'astrology')
+      await invalidateByExactPath(`/api/charts/${id}`, 'astrology')
+    } catch {}
+
     return NextResponse.json({
       success: true,
       message: '删除成功'

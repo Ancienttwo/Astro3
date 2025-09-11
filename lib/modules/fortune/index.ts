@@ -1,6 +1,5 @@
 // lib/modules/fortune/index.ts - Fortune Module Main Entry Point
 export * from './config';
-export * from './types';
 export * from './i18n';
 
 // Re-export i18n utilities
@@ -121,8 +120,7 @@ export async function initializeFortuneModule() {
   return true;
 }
 
-// Export component types for external use
-export type { TempleSystemSelectorProps } from '@/components/fortune/TempleSystemSelector';
+// Export component types for external use (omitted to avoid type conflicts)
 
 // Export utility functions
 export { normalizeFortuneLanguage, getActiveFortuneLanguages, getPlannedFortuneLanguages } from './i18n';

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase, getSupabaseAdmin } from '@/lib/supabase'
+import { invalidateByExactPath } from '@/lib/edge/invalidate'
 import { difyService } from '@/lib/services/dify-integration'
 
 // 获取服务端管理员客户端
@@ -38,10 +39,10 @@ async function authenticateRequest(request: NextRequest) {
 // 流式分析API - 实时推送DIFY分析过程
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ taskId: string }> }
+  { params }: { params: { taskId: string } }
 ) {
   try {
-    const { taskId } = await params
+    const { taskId } = params
     
     if (!taskId) {
       return NextResponse.json({ error: '缺少任务ID' }, { status: 400 })
@@ -109,6 +110,10 @@ export async function GET(
           return
         } else {
           console.log(`✅ 任务状态已更新为processing: ${taskId}`)
+          try {
+            await invalidateByExactPath('/api/analysis-tasks','astrology')
+            await invalidateByExactPath(`/api/analysis-tasks/${taskId}`,'astrology')
+          } catch {}
         }
 
         // 异步处理DIFY流式分析
@@ -196,7 +201,7 @@ async function processStreamingAnalysis(
     // 构建查询
     let query = ''
     if (analysisType === 'ziwei_reasoning') {
-      query = buildZiweiQuery(ziweiData)
+      query = buildZiweiQuery(ziweiData || {})
     } else if (analysisType === 'sihua_reasoning') {
       // 四化分析：直接使用前端构建的查询
       if (sihuaData && sihuaData.query) {
@@ -209,7 +214,7 @@ async function processStreamingAnalysis(
     } else {
       // 对于八字分析，需要使用baziData而不是ziweiData
       const baziData = task.input_data.baziData || ziweiData
-      query = buildBaziQuery(baziData, analysisType)
+      query = buildBaziQuery((baziData || {}) as Record<string, unknown>, analysisType)
     }
 
     // 调用DIFY流式API
@@ -309,6 +314,10 @@ async function processStreamingAnalysis(
               }
               
               console.log(`✅ 任务状态已更新为completed: ${task.id}`)
+              try {
+                await invalidateByExactPath('/api/analysis-tasks','astrology')
+                await invalidateByExactPath(`/api/analysis-tasks/${task.id}`,'astrology')
+              } catch {}
               
               // 发送完成信号，前端收到后会主动调用保存API
               const completeChunk = `data: ${JSON.stringify({

@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { PalaceData } from '@/app/ziwei/page';
 import { Button } from './ui/button';
-import { Solar } from 'lunar-typescript';
+import { Solar } from '@/lib/lunar';
 
 interface YearlyLuckSelectorProps {
     birthYear: number;

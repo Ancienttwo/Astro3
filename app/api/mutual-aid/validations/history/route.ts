@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { verifyWeb3Auth } from '@/lib/auth';
+import { getMutualAidUser } from '@/lib/mutual-aid-auth';
 import { z } from 'zod';
 
 const supabase = createClient(
@@ -24,16 +24,16 @@ const GetValidationHistorySchema = z.object({
  */
 export async function GET(request: NextRequest) {
   try {
-    // 验证Web3身份
-    const authResult = await verifyWeb3Auth(request);
-    if (!authResult.success) {
+    // 认证用户
+    const user = await getMutualAidUser(request as any);
+    if (!user) {
       return NextResponse.json(
         {
           success: false,
           error: {
             code: 'AUTHENTICATION_REQUIRED',
             message: '需要Web3身份验证',
-            details: authResult.error,
+            details: 'No valid mutual-aid user',
           },
         },
         { status: 401 }
@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
           )
         )
       `, { count: 'exact' })
-      .eq('validator_id', authResult.userId);
+      .eq('validator_id', user.id);
 
     // 应用筛选条件
     if (vote) {
@@ -140,7 +140,7 @@ export async function GET(request: NextRequest) {
     const hasPrev = page > 1;
 
     // 获取验证统计信息
-    const validationStats = await getValidationStats(authResult.userId, dateFrom, dateTo);
+    const validationStats = await getValidationStats(user.id, dateFrom, dateTo);
 
     return NextResponse.json({
       success: true,
@@ -208,11 +208,25 @@ async function getValidationStats(userId: string, dateFrom?: string, dateTo?: st
       query = query.lte('created_at', dateTo);
     }
 
-    const { data: validations, error } = await query;
+    const { data: validationsRaw, error } = await query;
 
-    if (error || !validations) {
+    if (error || !validationsRaw) {
       return null;
     }
+
+    type ValidationRecord = {
+      vote: 'approve' | 'reject';
+      created_at: string;
+      confidence_score: number;
+      request?: {
+        status?: string;
+        amount?: string;
+        category?: string;
+        severity_level?: number;
+      };
+    };
+
+    const validations = validationsRaw as unknown as ValidationRecord[];
 
     // 计算基础统计
     const totalValidations = validations.length;
@@ -222,7 +236,7 @@ async function getValidationStats(userId: string, dateFrom?: string, dateTo?: st
     // 计算准确率（基于最终结果的匹配度）
     let correctValidations = 0;
     validations.forEach(validation => {
-      const finalStatus = validation.request?.status;
+      const finalStatus = validation.request?.status || '';
       if (
         (validation.vote === 'approve' && (finalStatus === 'approved' || finalStatus === 'completed')) ||
         (validation.vote === 'reject' && finalStatus === 'rejected')

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { CacheManager } from '@/lib/redis-cache'
+import { invalidateByExactPath } from '@/lib/edge/invalidate'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -202,4 +204,17 @@ async function grantReward(userEmail: string, credits: number, reason: string, r
   }
 
   console.log(`成功为用户 ${userEmail} 发放 ${credits} 次奖励`)
-} 
+
+  // 缓存失效：尝试根据邮箱清理用户缓存
+  try {
+    const { data: userByEmail } = await supabaseAdmin
+      .from('users')
+      .select('id')
+      .eq('email', userEmail.toLowerCase())
+      .single()
+    if (userByEmail?.id) {
+      await CacheManager.clearUserCache(userByEmail.id)
+    }
+  } catch {}
+  try { await invalidateByExactPath('/api/user-usage', 'user') } catch {}
+}

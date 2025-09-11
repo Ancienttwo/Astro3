@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { invalidateByExactPath } from '@/lib/edge/invalidate'
 
 // 生成随机注册码
 function generateRegistrationCode(): string {
@@ -69,6 +70,8 @@ export async function POST(req: NextRequest) {
     }
 
     console.log('注册码生成成功:', data?.length)
+
+    try { await invalidateByExactPath('/api/admin/registration-codes-stats','user') } catch {}
 
     return NextResponse.json({ 
       success: true, 

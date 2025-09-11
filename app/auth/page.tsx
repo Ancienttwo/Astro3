@@ -1,10 +1,5 @@
-import React, { Suspense } from 'react'
-import AuthPageClient from './AuthPageClient'
+import { redirect } from 'next/navigation'
 
 export default function AuthPage() {
-  return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
-      <AuthPageClient />
-    </Suspense>
-  )
-} 
+  redirect('/privy-auth')
+}

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
-import { ethers } from 'ethers';
+import { isAddress } from 'viem';
 
 // 获取当前用户的排名信息
 export async function GET(request: NextRequest) {
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
       try {
         const web3User = JSON.parse(decodeURIComponent(atob(web3UserHeader)));
         walletAddress = web3User.walletAddress?.toLowerCase();
-        if (!ethers.isAddress(walletAddress)) {
+        if (!isAddress(walletAddress as `0x${string}`)) {
           walletAddress = null;
         }
       } catch (e) {
@@ -143,7 +143,7 @@ export async function GET(request: NextRequest) {
       
       if (userTasks) {
         completedTasks = userTasks.length;
-        totalTaskPoints = userTasks.reduce((sum, task) => sum + (task.tasks?.points_reward || 0), 0);
+        totalTaskPoints = userTasks.reduce((sum: number, task: any) => sum + (task.tasks?.points_reward || 0), 0);
       }
     } catch (e) {
       console.warn('Error fetching user tasks:', e);
@@ -208,7 +208,7 @@ async function getUserRankStats() {
 
     const totalUsers = allUsers.length;
     const averagePoints = totalUsers > 0 ? 
-      allUsers.reduce((sum, user) => sum + (user.total_chain_earned || 0), 0) / totalUsers : 0;
+      allUsers.reduce((sum: number, user: any) => sum + (user.total_chain_earned || 0), 0) / totalUsers : 0;
     
     // 计算前10%的分数线
     const sortedUsers = allUsers

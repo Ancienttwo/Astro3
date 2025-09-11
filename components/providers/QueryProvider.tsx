@@ -1,7 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider, useQueryClient as useRQClient } from '@tanstack/react-query';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
+import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { syncManager } from '@/lib/services/syncManager';
 import { useMutualAidStore } from '@/lib/stores/mutualAidStore';
@@ -52,6 +54,17 @@ interface QueryProviderProps {
 
 export default function QueryProvider({ children }: QueryProviderProps) {
   const [queryClient] = useState(createQueryClient);
+  const [persister, setPersister] = React.useState<any>(null);
+
+  // Initialize localStorage persister on client
+  React.useEffect(() => {
+    try {
+      const p = createSyncStoragePersister({ storage: window.localStorage });
+      setPersister(p);
+    } catch (e) {
+      console.warn('Persistor init skipped (non-browser env)');
+    }
+  }, []);
 
   // Initialize sync manager when provider mounts
   React.useEffect(() => {
@@ -160,18 +173,28 @@ export default function QueryProvider({ children }: QueryProviderProps) {
     };
   }, [queryClient]);
 
-  return (
-    <QueryClientProvider client={queryClient}>
+  const inner = (
+    <>
       {children}
       {process.env.NODE_ENV === 'development' && (
-        <ReactQueryDevtools 
-          initialIsOpen={false}
-          position="bottom-right"
-          buttonPosition="bottom-right"
-        />
+        <ReactQueryDevtools initialIsOpen={false} />
       )}
-    </QueryClientProvider>
+    </>
   );
+
+  // Use persistence when available; otherwise fallback to standard provider
+  if (persister) {
+    return (
+      <PersistQueryClientProvider
+        client={queryClient}
+        persistOptions={{ persister, buster: 'v1' }}
+      >
+        {inner}
+      </PersistQueryClientProvider>
+    );
+  }
+
+  return <QueryClientProvider client={queryClient}>{inner}</QueryClientProvider>;
 }
 
 // Performance monitoring component
@@ -215,13 +238,8 @@ export function QueryPerformanceMonitor() {
 
 // Custom hook for query client access
 export function useQueryClient() {
-  const queryClient = React.useContext(QueryClientProvider as any);
-  
-  if (!queryClient) {
-    throw new Error('useQueryClient must be used within QueryProvider');
-  }
-  
-  return queryClient;
+  // Use TanStack's official hook rather than React context on the provider component
+  return useRQClient();
 }
 
 // Prefetch helper hook

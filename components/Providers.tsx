@@ -8,6 +8,18 @@ import { PaidUserProvider } from "@/contexts/PaidUserContext";
 import { setUserContext } from "@/lib/config/feature-flags";
 import { supabase } from "@/lib/supabase";
 import { initializeLanguage } from "@/lib/i18n/language-manager";
+import dynamic from "next/dynamic";
+// Load providers that are known to be client-only with SSR disabled
+const Web3Provider = dynamic(
+  () => import("@/lib/web3/providers/Web3Provider").then(m => m.Web3Provider),
+  { ssr: false }
+);
+const PrivyAuthProviderNoSSR = dynamic(
+  () => import("@/contexts/PrivyContext").then(m => m.PrivyAuthProvider),
+  { ssr: false }
+);
+import QueryProvider from "@/components/providers/QueryProvider";
+import LanguageProvider from "@/lib/contexts/language-context";
 
 export function Providers({ children }: { children: ReactNode }) {
   // 初始化功能开关的用户上下文
@@ -51,10 +63,16 @@ export function Providers({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <PaidUserProvider>
-      <FateBookProvider>
-        {children}
-      </FateBookProvider>
-    </PaidUserProvider>
+    <QueryProvider>
+      <Web3Provider>
+        <PrivyAuthProviderNoSSR>
+          <LanguageProvider>
+            <PaidUserProvider>
+              <FateBookProvider>{children}</FateBookProvider>
+            </PaidUserProvider>
+          </LanguageProvider>
+        </PrivyAuthProviderNoSSR>
+      </Web3Provider>
+    </QueryProvider>
   );
-} 
+}

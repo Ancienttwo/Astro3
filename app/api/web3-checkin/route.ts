@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { CacheManager } from '@/lib/redis-cache'
+import { invalidateByExactPath } from '@/lib/edge/invalidate'
 
 // 初始化Supabase客户端
 const supabase = createClient(
@@ -141,6 +143,14 @@ export async function POST(request: NextRequest) {
         console.error('Error creating user stats:', createError);
       }
     }
+
+    // 缓存失效：用户缓存与排行榜
+    try {
+      await CacheManager.clearUserCache('web3_'+userAddress, userAddress)
+      await CacheManager.clearGlobalCache()
+      await invalidateByExactPath('/api/points/leaderboard','user')
+      await invalidateByExactPath('/api/airdrop/leaderboard','user')
+    } catch {}
 
     return NextResponse.json({
       success: true,

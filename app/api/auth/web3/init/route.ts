@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { v4 as uuidv4 } from 'uuid'
-import { checkRateLimit, recordFailedAttempt } from '@/lib/rate-limit'
+import { checkRateLimitRedis } from '@/lib/rate-limit-redis'
+import { recordFailedAttempt } from '@/lib/rate-limit'
 import { validateAddressSecurity } from '@/lib/address-validation'
 import { createAuthErrorResponse, AuthErrorCode, logAuthError, createAuthError } from '@/lib/auth-errors'
 
@@ -19,16 +20,16 @@ export async function POST(request: NextRequest) {
   const startTime = Date.now()
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 
             request.headers.get('x-real-ip') || 
-            request.ip || 
             'unknown'
   const userAgent = request.headers.get('user-agent') || 'unknown'
   
   try {
     // 1. 速率限制检查
-    const rateLimitResult = checkRateLimit(request, {
+    const rateLimitResult = await checkRateLimitRedis(request as any, {
       maxAttempts: 10, // Web3初始化允许更多尝试
       windowMs: 15 * 60 * 1000, // 15分钟
-      blockDurationMs: 30 * 60 * 1000 // 30分钟封禁
+      blockDurationMs: 30 * 60 * 1000, // 30分钟封禁
+      bucket: 'auth_web3_init'
     })
     
     if (!rateLimitResult.allowed) {

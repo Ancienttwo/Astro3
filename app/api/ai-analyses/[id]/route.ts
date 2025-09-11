@@ -28,10 +28,10 @@ async function authenticateRequest(request: NextRequest) {
 // DELETE /api/ai-analyses/[id] - 删除指定的AI分析
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await params
+    const { id } = params
     
     // 用户认证
     const authResult = await authenticateRequest(request)
@@ -66,7 +66,7 @@ export async function DELETE(
     }
 
     // 验证用户权限
-    if (analysis.user_charts.user_id !== user.id) {
+    if ((analysis as any).user_charts?.user_id !== user.id) {
       return NextResponse.json({ 
         error: '无权限删除此分析' 
       }, { status: 403 })

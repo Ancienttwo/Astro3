@@ -10,13 +10,15 @@ interface AuthGuardProps {
   children: React.ReactNode
 }
 
-// 定义不需要登录的页面路径
-const PUBLIC_PATHS = [
-  '/',
-  '/auth',
-  '/auth/callback',
-  '/wallet-auth',  // Web3钱包登录页面
-  '/privacy-policy',
+  // 定义不需要登录的页面路径
+  const PUBLIC_PATHS = [
+    '/',
+    '/auth',
+    '/auth-select',
+    '/auth/callback',
+    '/wallet-auth',  // Web3钱包登录页面
+    '/privy-auth',   // Privy 登录页面（Web2入口）
+    '/privacy-policy',
   '/service-agreement',
   '/fortune',      // 通用签文页面
   '/guandi',       // 关帝灵签页面
@@ -39,8 +41,13 @@ export default function AuthGuard({ children }: AuthGuardProps) {
   const [user, setUser] = useState<UnifiedUser | null>(null)
   const [loading, setLoading] = useState(true)
   const [isChecking, setIsChecking] = useState(true)
+  const [mounted, setMounted] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -80,11 +87,18 @@ export default function AuthGuard({ children }: AuthGuardProps) {
       }
     }
 
-    checkAuth()
-  }, [pathname, router])
+    // 仅在挂载后执行检查，避免SSR/CSR不一致导致的水合问题
+    if (mounted) {
+      checkAuth()
+    }
+  }, [pathname, router, mounted])
 
-  // 显示加载状态
-  if (loading || isChecking) {
+  // 对于公开路径，直接渲染子组件（不显示加载态）
+  const isPublic = isPublicPath(pathname)
+  if (isPublic) return <>{children}</>
+
+  // 显示加载状态（仅受保护路径才显示）
+  if (!mounted || loading || isChecking) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-primary/5 flex items-center justify-center">
         <div className="text-center space-y-4">
@@ -99,11 +113,6 @@ export default function AuthGuard({ children }: AuthGuardProps) {
         </div>
       </div>
     )
-  }
-
-  // 对于公开路径，直接渲染子组件
-  if (isPublicPath(pathname)) {
-    return <>{children}</>
   }
 
   // 对于受保护的路径，只有在用户已登录时才渲染

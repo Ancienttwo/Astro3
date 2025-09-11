@@ -1,4 +1,4 @@
-import { Solar } from 'lunar-typescript';
+import { Solar } from '@/lib/lunar';
 import { FIVE_TIGER_DUN } from '@/lib/zodiac/five-tiger-dun';
 import { HeavenlyStem, HEAVENLY_STEMS, STEM_YIN_YANG } from '@/lib/zodiac/stems';
 import { EARTHLY_BRANCHES, EarthlyBranch } from '@/lib/zodiac/branches';
@@ -408,7 +408,7 @@ export function calculateZiwei(params: CalculationParams): CalculationResult {
       const palaceName = PALACE_NAMES[palaceNameIndex];
 
       // 计算大运
-      let decade, decadeIndex;
+      let decade: string, decadeIndex: number;
       if (bureauNumber > 0) {
         const di = isYangManOrYinWoman
             ? (branchIndex - lifePalaceBranchIndex + 12) % 12
@@ -418,6 +418,9 @@ export function calculateZiwei(params: CalculationParams): CalculationResult {
         const endAge = startAge + 9;
         decade = `${startAge}-${endAge}`;
         decadeIndex = di;
+      } else {
+        decade = ''
+        decadeIndex = 0
       }
 
       const isLaiYin = palaceStem === yearGan && branch !== '子' && branch !== '丑';

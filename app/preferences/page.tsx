@@ -1,4 +1,6 @@
 'use client'
+// @ts-expect-error next-dynamic-flag
+export const dynamic = 'force-dynamic'
 
 import { useState } from 'react'
 import { useSearchParams, usePathname } from 'next/navigation'

@@ -6,7 +6,7 @@ import { getZiweiPosition } from '@/lib/zodiac/ziwei-position';
 import type { StarName, StarBrightness, StarType } from '@/lib/zodiac/stars';
 import { STARS, getStarBrightness } from '@/lib/zodiac/stars';
 import { SIHUA_MAP, HUA_TO_LETTER } from '@/lib/zodiac/sihua';
-import { Solar } from 'lunar-typescript';
+import { Solar } from '@/lib/lunar';
 import { FIVE_TIGER_DUN } from '@/lib/zodiac/five-tiger-dun';
 
 export interface StarData {

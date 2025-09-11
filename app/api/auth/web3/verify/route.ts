@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { ethers } from 'ethers'
-import { checkRateLimit, recordFailedAttempt } from '@/lib/rate-limit'
+import { verifyMessage } from 'viem'
+import { checkRateLimitRedis } from '@/lib/rate-limit-redis'
+import { recordFailedAttempt } from '@/lib/rate-limit'
 import { validateAddressSecurity } from '@/lib/address-validation'
 import { createAuthErrorResponse, AuthErrorCode, logAuthError, createAuthError } from '@/lib/auth-errors'
 import { createSupabaseSession, createWeb3FallbackAuth } from '@/lib/jwt-auth'
@@ -22,16 +23,16 @@ export async function POST(request: NextRequest) {
   const startTime = Date.now()
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 
             request.headers.get('x-real-ip') || 
-            request.ip || 
             'unknown'
   const userAgent = request.headers.get('user-agent') || 'unknown'
   
   try {
     // 1. 速率限制检查
-    const rateLimitResult = checkRateLimit(request, {
+    const rateLimitResult = await checkRateLimitRedis(request as any, {
       maxAttempts: 5, // 验证签名限制更严格
       windowMs: 15 * 60 * 1000, // 15分钟
-      blockDurationMs: 60 * 60 * 1000 // 1小时封禁
+      blockDurationMs: 60 * 60 * 1000, // 1小时封禁
+      bucket: 'auth_web3_verify'
     })
     
     if (!rateLimitResult.allowed) {
@@ -85,18 +86,17 @@ export async function POST(request: NextRequest) {
       return createAuthErrorResponse(AuthErrorCode.NONCE_INVALID)
     }
     
-    // 5. 验证签名
-    let recoveredAddress: string
+    // 5. 验证签名（使用 viem）
     try {
-      recoveredAddress = ethers.verifyMessage(session.message, signature)
-      
-      if (recoveredAddress.toLowerCase() !== normalizedAddress.toLowerCase()) {
-        recordFailedAttempt(ip, 'Signature address mismatch')
+      const isValid = await verifyMessage({
+        address: normalizedAddress as `0x${string}`,
+        message: session.message,
+        signature: (signature.startsWith('0x') ? signature : `0x${signature}`) as `0x${string}`,
+      })
+      if (!isValid) {
+        recordFailedAttempt(ip, 'Signature invalid (viem)')
         logAuthError(
-          createAuthError(AuthErrorCode.SIGNATURE_INVALID, {
-            expected: normalizedAddress,
-            recovered: recoveredAddress
-          }),
+          createAuthError(AuthErrorCode.SIGNATURE_INVALID, { reason: 'verifyMessage=false' }),
           { ip, userAgent, walletAddress: normalizedAddress, endpoint: '/api/auth/web3/verify' }
         )
         return createAuthErrorResponse(AuthErrorCode.SIGNATURE_INVALID)

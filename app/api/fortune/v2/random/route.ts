@@ -14,9 +14,10 @@ import {
   withMultilingualSupport, 
   MultilingualAPIMiddleware,
   generateCacheKey,
-  ResponseCacheMiddleware,
-  type SupportedLanguage 
+  ResponseCacheMiddleware
 } from '@/lib/middleware/multilingual-api';
+
+type SupportedLanguage = 'zh-CN' | 'zh-TW' | 'en-US';
 import type { FortuneSlipV2 } from '../slips/[temple_code]/[slip_number]/route';
 
 /**

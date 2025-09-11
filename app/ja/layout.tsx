@@ -1,32 +1,12 @@
-'use client'
+import {NextIntlClientProvider} from 'next-intl';
+import {unstable_setRequestLocale, getMessages} from 'next-intl/server';
 
-// Temporarily disable Google Fonts due to network issues
-// import { Inter } from 'next/font/google'
-import { ThemeProvider } from '@/components/theme-provider'
-import { useEffect } from 'react'
-
-// const inter = Inter({ subsets: ['latin'] })
-
-export default function JapaneseRootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  useEffect(() => {
-    // 设置页面语言为日语
-    document.documentElement.lang = 'ja'
-    
-    // 清理函数，在组件卸载时恢复默认语言
-    return () => {
-      document.documentElement.lang = 'en'
-    }
-  }, [])
-
+export default async function JaLayout({children}:{children: React.ReactNode}) {
+  unstable_setRequestLocale('ja');
+  const messages = await getMessages();
   return (
-    <div className={`font-noto-sans-jp leading-japanese tracking-japanese`}>
-      <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
-        {children}
-      </ThemeProvider>
-    </div>
-  )
+    <NextIntlClientProvider locale="ja" messages={messages}>
+      {children}
+    </NextIntlClientProvider>
+  );
 }

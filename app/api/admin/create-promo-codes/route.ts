@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { getUserRole } from '@/lib/auth';
+import { invalidateByExactPath } from '@/lib/edge/invalidate'
 
 // 生成随机兑换码
 function generatePromoCode(length: number = 8): string {
@@ -160,6 +161,8 @@ export async function POST(req: NextRequest) {
     }
 
     console.log(`成功生成 ${insertedCodes.length} 个兑换码`);
+
+    try { await invalidateByExactPath('/api/admin/create-promo-codes','user') } catch {}
 
     return NextResponse.json({
       success: true,

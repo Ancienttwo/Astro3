@@ -1,6 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 
+interface EligibilityRow {
+  wallet_address: string;
+  total_weight: number;
+  checkin_weight: number;
+  activity_weight: number;
+  referral_weight: number;
+  estimated_tokens: number;
+  is_eligible?: boolean;
+  last_updated: string;
+}
+import { supabaseReadonly } from '@/lib/supabase-optimized';
+
 // 获取空投资格排行榜
 export async function GET(request: NextRequest) {
   try {
@@ -14,7 +26,7 @@ export async function GET(request: NextRequest) {
     else if (category === 'activity') orderBy = 'activity_weight';
 
     // 获取排行榜数据
-    const { data: leaderboardData, error: leaderboardError } = await supabaseAdmin
+    const { data: leaderboardData, error: leaderboardError } = await supabaseReadonly
       .from('airdrop_eligibility')
       .select(`
         wallet_address,
@@ -35,7 +47,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 获取总计数据用于统计
-    const { data: totalStats, error: statsError } = await supabaseAdmin
+    const { data: totalStats, error: statsError } = await supabaseReadonly
       .from('airdrop_eligibility')
       .select(`
         wallet_address,
@@ -49,10 +61,10 @@ export async function GET(request: NextRequest) {
     }
 
     // 计算统计信息
-    const stats = calculateLeaderboardStats(totalStats || []);
+    const stats = calculateLeaderboardStats((totalStats as EligibilityRow[]) || []);
 
     // 格式化排行榜数据
-    const formattedLeaderboard = leaderboardData?.map((entry, index) => ({
+    const formattedLeaderboard = (leaderboardData as EligibilityRow[] | null)?.map((entry: EligibilityRow, index: number) => ({
       rank: offset + index + 1,
       walletAddress: entry.wallet_address,
       displayAddress: formatWalletAddress(entry.wallet_address),
@@ -155,7 +167,7 @@ export async function POST(request: NextRequest) {
           estimatedTokens: userData.estimated_tokens,
           tier: getTierFromWeight(userData.total_weight)
         },
-        nearbyUsers: nearbyUsers?.map((user, index) => ({
+        nearbyUsers: (nearbyUsers as EligibilityRow[] | null)?.map((user: EligibilityRow, index: number) => ({
           rank: Math.max(0, userRank - 3) + index + 1,
           walletAddress: user.wallet_address,
           displayAddress: formatWalletAddress(user.wallet_address),
@@ -173,7 +185,7 @@ export async function POST(request: NextRequest) {
 }
 
 // 计算排行榜统计信息
-function calculateLeaderboardStats(data: any[]): any {
+function calculateLeaderboardStats(data: EligibilityRow[]) {
   if (!data || data.length === 0) {
     return {
       totalUsers: 0,

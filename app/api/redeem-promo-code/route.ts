@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { CacheManager } from '@/lib/redis-cache'
+import { invalidateByExactPath } from '@/lib/edge/invalidate'
 import { getCurrentUnifiedUser } from '@/lib/auth';
 
 export async function POST(req: NextRequest) {
@@ -212,6 +214,10 @@ export async function POST(req: NextRequest) {
     }
 
     console.log(`兑换成功：用户 ${user.email} 兑换了 ${promoCode.credits} 次`);
+
+    // 缓存失效：用户使用情况
+    try { await CacheManager.clearUserCache(user.id) } catch {}
+    try { await invalidateByExactPath('/api/user-usage', 'user') } catch {}
 
     return NextResponse.json({
       success: true,

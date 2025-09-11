@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "context7": {
+      "command": "node",
+      "args": ["/Users/ancienttwo/Downloads/Astro3/lib/context7/sequential-mcp-server.js"],
+      "env": {
+        "NODE_ENV": "production"
+      }
+    }
+  }
+}

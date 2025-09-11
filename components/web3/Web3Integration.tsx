@@ -1,98 +1,55 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  Wallet, 
-  Activity, 
-  TrendingUp, 
-  Settings,
-  AlertTriangle,
-  Shield,
-  Info
-} from 'lucide-react';
-import { ethers } from 'ethers';
+import { Wallet, Activity, TrendingUp, Settings, AlertTriangle, Shield, Info } from "lucide-react";
+import { useAccount, useBalance, useChainId } from "wagmi";
 
-import Web3WalletConnector from './Web3WalletConnector';
+import WagmiWalletConnector from "./WagmiWalletConnector";
 import Web3SmartContractInteraction from './Web3SmartContractInteraction';
-
-interface WalletInfo {
-  address: string;
-  balance: string;
-  chainId: number;
-  isConnected: boolean;
-}
 
 interface Web3IntegrationProps {
   onWeb3UserUpdate?: (isWeb3User: boolean, walletAddress?: string) => void;
 }
 
 export default function Web3Integration({ onWeb3UserUpdate }: Web3IntegrationProps) {
-  const [walletInfo, setWalletInfo] = useState<WalletInfo | null>(null);
-  const [provider, setProvider] = useState<ethers.BrowserProvider | null>(null);
+  const { address, isConnected } = useAccount();
+  const chainId = useChainId();
+  const { data: bal } = useBalance({ address });
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
-    // 检查是否已连接钱包
-    checkExistingConnection();
+    // 初始化 provider（供旧组件使用）
+    // 仅用于兼容旧组件的 provider 已迁移，保留轻量初始化避免闪烁
+    setIsLoading(false);
   }, []);
 
   useEffect(() => {
     // 通知父组件Web3用户状态变化
     if (onWeb3UserUpdate) {
-      onWeb3UserUpdate(!!walletInfo?.isConnected, walletInfo?.address);
+      onWeb3UserUpdate(!!isConnected, address);
     }
-  }, [walletInfo, onWeb3UserUpdate]);
+  }, [isConnected, address, onWeb3UserUpdate]);
 
-  const checkExistingConnection = async () => {
-    setIsLoading(true);
-    try {
-      if (typeof window !== 'undefined' && window.ethereum) {
-        const web3Provider = new ethers.BrowserProvider(window.ethereum);
-        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-        
-        if (accounts.length > 0) {
-          setProvider(web3Provider);
-          // 钱包连接器会自动处理连接状态
-        }
-      }
-    } catch (error) {
-      console.error('Error checking existing connection:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const walletInfo = useMemo(
+    () =>
+      address
+        ? {
+            address,
+            balance: bal?.formatted ?? '0',
+            chainId: chainId ?? 0,
+            isConnected,
+          }
+        : null,
+    [address, bal?.formatted, chainId, isConnected]
+  );
 
-  const handleWalletConnect = async (wallet: WalletInfo) => {
-    setWalletInfo(wallet);
-    
-    if (typeof window !== 'undefined' && window.ethereum) {
-      const web3Provider = new ethers.BrowserProvider(window.ethereum);
-      setProvider(web3Provider);
-    }
-
-    toast({
-      title: "钱包已连接",
-      description: "欢迎使用Web3功能！",
-    });
-  };
-
-  const handleWalletDisconnect = () => {
-    setWalletInfo(null);
-    setProvider(null);
-    
-    toast({
-      title: "钱包已断开",
-      description: "已退出Web3模式",
-    });
-  };
-
-  const isCorrectNetwork = walletInfo?.chainId === 97;
+  const isCorrectNetwork = (chainId ?? 0) === 56; // BSC Mainnet
 
   if (isLoading) {
     return (
@@ -147,7 +104,7 @@ export default function Web3Integration({ onWeb3UserUpdate }: Web3IntegrationPro
       </Card>
 
       {/* 网络状态警告 */}
-      {walletInfo?.isConnected && !isCorrectNetwork && (
+      {isConnected && !isCorrectNetwork && (
         <Card className="border-yellow-200 bg-yellow-50">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
@@ -155,7 +112,7 @@ export default function Web3Integration({ onWeb3UserUpdate }: Web3IntegrationPro
               <div>
                 <p className="font-medium text-yellow-800">网络不匹配</p>
                 <p className="text-sm text-yellow-700">
-                  请切换到 BSC 测试网以使用 Web3 功能
+                  请切换到 BSC 主网以使用 Web3 功能
                 </p>
               </div>
             </div>
@@ -164,11 +121,8 @@ export default function Web3Integration({ onWeb3UserUpdate }: Web3IntegrationPro
       )}
 
       {/* 主要内容区域 */}
-      {!walletInfo?.isConnected ? (
-        <Web3WalletConnector 
-          onWalletConnect={handleWalletConnect}
-          onWalletDisconnect={handleWalletDisconnect}
-        />
+      {!isConnected ? (
+        <WagmiWalletConnector />
       ) : (
         <Tabs defaultValue="overview" className="space-y-4">
           <TabsList className="grid w-full grid-cols-3">
@@ -187,10 +141,9 @@ export default function Web3Integration({ onWeb3UserUpdate }: Web3IntegrationPro
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4">
-            {isCorrectNetwork && provider ? (
+            {isCorrectNetwork ? (
               <Web3SmartContractInteraction 
-                walletAddress={walletInfo.address}
-                provider={provider}
+                walletAddress={walletInfo?.address as string}
               />
             ) : (
               <Card>
@@ -206,10 +159,9 @@ export default function Web3Integration({ onWeb3UserUpdate }: Web3IntegrationPro
           </TabsContent>
 
           <TabsContent value="checkin" className="space-y-4">
-            {isCorrectNetwork && provider ? (
+            {isCorrectNetwork ? (
               <Web3SmartContractInteraction 
-                walletAddress={walletInfo.address}
-                provider={provider}
+                walletAddress={walletInfo?.address as string}
               />
             ) : (
               <Card>
@@ -221,10 +173,7 @@ export default function Web3Integration({ onWeb3UserUpdate }: Web3IntegrationPro
           </TabsContent>
 
           <TabsContent value="wallet">
-            <Web3WalletConnector 
-              onWalletConnect={handleWalletConnect}
-              onWalletDisconnect={handleWalletDisconnect}
-            />
+            <WagmiWalletConnector />
           </TabsContent>
         </Tabs>
       )}
@@ -237,7 +186,7 @@ export default function Web3Integration({ onWeb3UserUpdate }: Web3IntegrationPro
         <CardContent className="pt-0">
           <div className="space-y-2 text-xs text-gray-600">
             <p>• 如果没有MetaMask，请先安装并创建钱包</p>
-            <p>• 需要测试BNB？访问 BSC 测试网水龙头获取</p>
+            <p>• 若需测试，请切换到 BSC 测试网并获取测试 BNB</p>
             <p>• 遇到问题？检查网络连接和钱包设置</p>
           </div>
           <div className="flex gap-2 mt-3">

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 import { createClient } from '@supabase/supabase-js'
+import { invalidateByExactPath } from '@/lib/edge/invalidate'
 
 export async function PUT(request: NextRequest) {
   try {
@@ -79,6 +80,13 @@ export async function PUT(request: NextRequest) {
     }
 
     console.log('✅ 用户信息更新成功:', data)
+
+    // 失效用户相关的边缘缓存（如通过网关读取的 /api/user/profile 等）
+    try {
+      await invalidateByExactPath('/api/user/profile', 'user')
+    } catch (e) {
+      console.warn('⚠️ 边缘缓存失效（用户资料）失败:', (e as Error)?.message)
+    }
 
     return NextResponse.json({
       success: true,

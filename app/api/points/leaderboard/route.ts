@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
-import { ethers } from 'ethers';
+import { supabaseReadonly } from '@/lib/supabase-optimized';
+import { isAddress } from 'viem';
 
 // 获取积分排行榜
 export async function GET(request: NextRequest) {
@@ -29,7 +30,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 获取Web3用户积分排行榜
-    const { data: web3Leaderboard, error: web3Error } = await supabaseAdmin
+    const { data: web3Leaderboard, error: web3Error } = await supabaseReadonly
       .from('user_points_web3')
       .select(selectFields)
       .eq('is_active', true)
@@ -43,7 +44,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 获取统计数据
-    const { data: totalStats, error: statsError } = await supabaseAdmin
+    const { data: totalStats, error: statsError } = await supabaseReadonly
       .from('user_points_web3')
       .select('wallet_address, chain_points_balance, total_chain_earned, consecutive_days')
       .eq('is_active', true);
@@ -56,7 +57,18 @@ export async function GET(request: NextRequest) {
     const stats = calculatePointsLeaderboardStats(totalStats || []);
 
     // 格式化排行榜数据
-    const formattedLeaderboard = web3Leaderboard?.map((entry, index) => {
+    type Web3PointsRow = {
+      wallet_address: string
+      chain_points_balance: number
+      total_chain_earned: number
+      consecutive_days: number
+      last_checkin_date: string | null
+      updated_at: string
+    }
+
+    const rows = (web3Leaderboard as unknown as Web3PointsRow[]) || []
+
+    const formattedLeaderboard = rows.map((entry, index) => {
       const currentPoints = category === 'consecutive' ? entry.consecutive_days : 
                            category === 'chain' ? entry.chain_points_balance :
                            entry.total_chain_earned;
@@ -111,7 +123,7 @@ export async function POST(request: NextRequest) {
       try {
         const web3User = JSON.parse(decodeURIComponent(atob(web3UserHeader)));
         walletAddress = web3User.walletAddress?.toLowerCase();
-        if (!ethers.isAddress(walletAddress)) {
+        if (!isAddress(walletAddress as `0x${string}`)) {
           walletAddress = null;
         }
       } catch (e) {
@@ -138,7 +150,7 @@ export async function POST(request: NextRequest) {
       const body = await request.json();
       walletAddress = body.walletAddress?.toLowerCase();
       
-      if (!walletAddress || !ethers.isAddress(walletAddress)) {
+      if (!walletAddress || !isAddress(walletAddress as `0x${string}`)) {
         return NextResponse.json({ 
           error: 'Authentication required or valid wallet address needed' 
         }, { status: 401 });
@@ -261,10 +273,10 @@ function calculatePointsLeaderboardStats(data: any[]): any {
     };
   }
 
-  const totalPoints = data.reduce((sum, user) => sum + (user.total_chain_earned || 0), 0);
-  const totalBalance = data.reduce((sum, user) => sum + (user.chain_points_balance || 0), 0);
-  const activeUsers = data.filter(user => (user.consecutive_days || 0) > 0).length;
-  const topTierUsers = data.filter(user => (user.total_chain_earned || 0) >= 500).length;
+  const totalPoints = data.reduce((sum: number, user: any) => sum + (user.total_chain_earned || 0), 0);
+  const totalBalance = data.reduce((sum: number, user: any) => sum + (user.chain_points_balance || 0), 0);
+  const activeUsers = data.filter((user: any) => (user.consecutive_days || 0) > 0).length;
+  const topTierUsers = data.filter((user: any) => (user.total_chain_earned || 0) >= 500).length;
 
   return {
     totalUsers: data.length,

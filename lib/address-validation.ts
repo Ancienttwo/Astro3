@@ -1,4 +1,4 @@
-import { ethers } from 'ethers'
+import { isAddress as viemIsAddress, getAddress as viemGetAddress, zeroAddress, createPublicClient, http } from 'viem'
 
 /**
  * 验证以太坊地址格式和校验和
@@ -6,11 +6,14 @@ import { ethers } from 'ethers'
  */
 export function validateEthereumAddress(address: string): boolean {
   try {
-    // ethers.getAddress 会验证格式和校验和
-    const checksumAddress = ethers.getAddress(address)
-    return checksumAddress === address || checksumAddress.toLowerCase() === address.toLowerCase()
-  } catch (error) {
-    return false
+    if (!address || typeof address !== 'string') return false;
+    if (!viemIsAddress(address)) return false;
+    const checksumAddress = viemGetAddress(address);
+    return (
+      checksumAddress === address || checksumAddress.toLowerCase() === address.toLowerCase()
+    );
+  } catch {
+    return false;
   }
 }
 
@@ -19,9 +22,9 @@ export function validateEthereumAddress(address: string): boolean {
  */
 export function getChecksumAddress(address: string): string | null {
   try {
-    return ethers.getAddress(address)
+    return viemGetAddress(address);
   } catch (error) {
-    return null
+    return null;
   }
 }
 
@@ -37,8 +40,11 @@ export function isKnownMaliciousAddress(address: string): boolean {
   ])
   
   try {
-    const checksumAddress = ethers.getAddress(address.toLowerCase())
-    return maliciousAddresses.has(checksumAddress.toLowerCase())
+    const checksumAddress = viemGetAddress(address.toLowerCase())
+    return (
+      maliciousAddresses.has(checksumAddress.toLowerCase()) ||
+      checksumAddress.toLowerCase() === zeroAddress
+    )
   } catch {
     return true // 无效地址也视为恶意
   }
@@ -50,17 +56,13 @@ export function isKnownMaliciousAddress(address: string): boolean {
  */
 export async function isContractAddress(address: string, providerUrl?: string): Promise<boolean> {
   try {
-    if (!providerUrl) {
-      // 如果没有提供provider，跳过合约检查
-      return false
-    }
-    
-    const provider = new ethers.JsonRpcProvider(providerUrl)
-    const code = await provider.getCode(address)
-    return code !== '0x'
+    if (!providerUrl) return false;
+    const client = createPublicClient({ transport: http(providerUrl) });
+    const code = await client.getBytecode({ address: viemGetAddress(address) as `0x${string}` });
+    return !!code && code !== '0x';
   } catch (error) {
-    console.warn('合约地址检查失败:', error)
-    return false
+    console.warn('合约地址检查失败:', error);
+    return false;
   }
 }
 
@@ -97,16 +99,12 @@ export function validateAddressSecurity(address: string): {
     return { isValid, isChecksum, isMalicious: true, normalizedAddress, errors }
   }
   
-  // ethers.js完整验证
+  // viem完整验证
   try {
-    normalizedAddress = ethers.getAddress(address)
+    if (!viemIsAddress(address)) throw new Error('Invalid address');
+    normalizedAddress = viemGetAddress(address)
     isValid = true
-    isChecksum = normalizedAddress === address
-    
-    if (!isChecksum) {
-      // 检查是否是小写版本
-      isChecksum = normalizedAddress.toLowerCase() === address.toLowerCase()
-    }
+    isChecksum = normalizedAddress === address || normalizedAddress.toLowerCase() === address.toLowerCase()
   } catch (error) {
     errors.push('地址校验和验证失败')
     return { isValid, isChecksum, isMalicious: true, normalizedAddress, errors }

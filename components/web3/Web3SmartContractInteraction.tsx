@@ -1,26 +1,27 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { useToast } from '@/hooks/use-toast';
-import { 
-  Calendar, 
-  Coins, 
-  Gift, 
-  TrendingUp, 
-  ExternalLink, 
+import React, { useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Calendar,
+  Coins,
+  Gift,
+  TrendingUp,
+  ExternalLink,
   RefreshCw,
   Star,
   Clock,
-  CheckCircle2
-} from 'lucide-react';
-import { ethers } from 'ethers';
+  CheckCircle2,
+} from "lucide-react";
+import { useAccount, useReadContract, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
+import { formatEther } from "viem";
 
 // 合约配置
-const CONTRACT_ADDRESS = '0x3b016F5A7C462Fe51B691Ef18559DE720D9B452F';
+const CONTRACT_ADDRESS = "0x3b016F5A7C462Fe51B691Ef18559DE720D9B452F";
 
 // 合约ABI - 只包含我们需要的函数
 const CONTRACT_ABI = [
@@ -33,7 +34,7 @@ const CONTRACT_ABI = [
   "function totalUsers() view returns (uint256)",
   "function totalCheckins() view returns (uint256)",
   "function getContractInfo() view returns (uint256, uint256, uint256, uint256, uint256)",
-  "event CheckinCompleted(address indexed user, uint256 pointsEarned, uint256 consecutiveDays, uint256 airdropWeightEarned, uint256 bnbPaid, uint256 timestamp)"
+  "event CheckinCompleted(address indexed user, uint256 pointsEarned, uint256 consecutiveDays, uint256 airdropWeightEarned, uint256 bnbPaid, uint256 timestamp)",
 ];
 
 interface UserStats {
@@ -60,161 +61,110 @@ interface ContractInfo {
   contractBalance: bigint;
 }
 
-interface Web3SmartContractInteractionProps {
-  walletAddress: string;
-  provider: ethers.BrowserProvider;
-}
-
-export default function Web3SmartContractInteraction({ 
-  walletAddress, 
-  provider 
-}: Web3SmartContractInteractionProps) {
-  const [userStats, setUserStats] = useState<UserStats | null>(null);
-  const [contractInfo, setContractInfo] = useState<ContractInfo | null>(null);
-  const [checkinRewards, setCheckinRewards] = useState<CheckinRewards | null>(null);
-  const [canCheckin, setCanCheckin] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isCheckingIn, setIsCheckingIn] = useState(false);
+export default function Web3SmartContractInteraction({ walletAddress }: { walletAddress: string }) {
+  const { isConnected } = useAccount();
   const [lastTransactionHash, setLastTransactionHash] = useState<string | null>(null);
   const { toast } = useToast();
 
-  useEffect(() => {
-    if (walletAddress && provider) {
-      loadContractData();
-    }
-  }, [walletAddress, provider]);
+  const { data: userStatsData, refetch: refetchUserStats, isFetching: f1 } = useReadContract({
+    address: CONTRACT_ADDRESS as `0x${string}`,
+    abi: CONTRACT_ABI as any,
+    functionName: "getUserStats",
+    args: [walletAddress as `0x${string}`],
+    query: { enabled: !!walletAddress },
+  });
+  const { data: contractInfoData, refetch: refetchContractInfo, isFetching: f2 } = useReadContract({
+    address: CONTRACT_ADDRESS as `0x${string}`,
+    abi: CONTRACT_ABI as any,
+    functionName: "getContractInfo",
+  });
+  const { data: canCheckinData, refetch: refetchCan, isFetching: f3 } = useReadContract({
+    address: CONTRACT_ADDRESS as `0x${string}`,
+    abi: CONTRACT_ABI as any,
+    functionName: "canCheckin",
+    args: [walletAddress as `0x${string}`],
+    query: { enabled: !!walletAddress },
+  });
+  const { data: previewRewardsData, refetch: refetchPreview, isFetching: f4 } = useReadContract({
+    address: CONTRACT_ADDRESS as `0x${string}`,
+    abi: CONTRACT_ABI as any,
+    functionName: "previewCheckinRewards",
+    args: [walletAddress as `0x${string}`],
+    query: { enabled: !!walletAddress },
+  });
 
-  const getContract = () => {
-    return new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
-  };
+  const userStats: UserStats | null = useMemo(() => {
+    if (!userStatsData) return null;
+    const d = userStatsData as any[];
+    return {
+      totalPoints: d[0],
+      consecutiveDays: d[1],
+      lastCheckinDate: d[2],
+      airdropWeight: d[3],
+      totalBNBSpent: d[4],
+      totalCheckins: d[5],
+      isActive: d[6],
+    } as UserStats;
+  }, [userStatsData]);
 
-  const getContractWithSigner = async () => {
-    const signer = await provider.getSigner();
-    return new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-  };
+  const contractInfo: ContractInfo | null = useMemo(() => {
+    if (!contractInfoData) return null;
+    const d = contractInfoData as any[];
+    return {
+      checkinCost: d[0],
+      totalUsers: d[1],
+      totalCheckins: d[2],
+      totalRevenue: d[3],
+      contractBalance: d[4],
+    } as ContractInfo;
+  }, [contractInfoData]);
 
-  const loadContractData = async () => {
-    setIsLoading(true);
-    try {
-      const contract = getContract();
-      
-      // 并行加载所有数据
-      const [
-        userStatsData,
-        contractInfoData,
-        canCheckinData,
-        previewRewardsData
-      ] = await Promise.all([
-        contract.getUserStats(walletAddress),
-        contract.getContractInfo(),
-        contract.canCheckin(walletAddress),
-        contract.previewCheckinRewards(walletAddress)
-      ]);
+  const canCheckin = Boolean(canCheckinData);
+  const checkinRewards: CheckinRewards | null = useMemo(() => {
+    if (!previewRewardsData) return null;
+    const d = previewRewardsData as any[];
+    return { pointsEarned: d[0], airdropWeightEarned: d[1], consecutiveDays: d[2] } as CheckinRewards;
+  }, [previewRewardsData]);
 
-      setUserStats({
-        totalPoints: userStatsData[0],
-        consecutiveDays: userStatsData[1],
-        lastCheckinDate: userStatsData[2],
-        airdropWeight: userStatsData[3],
-        totalBNBSpent: userStatsData[4],
-        totalCheckins: userStatsData[5],
-        isActive: userStatsData[6]
-      });
+  const { writeContract, isPending } = useWriteContract();
+  const [txHash, setTxHash] = useState<`0x${string}` | undefined>(undefined);
+  const { isLoading: isWaiting } = useWaitForTransactionReceipt({ hash: txHash, query: { enabled: !!txHash } });
 
-      setContractInfo({
-        checkinCost: contractInfoData[0],
-        totalUsers: contractInfoData[1],
-        totalCheckins: contractInfoData[2],
-        totalRevenue: contractInfoData[3],
-        contractBalance: contractInfoData[4]
-      });
-
-      setCanCheckin(canCheckinData);
-
-      setCheckinRewards({
-        pointsEarned: previewRewardsData[0],
-        airdropWeightEarned: previewRewardsData[1],
-        consecutiveDays: previewRewardsData[2]
-      });
-
-    } catch (error) {
-      console.error('Error loading contract data:', error);
-      toast({
-        title: "加载失败",
-        description: "无法加载智能合约数据，请刷新重试",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const isLoading = f1 || f2 || f3 || f4;
 
   const performCheckin = async () => {
-    if (!canCheckin || !contractInfo) {
-      toast({
-        title: "无法签到",
-        description: "今天已经签到过了或数据未加载",
-        variant: "destructive"
-      });
+    if (!isConnected || !canCheckin || !contractInfo) {
+      toast({ title: "无法签到", description: "请连接钱包或今天已签到", variant: "destructive" });
       return;
     }
-
-    setIsCheckingIn(true);
     try {
-      const contract = await getContractWithSigner();
-      
-      // 执行签到，发送指定的BNB
-      const tx = await contract.performCheckin({
+      const hash = await writeContract({
+        address: CONTRACT_ADDRESS as `0x${string}`,
+        abi: CONTRACT_ABI as any,
+        functionName: "performCheckin",
         value: contractInfo.checkinCost,
-        gasLimit: 500000 // 设置合理的gas限制
       });
-
-      toast({
-        title: "签到中...",
-        description: `交易已提交: ${tx.hash.slice(0, 10)}...`,
-      });
-
-      setLastTransactionHash(tx.hash);
-
-      // 等待交易确认
-      const receipt = await tx.wait();
-      
-      if (receipt.status === 1) {
-        toast({
-          title: "签到成功！",
-          description: `获得 ${ethers.formatUnits(checkinRewards?.pointsEarned || 0, 0)} 积分`,
-        });
-
-        // 重新加载数据
-        await loadContractData();
-      } else {
-        throw new Error('Transaction failed');
-      }
-
+      setTxHash(hash as `0x${string}`);
+      setLastTransactionHash(hash as string);
+      toast({ title: "签到中...", description: `交易已提交: ${(hash as string).slice(0, 10)}...` });
+      setTimeout(() => {
+        refetchUserStats();
+        refetchCan();
+        refetchPreview();
+        refetchContractInfo();
+      }, 1500);
     } catch (error: any) {
-      console.error('Error performing checkin:', error);
-      
+      console.error("Error performing checkin:", error);
       let errorMessage = "签到失败，请重试";
-      if (error.code === 'INSUFFICIENT_FUNDS') {
-        errorMessage = "BNB余额不足，请充值后重试";
-      } else if (error.message?.includes('User denied')) {
-        errorMessage = "用户取消了交易";
-      } else if (error.message?.includes('gas')) {
-        errorMessage = "Gas费用不足，请检查网络设置";
-      }
-
-      toast({
-        title: "签到失败",
-        description: errorMessage,
-        variant: "destructive"
-      });
-    } finally {
-      setIsCheckingIn(false);
+      if (error?.code === "INSUFFICIENT_FUNDS") errorMessage = "BNB余额不足，请充值后重试";
+      else if (error?.message?.includes("User denied")) errorMessage = "用户取消了交易";
+      else if (error?.message?.includes("gas")) errorMessage = "Gas费用不足，请检查网络设置";
+      toast({ title: "签到失败", description: errorMessage, variant: "destructive" });
     }
   };
 
   const formatBNB = (wei: bigint) => {
-    return parseFloat(ethers.formatEther(wei)).toFixed(4);
+    return parseFloat(formatEther(wei)).toFixed(4);
   };
 
   const formatNumber = (num: bigint) => {
@@ -274,7 +224,7 @@ export default function Web3SmartContractInteraction({
       <Card>
         <CardContent className="p-6 text-center">
           <p className="text-gray-500">无法加载智能合约数据</p>
-          <Button onClick={loadContractData} className="mt-2">
+          <Button onClick={() => { refetchUserStats(); refetchContractInfo(); refetchCan(); refetchPreview(); }} className="mt-2">
             <RefreshCw className="w-4 h-4 mr-2" />
             重试
           </Button>
@@ -311,26 +261,20 @@ export default function Web3SmartContractInteraction({
         </CardHeader>
         <CardContent className="space-y-4">
           {canCheckin && checkinRewards && (
-            <div className="p-4 bg-white rounded-lg border">
+            <div className="p-4 bg白 rounded-lg border">
               <h4 className="font-semibold mb-2">今日签到奖励预览:</h4>
               <div className="grid grid-cols-3 gap-4 text-sm">
                 <div className="text-center">
                   <p className="text-gray-600">积分</p>
-                  <p className="text-lg font-bold text-blue-600">
-                    +{formatNumber(checkinRewards.pointsEarned)}
-                  </p>
+                  <p className="text-lg font-bold text-blue-600">+{formatNumber(checkinRewards.pointsEarned)}</p>
                 </div>
                 <div className="text-center">
                   <p className="text-gray-600">空投权重</p>
-                  <p className="text-lg font-bold text-purple-600">
-                    +{(Number(checkinRewards.airdropWeightEarned) / 1000).toFixed(1)}
-                  </p>
+                  <p className="text-lg font-bold text-purple-600">+{(Number(checkinRewards.airdropWeightEarned) / 1000).toFixed(1)}</p>
                 </div>
                 <div className="text-center">
                   <p className="text-gray-600">连续天数</p>
-                  <p className="text-lg font-bold text-green-600">
-                    {formatNumber(checkinRewards.consecutiveDays)}
-                  </p>
+                  <p className="text-lg font-bold text-green-600">{formatNumber(checkinRewards.consecutiveDays)}</p>
                 </div>
               </div>
             </div>
@@ -339,30 +283,19 @@ export default function Web3SmartContractInteraction({
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">签到费用</p>
-              <p className="text-lg font-semibold">
-                {formatBNB(contractInfo.checkinCost)} BNB
-              </p>
+              <p className="text-lg font-semibold">{formatBNB(contractInfo.checkinCost)} BNB</p>
             </div>
-            
-            <Button
-              onClick={performCheckin}
-              disabled={!canCheckin || isCheckingIn}
-              className="min-w-[120px]"
-              size="lg"
-            >
-              {isCheckingIn ? (
-                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-              ) : (
-                <Gift className="w-4 h-4 mr-2" />
-              )}
-              {isCheckingIn ? '签到中...' : canCheckin ? '立即签到' : '今日已签到'}
+
+            <Button onClick={performCheckin} disabled={!canCheckin || isPending || isWaiting} className="min-w-[120px]" size="lg">
+              {isPending || isWaiting ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <Gift className="w-4 h-4 mr-2" />}
+              {isPending || isWaiting ? '签到中...' : canCheckin ? '立即签到' : '今日已签到'}
             </Button>
           </div>
 
           {lastTransactionHash && (
             <div className="p-2 bg-green-50 rounded border border-green-200">
               <p className="text-sm text-green-700">
-                最近交易: 
+                最近交易:
                 <Button
                   variant="link"
                   className="h-auto p-0 ml-1 text-green-700"
@@ -384,9 +317,7 @@ export default function Web3SmartContractInteraction({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-blue-600">总积分</p>
-                <p className="text-2xl font-bold text-blue-900">
-                  {formatNumber(userStats.totalPoints)}
-                </p>
+                <p className="text-2xl font-bold text-blue-900">{formatNumber(userStats.totalPoints)}</p>
               </div>
               <Coins className="h-8 w-8 text-blue-500" />
             </div>
@@ -398,9 +329,7 @@ export default function Web3SmartContractInteraction({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-purple-600">空投权重</p>
-                <p className="text-2xl font-bold text-purple-900">
-                  {(Number(userStats.airdropWeight) / 1000).toFixed(1)}
-                </p>
+                <p className="text-2xl font-bold text-purple-900">{(Number(userStats.airdropWeight) / 1000).toFixed(1)}</p>
               </div>
               <Gift className="h-8 w-8 text-purple-500" />
             </div>
@@ -412,17 +341,11 @@ export default function Web3SmartContractInteraction({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-green-600">连续签到</p>
-                <p className="text-2xl font-bold text-green-900">
-                  {consecutiveDays}天
-                </p>
+                <p className="text-2xl font-bold text-green-900">{consecutiveDays}天</p>
               </div>
               <Calendar className="h-8 w-8 text-green-500" />
             </div>
-            <Badge 
-              className={`bg-gradient-to-r ${getConsecutiveDaysColor(consecutiveDays)} text-white text-xs mt-1`}
-            >
-              {getConsecutiveDaysLabel(consecutiveDays)}
-            </Badge>
+            <Badge className={`bg-gradient-to-r ${getConsecutiveDaysColor(consecutiveDays)} text-white text-xs mt-1`}>{getConsecutiveDaysLabel(consecutiveDays)}</Badge>
           </CardContent>
         </Card>
 
@@ -431,9 +354,7 @@ export default function Web3SmartContractInteraction({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-orange-600">总投入</p>
-                <p className="text-2xl font-bold text-orange-900">
-                  {formatBNB(userStats.totalBNBSpent)}
-                </p>
+                <p className="text-2xl font-bold text-orange-900">{formatBNB(userStats.totalBNBSpent)}</p>
               </div>
               <TrendingUp className="h-8 w-8 text-orange-500" />
             </div>
@@ -454,14 +375,13 @@ export default function Web3SmartContractInteraction({
           <CardContent className="space-y-3">
             <div className="flex justify-between text-sm">
               <span>连续签到进度</span>
-              <span>{consecutiveDays}/{nextMilestone.target}天</span>
+              <span>
+                {consecutiveDays}/{nextMilestone.target}天
+              </span>
             </div>
-            <Progress 
-              value={(consecutiveDays / nextMilestone.target) * 100} 
-              className="h-2"
-            />
+            <Progress value={(consecutiveDays / nextMilestone.target) * 100} className="h-2" />
             <p className="text-sm text-gray-600">
-              还需签到 {nextMilestone.target - consecutiveDays} 天解锁 
+              还需签到 {nextMilestone.target - consecutiveDays} 天解锁
               <span className="font-semibold text-blue-600"> {nextMilestone.reward} 奖励倍数</span>
             </p>
           </CardContent>
@@ -477,27 +397,19 @@ export default function Web3SmartContractInteraction({
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div className="text-center">
               <p className="text-gray-600">总用户数</p>
-              <p className="text-lg font-bold text-blue-600">
-                {formatNumber(contractInfo.totalUsers)}
-              </p>
+              <p className="text-lg font-bold text-blue-600">{formatNumber(contractInfo.totalUsers)}</p>
             </div>
             <div className="text-center">
               <p className="text-gray-600">总签到次数</p>
-              <p className="text-lg font-bold text-green-600">
-                {formatNumber(contractInfo.totalCheckins)}
-              </p>
+              <p className="text-lg font-bold text-green-600">{formatNumber(contractInfo.totalCheckins)}</p>
             </div>
             <div className="text-center">
               <p className="text-gray-600">总收入</p>
-              <p className="text-lg font-bold text-purple-600">
-                {formatBNB(contractInfo.totalRevenue)} BNB
-              </p>
+              <p className="text-lg font-bold text-purple-600">{formatBNB(contractInfo.totalRevenue)} BNB</p>
             </div>
             <div className="text-center">
               <p className="text-gray-600">合约余额</p>
-              <p className="text-lg font-bold text-orange-600">
-                {formatBNB(contractInfo.contractBalance)} BNB
-              </p>
+              <p className="text-lg font-bold text-orange-600">{formatBNB(contractInfo.contractBalance)} BNB</p>
             </div>
           </div>
         </CardContent>
@@ -505,16 +417,21 @@ export default function Web3SmartContractInteraction({
 
       {/* 操作按钮 */}
       <div className="flex gap-4">
-        <Button 
-          variant="outline" 
-          onClick={loadContractData}
+        <Button
+          variant="outline"
+          onClick={() => {
+            refetchUserStats();
+            refetchContractInfo();
+            refetchCan();
+            refetchPreview();
+          }}
           className="flex-1"
         >
           <RefreshCw className="w-4 h-4 mr-2" />
           刷新数据
         </Button>
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           onClick={() => window.open(`https://bscscan.com/address/${CONTRACT_ADDRESS}`, '_blank')}
           className="flex-1"
         >
@@ -525,3 +442,4 @@ export default function Web3SmartContractInteraction({
     </div>
   );
 }
+

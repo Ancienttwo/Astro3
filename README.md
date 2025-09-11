@@ -23,6 +23,15 @@
 - **支付**: Stripe
 - **部署**: Vercel
 
+## RAG 文档
+
+- 总览: `docs/RAG/README.md`
+- 导入/切片: `docs/RAG/ingestion.md`
+- 连接器: `docs/RAG/connectors.md`
+- 运维维护: `docs/RAG/maintenance.md`
+- API 参考: `docs/RAG/api.md`
+- 故障排查: `docs/RAG/troubleshooting.md`
+
 ## Stripe支付配置
 
 ### 1. 环境变量设置

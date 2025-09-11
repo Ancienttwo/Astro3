@@ -17,7 +17,7 @@ import {
   Crown,
   Menu,
   ArrowLeft
-} from 'lucide-react';
+ , Coins, CheckCircle, Calendar } from 'lucide-react';
 import Logo from '@/components/Logo';
 import Link from 'next/link';
 import LanguageSelector from '@/components/i18n/LanguageSelector';

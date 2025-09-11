@@ -70,17 +70,31 @@ async function getFortuneSlipData(
 
     if (error || !data) return null;
 
+    type FortuneSlipRow = {
+      id: string;
+      slip_number: number;
+      fortune_level?: string;
+      categories?: string[];
+      title?: string;
+      content?: string;
+      basic_interpretation?: string;
+      historical_context?: string;
+      symbolism?: string;
+      [key: string]: any;
+    };
+    const row = data as unknown as FortuneSlipRow;
+
     return {
-      id: data.id,
-      slip_number: data.slip_number,
+      id: row.id,
+      slip_number: row.slip_number,
       temple_name: templeData.temple_name,
-      fortune_level: data.fortune_level || 'average',
-      categories: data.categories || [],
-      title: data[`title${languageSuffix}`] || data.title || 'Unknown Title',
-      content: data[`content${languageSuffix}`] || data.content || 'No content',
-      basic_interpretation: data[`basic_interpretation${languageSuffix}`] || data.basic_interpretation || 'No interpretation',
-      historical_context: data[`historical_context${languageSuffix}`] || data.historical_context,
-      symbolism: data[`symbolism${languageSuffix}`] || data.symbolism,
+      fortune_level: row.fortune_level || 'average',
+      categories: row.categories || [],
+      title: row[`title${languageSuffix}`] || row.title || 'Unknown Title',
+      content: row[`content${languageSuffix}`] || row.content || 'No content',
+      basic_interpretation: row[`basic_interpretation${languageSuffix}`] || row.basic_interpretation || 'No interpretation',
+      historical_context: row[`historical_context${languageSuffix}`] || row.historical_context,
+      symbolism: row[`symbolism${languageSuffix}`] || row.symbolism,
       language
     };
   } catch (error) {
@@ -97,7 +111,7 @@ function generateMockInterpretation(
   level: InterpretationLevel,
   userContext?: UserContext
 ): string {
-  const templates = {
+  const templates: Record<'zh-CN' | 'zh-TW' | 'en-US', { basic: string; personalized: string; deep: string }> = {
     'zh-CN': {
       basic: `## 🎯 基础解读
 
@@ -223,6 +237,11 @@ This phase will become a turning point in your life. Looking back years from now
 
 **Life Philosophy Reflection:**
 As the ancients said, "After winding paths through mountains and rivers where no road seems to exist, suddenly willows provide shade and flowers bloom in another village" - life's wisdom lies in finding unchanging inner strength amid change.`
+    },
+    'zh-TW': {
+      basic: `## 🎯 基礎解讀\n\n**核心含義：**\n• ${fortuneSlip.title}代表著轉機與希望\n• 當前的困境即將迎來轉變\n• 需要保持耐心和積極的心態\n\n**實用建議：**\n• 繼續堅持當前的努力方向\n• 注意把握即將到來的機會\n• 與有經驗的人多交流學習\n\n**總體指導：**\n此籤象徵著「否極泰來」，過去的辛苦付出即將有所回報。保持信心，時機成熟時自然會有好的結果。\n\n**注意事項：**\n雖然整體趨勢向好，但仍需謹慎行事，避免過於急躁。`,
+      personalized: `## 🎯 個性化解讀\n\n${userContext?.gender ? `**針對${userContext.gender === 'male' ? '男性' : '女性'}的建議：**\n` : ''}\n${userContext?.concern_area ? `在${userContext.concern_area === 'career' ? '事業發展' : userContext.concern_area === 'love' ? '感情婚姻' : userContext.concern_area === 'health' ? '健康養生' : userContext.concern_area === 'finance' ? '財運投資' : userContext.concern_area === 'study' ? '學業考試' : '綜合運勢'}方面，` : ''}${fortuneSlip.title}為您指明了方向。\n\n**核心洞察：**\n• 您當前的狀況正在發生積極的變化\n• ${userContext?.specific_question ? `關於「${userContext.specific_question}」這個問題，籤文顯示時機即將成熟` : '各方面都將有所改善'}\n• ${userContext?.emotional_state === 'anxious' ? '您的焦慮情緒會逐漸緩解' : userContext?.emotional_state === 'confused' ? '困惑的狀態即將明朗' : userContext?.emotional_state === 'hopeful' ? '您的希望有實現的可能' : '保持當前的心態狀態'}`,
+      deep: `## 🎯 深度靈性解讀\n\n**靈性指引：**\n${fortuneSlip.title}不只是預測，更是來自宇宙的啟示。每個階段都有其深刻的意義，而您當前的經歷正為靈魂成長鋪路。\n\n**內在成長方向：**\n• 在困難中學會保持內在的平靜\n• 理解人生的起伏乃是自然法則的展現\n• 培養對未來的信任與對當下的接納\n\n……`
     }
   };
 

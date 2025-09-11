@@ -10,49 +10,49 @@
   :root {
     /* 明亮背景色 */
     --background: 0 0% 100%; /* 纯白背景 */
-    --foreground: 210 20% 11%; /* 深灰文字 */
+    --foreground: 0 0% 3.9%; /* 深灰文字 */
     
     /* 卡片样式 */
     --card: 0 0% 100%; /* 白色卡片 */
-    --card-foreground: 210 20% 11%;
+    --card-foreground: 0 0% 3.9%;
     
     /* 弹窗样式 */
     --popover: 0 0% 100%;
-    --popover-foreground: 210 20% 11%;
+    --popover-foreground: 0 0% 3.9%;
     
     /* 皇家紫色主色调 */
-    --primary: 262 80% 58%; /* 皇家紫 #7C3AED */
-    --primary-foreground: 0 0% 100%; /* 白色文字 */
+    --primary: 0 0% 9%; /* 皇家紫 #7C3AED */
+    --primary-foreground: 0 0% 98%; /* 白色文字 */
     
     /* 金黄色辅助色 */
-    --secondary: 248 6% 93%; /* 淡灰背景 */
-    --secondary-foreground: 210 20% 11%;
+    --secondary: 0 0% 96.1%; /* 淡灰背景 */
+    --secondary-foreground: 0 0% 9%;
     
     /* 静音色彩 */
-    --muted: 248 6% 93%; /* 淡灰 */
-    --muted-foreground: 215 13% 34%; /* 中灰文字 */
+    --muted: 0 0% 96.1%; /* 淡灰 */
+    --muted-foreground: 0 0% 45.1%; /* 中灰文字 */
     
     /* 金黄色强调色 */
-    --accent: 45 93% 47%; /* 金黄色 #F59E0B */
-    --accent-foreground: 0 0% 100%; /* 白色文字 */
+    --accent: 0 0% 96.1%; /* 金黄色 #F59E0B */
+    --accent-foreground: 0 0% 9%; /* 白色文字 */
     
     /* 错误色 */
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
     
     /* 边框和输入框 */
-    --border: 262 50% 90%; /* 淡紫色边框 */
-    --input: 0 0% 100%; /* 白色输入框 */
-    --ring: 262 80% 58%; /* 紫色聚焦环 */
+    --border: 0 0% 89.8%; /* 淡紫色边框 */
+    --input: 0 0% 89.8%; /* 白色输入框 */
+    --ring: 0 0% 3.9%; /* 紫色聚焦环 */
     
     /* 图表色彩 */
-    --chart-1: 262 80% 58%;
-    --chart-2: 45 93% 47%;
-    --chart-3: 210 20% 45%;
-    --chart-4: 280 100% 70%;
-    --chart-5: 30 100% 50%;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
     
-    --radius: 0.75rem; /* 增加圆角以适应明亮主题 */
+    --radius: 0.5rem; /* 增加圆角以适应明亮主题 */
     
     /* 侧边栏样式 */
     --sidebar-background: 0 0% 100%;
@@ -75,48 +75,48 @@
   
   .dark {
     /* 为紫微斗数应用优化的暗色主题 */
-    --background: 240 10% 8%; /* 深蓝灰背景，更有神秘感 */
-    --foreground: 240 5% 95%; /* 淡灰白文字 */
+    --background: 0 0% 3.9%; /* 深蓝灰背景，更有神秘感 */
+    --foreground: 0 0% 98%; /* 淡灰白文字 */
     
     /* 卡片样式 */
-    --card: 240 10% 12%; /* 深色卡片背景 */
-    --card-foreground: 240 5% 95%;
+    --card: 0 0% 3.9%; /* 深色卡片背景 */
+    --card-foreground: 0 0% 98%;
     
     /* 弹窗样式 */
-    --popover: 240 10% 12%;
-    --popover-foreground: 240 5% 95%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
     
     /* 紫色主色调 - 暗色下更亮 */
-    --primary: 262 80% 70%; /* 亮紫色 */
-    --primary-foreground: 240 10% 12%; /* 深色文字 */
+    --primary: 0 0% 98%; /* 亮紫色 */
+    --primary-foreground: 0 0% 9%; /* 深色文字 */
     
     /* 金色辅助色 */
-    --secondary: 240 8% 18%; /* 深灰背景 */
-    --secondary-foreground: 240 5% 95%;
+    --secondary: 0 0% 14.9%; /* 深灰背景 */
+    --secondary-foreground: 0 0% 98%;
     
     /* 静音色彩 */
-    --muted: 240 8% 18%; /* 深灰 */
-    --muted-foreground: 240 5% 70%; /* 中灰文字 */
+    --muted: 0 0% 14.9%; /* 深灰 */
+    --muted-foreground: 0 0% 63.9%; /* 中灰文字 */
     
     /* 金黄色强调色 - 暗色下更暖 */
-    --accent: 45 93% 60%; /* 温暖金色 */
-    --accent-foreground: 240 10% 12%; /* 深色文字 */
+    --accent: 0 0% 14.9%; /* 温暖金色 */
+    --accent-foreground: 0 0% 98%; /* 深色文字 */
     
     /* 错误色 */
-    --destructive: 0 75% 60%; /* 亮红色 */
+    --destructive: 0 62.8% 30.6%; /* 亮红色 */
     --destructive-foreground: 0 0% 98%;
     
     /* 边框和输入框 */
-    --border: 240 8% 20%; /* 深灰边框 */
-    --input: 240 8% 18%; /* 深色输入框 */
-    --ring: 262 80% 70%; /* 紫色聚焦环 */
+    --border: 0 0% 14.9%; /* 深灰边框 */
+    --input: 0 0% 14.9%; /* 深色输入框 */
+    --ring: 0 0% 83.1%; /* 紫色聚焦环 */
     
     /* 图表色彩 - 暗色下更鲜艳 */
-    --chart-1: 262 80% 70%; /* 紫色 */
-    --chart-2: 45 93% 60%; /* 金色 */
-    --chart-3: 195 100% 65%; /* 青色 */
-    --chart-4: 120 60% 65%; /* 绿色 */
-    --chart-5: 30 100% 65%; /* 橙色 */
+    --chart-1: 220 70% 50%; /* 紫色 */
+    --chart-2: 160 60% 45%; /* 金色 */
+    --chart-3: 30 80% 55%; /* 青色 */
+    --chart-4: 280 65% 60%; /* 绿色 */
+    --chart-5: 340 75% 55%; /* 橙色 */
     
     /* 侧边栏样式 */
     --sidebar-background: 240 10% 10%;

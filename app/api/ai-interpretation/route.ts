@@ -47,7 +47,13 @@ export async function POST(request: NextRequest) {
       body.content,
       body.basic_interpretation,
       body.interpretation_level,
-      body.user_info || {},
+      {
+        // 仅映射已知字段，避免类型不匹配
+        gender: body.user_info?.gender === 'male' || body.user_info?.gender === 'female' 
+          ? body.user_info.gender 
+          : undefined,
+        specific_question: body.user_info?.question
+      },
       body.language || 'zh'
     );
     

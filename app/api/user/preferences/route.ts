@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth, createServerSupabaseClient } from '@/lib/auth-server'
+import { invalidateByExactPath } from '@/lib/edge/invalidate'
 
 /**
  * 用户偏好设置API
@@ -121,6 +122,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // 7. 返回更新后的偏好设置
+    try { await invalidateByExactPath('/api/user/preferences','user') } catch {}
     return NextResponse.json({
       success: true,
       data: {
@@ -173,6 +175,7 @@ export async function DELETE() {
     }
 
     // 4. 返回重置后的偏好设置
+    try { await invalidateByExactPath('/api/user/preferences','user') } catch {}
     return NextResponse.json({
       success: true,
       data: {

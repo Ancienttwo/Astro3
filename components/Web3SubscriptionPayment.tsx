@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -17,7 +17,8 @@ import {
   Copy
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { ethers } from 'ethers';
+import { useAccount, useBalance, useReadContract, useSwitchChain, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
+import { parseUnits } from 'viem'
 
 // BSC收款地址
 const PAYMENT_RECEIVER_ADDRESS = '0xa047FFa6923BfE296B633A7b88f37dFcaAB93Cf3';
@@ -138,48 +139,43 @@ interface Web3SubscriptionPaymentProps {
   onPaymentSuccess?: (plan: Web3SubscriptionPlan, txHash: string) => void;
 }
 
-export default function Web3SubscriptionPayment({ 
-  walletAddress, 
-  onPaymentSuccess 
-}: Web3SubscriptionPaymentProps) {
+export default function Web3SubscriptionPayment({ walletAddress, onPaymentSuccess }: Web3SubscriptionPaymentProps) {
+  const { address, isConnected } = useAccount();
+  const activeAddress = (walletAddress || address) as `0x${string}` | undefined;
   const [selectedPlan, setSelectedPlan] = useState<Web3SubscriptionPlan | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [provider, setProvider] = useState<ethers.BrowserProvider | null>(null);
-  const [usdtBalance, setUsdtBalance] = useState<string>('0');
   const [lastTransactionHash, setLastTransactionHash] = useState<string | null>(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const { switchChain, isPending: isSwitching } = useSwitchChain();
 
-  // Initialize Web3
-  useEffect(() => {
-    if (typeof window !== 'undefined' && window.ethereum) {
-      const web3Provider = new ethers.BrowserProvider(window.ethereum);
-      setProvider(web3Provider);
-    }
-  }, []);
+  // USDT balance (ERC20)
+  const { data: decimals } = useReadContract({
+    address: USDT_CONTRACT_ADDRESS as `0x${string}`,
+    abi: USDT_ABI as any,
+    functionName: 'decimals',
+  });
+  const { data: usdtBalData, refetch: refetchUsdt } = useReadContract({
+    address: USDT_CONTRACT_ADDRESS as `0x${string}`,
+    abi: USDT_ABI as any,
+    functionName: 'balanceOf',
+    args: activeAddress ? [activeAddress] : undefined,
+    query: { enabled: !!activeAddress },
+  });
+  const usdtBalance = useMemo(() => {
+    const dec = Number(decimals ?? 18);
+    const raw = (usdtBalData as bigint) ?? 0n;
+    if (!dec) return '0';
+    // format manually to avoid extra imports
+    const s = raw.toString().padStart(dec + 1, '0');
+    const intPart = s.slice(0, -dec) || '0';
+    const frac = s.slice(-dec);
+    const trimmed = `${intPart}.${frac}`.replace(/\.0+$/, '');
+    return trimmed;
+  }, [decimals, usdtBalData]);
 
-  // Load user balance
-  useEffect(() => {
-    if (provider && walletAddress) {
-      loadUserBalance();
-    }
-  }, [provider, walletAddress]);
-
-  const loadUserBalance = async () => {
-    if (!provider || !walletAddress) return;
-    
-    try {
-      // Load BNB balance
-      const bnbBal = await provider.getBalance(walletAddress);
-      setBnbBalance(ethers.formatEther(bnbBal));
-      
-      // Load USDT balance
-      const usdtContract = new ethers.Contract(USDT_CONTRACT_ADDRESS, USDT_ABI, provider);
-      const usdtBal = await usdtContract.balanceOf(walletAddress);
-      setUsdtBalance(ethers.formatUnits(usdtBal, 18)); // USDT使用18位小数
-    } catch (error) {
-      console.error('Failed to load balance:', error);
-    }
-  };
+  const { writeContract, isPending } = useWriteContract();
+  const [txHash, setTxHash] = useState<`0x${string}` | undefined>(undefined);
+  const { isLoading: isWaiting } = useWaitForTransactionReceipt({ hash: txHash, query: { enabled: !!txHash } });
 
   const handlePlanSelect = (plan: Web3SubscriptionPlan) => {
     setSelectedPlan(plan);
@@ -187,7 +183,7 @@ export default function Web3SubscriptionPayment({
   };
 
   const handlePayment = async () => {
-    if (!provider || !selectedPlan || !walletAddress) {
+    if (!isConnected || !selectedPlan || !activeAddress) {
       toast({
         title: 'Error',
         description: 'Please ensure wallet is connected',
@@ -212,55 +208,25 @@ export default function Web3SubscriptionPayment({
     setIsProcessing(true);
 
     try {
-      // Check if we're on BSC network
-      const network = await provider.getNetwork();
-      if (network.chainId !== 56n) { // BSC Mainnet
-        toast({
-          title: 'Wrong Network',
-          description: 'Please switch to BSC Mainnet',
-          variant: 'destructive',
-        });
-        
-        try {
-          await window.ethereum.request({
-            method: 'wallet_switchEthereumChain',
-            params: [{ chainId: '0x38' }], // BSC Mainnet
-          });
-        } catch (switchError: any) {
-          if (switchError.code === 4902) {
-            // Network not added, add BSC network
-            await window.ethereum.request({
-              method: 'wallet_addEthereumChain',
-              params: [{
-                chainId: '0x38',
-                chainName: 'BSC Mainnet',
-                nativeCurrency: {
-                  name: 'BNB',
-                  symbol: 'BNB',
-                  decimals: 18,
-                },
-                rpcUrls: ['https://bsc-dataseed.binance.org/'],
-                blockExplorerUrls: ['https://bscscan.com/'],
-              }],
-            });
-          }
-        }
-        setIsProcessing(false);
-        return;
+      // 如果不在 BSC 主网，引导切换
+      try {
+        await switchChain({ chainId: 56 });
+      } catch (e) {
+        // 忽略用户取消
       }
 
-      const signer = await provider.getSigner();
-      
-      // Create USDT contract instance with signer
-      const usdtContract = new ethers.Contract(USDT_CONTRACT_ADDRESS, USDT_ABI, signer);
-      
-      // Convert USDT amount to proper units (18 decimals)
-      const usdtAmount = ethers.parseUnits(selectedPlan.price, 18);
-      
-      // Execute USDT transfer
-      const tx = await usdtContract.transfer(PAYMENT_RECEIVER_ADDRESS, usdtAmount);
+      // 执行 USDT transfer
+      const dec = Number(decimals ?? 18);
+      const amount = parseUnits(selectedPlan.price as `${number}`, dec);
+      const hash = await writeContract({
+        address: USDT_CONTRACT_ADDRESS as `0x${string}`,
+        abi: USDT_ABI as any,
+        functionName: 'transfer',
+        args: [PAYMENT_RECEIVER_ADDRESS as `0x${string}`, amount],
+      });
 
-      setLastTransactionHash(tx.hash);
+      setTxHash(hash as `0x${string}`);
+      setLastTransactionHash(hash as string);
       
       toast({
         title: 'Payment Submitted',
@@ -268,54 +234,34 @@ export default function Web3SubscriptionPayment({
         variant: 'default',
       });
 
-      // Wait for confirmation
-      const receipt = await tx.wait();
-      
-      if (receipt?.status === 1) {
-        toast({
-          title: 'Payment Successful!',
-          description: `Successfully subscribed to ${selectedPlan.name}`,
-          variant: 'default',
-        });
-        
-        // Refresh balance
-        await loadUserBalance();
-        
-        // Call success callback
-        if (onPaymentSuccess) {
-          onPaymentSuccess(selectedPlan, tx.hash);
-        }
-        
-        setShowPaymentModal(false);
-        setSelectedPlan(null);
-      } else {
-        toast({
-          title: 'Payment Failed',
-          description: 'Transaction failed, please try again',
-          variant: 'destructive',
-        });
-      }
+      // 等待确认（useWaitForTransactionReceipt 会跟踪）
+      // 成功回调在下方 useEffect 里处理
     } catch (error: any) {
-      console.error('Payment error:', error);
-      
-      let errorMessage = 'Payment failed, please try again';
-      if (error.code === 'INSUFFICIENT_FUNDS') {
-        errorMessage = 'Insufficient BNB balance';
-      } else if (error.message?.includes('User denied')) {
-        errorMessage = 'Transaction cancelled by user';
-      } else if (error.message?.includes('gas')) {
-        errorMessage = 'Gas estimation failed';
-      }
-      
       toast({
         title: 'Payment Error',
-        description: errorMessage,
+        description: error?.message || 'Payment failed, please try again',
         variant: 'destructive',
       });
     } finally {
       setIsProcessing(false);
     }
   };
+
+  // 等待交易确认并处理成功逻辑
+  const { data: receipt } = useWaitForTransactionReceipt({ hash: txHash, query: { enabled: !!txHash } });
+  React.useEffect(() => {
+    if (!receipt || !selectedPlan) return;
+    if (receipt.status === 'success') {
+      toast({ title: 'Payment Successful!', description: `Successfully subscribed to ${selectedPlan.name}` });
+      refetchUsdt();
+      if (onPaymentSuccess && txHash) onPaymentSuccess(selectedPlan, txHash);
+      setShowPaymentModal(false);
+      setSelectedPlan(null);
+    } else {
+      toast({ title: 'Payment Failed', description: 'Transaction failed, please try again', variant: 'destructive' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [receipt]);
 
   const copyAddress = () => {
     navigator.clipboard.writeText(PAYMENT_RECEIVER_ADDRESS);
@@ -331,7 +277,7 @@ export default function Web3SubscriptionPayment({
     }
   };
 
-  if (!walletAddress) {
+  if (!activeAddress) {
     return (
       <Alert className="border-yellow-200 bg-yellow-50">
         <AlertTriangle className="h-4 w-4 text-yellow-600" />
@@ -357,7 +303,7 @@ export default function Web3SubscriptionPayment({
             <div>
               <span className="text-gray-600">Address:</span>
               <span className="ml-2 font-mono text-blue-600">
-                {`${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`}
+                {`${(activeAddress as string).slice(0, 6)}...${(activeAddress as string).slice(-4)}`}
               </span>
             </div>
           </div>

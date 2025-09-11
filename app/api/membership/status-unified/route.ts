@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: '用户认证失败' }, { status: 401 })
     }
 
-    console.log(`查询会员状态: ${user.email} (${user.id}) - Auth Type: ${user.auth_type || 'supabase'}`)
+    console.log(`查询会员状态: ${user.email} (${user.id})`)
 
     // 先检查表是否存在
     console.log('🔍 开始查询会员信息，用户ID:', user.id)
@@ -70,7 +70,10 @@ export async function GET(request: NextRequest) {
           daysRemaining: 0,
           user_info: {
             auth_type: 'supabase',
-            wallet_address: null
+            wallet_address: null,
+            user_id: user.id,
+            user_email: user.email,
+            user_type: 'web2'
           }
         }
       })
@@ -107,12 +110,7 @@ export async function GET(request: NextRequest) {
     // 如果没有会员记录，创建默认免费会员
     if (!membership) {
       console.log('🔍 用户会员记录不存在，准备创建免费会员记录')
-      console.log('🔍 用户信息:', {
-        userId: user.id,
-        email: user.email,
-        authType: user.auth_type,
-        walletAddress: user.wallet_address
-      })
+      console.log('🔍 用户信息(基础):', { userId: user.id, email: user.email })
       
       // 检查用户类型（Web2还是Web3）
       const { data: userInfo } = await supabaseAdmin
@@ -170,7 +168,10 @@ export async function GET(request: NextRequest) {
           benefits: getMembershipBenefits(newMembership.tier),
           user_info: {
             auth_type: userInfo?.auth_type || 'supabase',
-            wallet_address: walletAddress
+            wallet_address: walletAddress,
+            user_id: user.id,
+            user_email: user.email,
+            user_type: isWeb3User ? 'web3' : 'web2'
           }
         }
       })
@@ -216,7 +217,10 @@ export async function GET(request: NextRequest) {
           0,
         user_info: {
           auth_type: membership.user_type || 'supabase',
-          wallet_address: membership.wallet_address
+          wallet_address: membership.wallet_address,
+          user_id: user.id,
+          user_email: user.email,
+          user_type: membership.user_type || 'web2'
         }
       }
     })

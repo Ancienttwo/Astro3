@@ -1,10 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
-import { ethers } from 'ethers';
+import { checkRateLimitRedis } from '@/lib/rate-limit-redis'
+import { CacheManager } from '@/lib/redis-cache'
+import { invalidateByExactPath } from '@/lib/edge/invalidate'
+import { isAddress } from 'viem';
 
 // 关帝灵签每日抽签 API
 export async function POST(request: NextRequest) {
   try {
+    // 速率限制：抽签动作
+    const rl = await checkRateLimitRedis(request as any, {
+      maxAttempts: 20,
+      windowMs: 60 * 1000,
+      blockDurationMs: 5 * 60 * 1000,
+      bucket: 'guandi_draw_post'
+    })
+    if (!rl.allowed) return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 })
     // 验证 Web3 用户身份
     let walletAddress: string | null = null;
 
@@ -13,7 +24,7 @@ export async function POST(request: NextRequest) {
       try {
         const web3User = JSON.parse(decodeURIComponent(atob(web3UserHeader)));
         walletAddress = web3User.walletAddress?.toLowerCase();
-        if (!ethers.isAddress(walletAddress)) {
+        if (!isAddress(walletAddress as `0x${string}`)) {
           walletAddress = null;
         }
       } catch (e) {
@@ -126,7 +137,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Failed to start fortune drawing' }, { status: 500 });
       }
 
-      return NextResponse.json({
+      const resp = NextResponse.json({
         success: true,
         data: {
           drawId: drawRecord.id,
@@ -135,7 +146,12 @@ export async function POST(request: NextRequest) {
           consecutiveSuccesses: 0,
           requiresJiaobei: true
         }
-      });
+      })
+      try {
+        await invalidateByExactPath(`/api/guandi/draw?wallet_address=${walletAddress}`,'astrology')
+        await invalidateByExactPath(`/api/guandi/gallery?wallet_address=${walletAddress}`,'astrology')
+      } catch {}
+      return resp;
     }
 
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
@@ -149,10 +165,18 @@ export async function POST(request: NextRequest) {
 // 获取用户今日抽签状态
 export async function GET(request: NextRequest) {
   try {
+    // 速率限制：查询状态
+    const rl = await checkRateLimitRedis(request as any, {
+      maxAttempts: 60,
+      windowMs: 60 * 1000,
+      blockDurationMs: 5 * 60 * 1000,
+      bucket: 'guandi_draw_get'
+    })
+    if (!rl.allowed) return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 })
     const { searchParams } = new URL(request.url);
     const walletAddress = searchParams.get('wallet_address')?.toLowerCase();
 
-    if (!walletAddress || !ethers.isAddress(walletAddress)) {
+    if (!walletAddress || !isAddress(walletAddress as `0x${string}`)) {
       return NextResponse.json({ error: 'Valid wallet address required' }, { status: 400 });
     }
 

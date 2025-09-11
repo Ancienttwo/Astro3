@@ -294,7 +294,13 @@ class DifyService {
   /**
    * 指定Agent的聊天接口 - 移除重试机制，避免打断DIFY处理，支持历史消息
    */
-  async chatWithAgent(query: string, userId: string, agentType: string, conversationId?: string, history?: unknown[]): Promise<DifyResponse> {
+  async chatWithAgent(
+    query: string,
+    userId: string,
+    agentType: string,
+    conversationId?: string,
+    history?: Array<{ role: string; content: string }>
+  ): Promise<DifyResponse> {
     const apiKey = this.agents[agentType];
     if (!apiKey) {
       throw new Error(`未找到Agent类型: ${agentType}`);
@@ -303,9 +309,10 @@ class DifyService {
     // 如果有历史消息，将其整合到查询中
     let finalQuery = query;
     if (history && history.length > 0) {
-      const historyContext = history.map(msg => 
-        `${msg.role === 'user' ? '用户' : 'AI'}：${msg.content}`
-      ).join('\n\n');
+      const historyContext = history.map((msg) => {
+        const role = msg.role === 'user' ? '用户' : 'AI';
+        return `${role}：${msg.content}`;
+      }).join('\n\n');
       
       finalQuery = `以下是我们之前的对话记录：\n\n${historyContext}\n\n现在请回答：${query}`;
       // console.log(`📚 包含${history.length}条历史记录，总查询长度: ${finalQuery.length}字符`);
@@ -460,6 +467,19 @@ class DifyService {
   }
 }
 
+// 辅助类型与类型守卫（用于星曜信息）
+type StarLite = {
+  name: string;
+  brightness: string;
+  sihua?: string;
+  xiangXinSihua?: string;
+  liXinSihua?: string;
+};
+
+function isStarLite(x: unknown): x is StarLite {
+  return typeof x === 'object' && x !== null && 'name' in (x as any) && 'brightness' in (x as any);
+}
+
 export const difyService = new DifyService();
 
 /**
@@ -492,11 +512,12 @@ export async function analyzeZiweiWithDify(
     if (mingGong) {
       query += `\n🎯 命宫：${mingGong.heavenlyStem}${mingGong.branch}`;
       if (mingGong.stars && mingGong.stars.length > 0) {
-                const starInfo = mingGong.stars.map((star: unknown) => {
-          let result = `${star.name}(${star.brightness})`
-          if (star.xiangXinSihua) result += `i${star.xiangXinSihua}`
-          if (star.liXinSihua) result += `x${star.liXinSihua}`
-          if (star.sihua) result += star.sihua
+        const starInfo = mingGong.stars.map((star: unknown) => {
+          const s = isStarLite(star) ? star : { name: '未知', brightness: '' };
+          let result = `${s.name}(${s.brightness})`
+          if (isStarLite(star) && s.xiangXinSihua) result += `i${s.xiangXinSihua}`
+          if (isStarLite(star) && s.liXinSihua) result += `x${s.liXinSihua}`
+          if (isStarLite(star) && s.sihua) result += s.sihua
           return result
         }).join('、');
         query += ` - ${starInfo}`;
@@ -508,10 +529,11 @@ export async function analyzeZiweiWithDify(
       query += `\n🏹 迁移宫：${qianYi.heavenlyStem}${qianYi.branch}`;
       if (qianYi.stars && qianYi.stars.length > 0) {
         const starInfo = qianYi.stars.map((star: unknown) => {
-          let result = `${star.name}(${star.brightness})`
-          if (star.xiangXinSihua) result += `i${star.xiangXinSihua}`
-          if (star.liXinSihua) result += `x${star.liXinSihua}`
-          if (star.sihua) result += star.sihua
+          const s = isStarLite(star) ? star : { name: '未知', brightness: '' };
+          let result = `${s.name}(${s.brightness})`
+          if (isStarLite(star) && s.xiangXinSihua) result += `i${s.xiangXinSihua}`
+          if (isStarLite(star) && s.liXinSihua) result += `x${s.liXinSihua}`
+          if (isStarLite(star) && s.sihua) result += s.sihua
           return result
         }).join('、');
         query += ` - ${starInfo}`;
@@ -523,10 +545,11 @@ export async function analyzeZiweiWithDify(
       query += `\n💰 财帛宫：${caiPo.heavenlyStem}${caiPo.branch}`;
       if (caiPo.stars && caiPo.stars.length > 0) {
         const starInfo = caiPo.stars.map((star: unknown) => {
-          let result = `${star.name}(${star.brightness})`
-          if (star.xiangXinSihua) result += `i${star.xiangXinSihua}`
-          if (star.liXinSihua) result += `x${star.liXinSihua}`
-          if (star.sihua) result += star.sihua
+          const s = isStarLite(star) ? star : { name: '未知', brightness: '' };
+          let result = `${s.name}(${s.brightness})`
+          if (isStarLite(star) && s.xiangXinSihua) result += `i${s.xiangXinSihua}`
+          if (isStarLite(star) && s.liXinSihua) result += `x${s.liXinSihua}`
+          if (isStarLite(star) && s.sihua) result += s.sihua
           return result
         }).join('、');
         query += ` - ${starInfo}`;
@@ -538,10 +561,11 @@ export async function analyzeZiweiWithDify(
       query += `\n🎖️ 官禄宫：${guanLu.heavenlyStem}${guanLu.branch}`;
       if (guanLu.stars && guanLu.stars.length > 0) {
         const starInfo = guanLu.stars.map((star: unknown) => {
-          let result = `${star.name}(${star.brightness})`
-          if (star.xiangXinSihua) result += `i${star.xiangXinSihua}`
-          if (star.liXinSihua) result += `x${star.liXinSihua}`
-          if (star.sihua) result += star.sihua
+          const s = isStarLite(star) ? star : { name: '未知', brightness: '' };
+          let result = `${s.name}(${s.brightness})`
+          if (isStarLite(star) && s.xiangXinSihua) result += `i${s.xiangXinSihua}`
+          if (isStarLite(star) && s.liXinSihua) result += `x${s.liXinSihua}`
+          if (isStarLite(star) && s.sihua) result += s.sihua
           return result
         }).join('、');
         query += ` - ${starInfo}`;
@@ -797,6 +821,17 @@ ${fortuneSlipData.display_content}
 请融合传统文化底蕴与现代实用智慧，提供深入而实用的解读。`;
   }
 
+type StarLite = {
+  name: string;
+  brightness: string;
+  sihua?: string;
+  xiangXinSihua?: string;
+  liXinSihua?: string;
+};
+
+function isStarLite(x: unknown): x is StarLite {
+  return typeof x === 'object' && x !== null && 'name' in (x as any) && 'brightness' in (x as any);
+}
   // 调用对应语言的解签大师
   return await difyService.chatWithAgentStreaming(query, userId, agentType, conversationId, false);
 }

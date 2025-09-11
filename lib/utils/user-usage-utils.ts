@@ -46,10 +46,12 @@ export async function getWeb2UserUsage(userId: string): Promise<UserUsageRespons
 
     // 如果用户没有记录，返回默认值
     if (!rawUsage) {
+      const DEFAULT_NO_TYPE1: Omit<UserUsage, 'user_id' | 'user_email' | 'created_at' | 'updated_at'> = DEFAULT_USER_USAGE;
       return {
-        ...DEFAULT_USER_USAGE,
+        ...DEFAULT_NO_TYPE1,
         user_id: userId,
         user_email: `${userId}@temp.local`,
+        user_type: 'web2',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         ...calculateRemainingUsage(DEFAULT_USER_USAGE),
@@ -93,8 +95,9 @@ export async function getWeb3UserUsage(walletAddress: string): Promise<UserUsage
     }
 
     if (!usageResult || !usageResult.exists) {
+      const DEFAULT_NO_TYPE2: Omit<UserUsage, 'user_id' | 'user_email' | 'created_at' | 'updated_at'> = DEFAULT_USER_USAGE;
       return {
-        ...DEFAULT_USER_USAGE,
+        ...DEFAULT_NO_TYPE2,
         user_id: `web3_${walletAddress}`,
         user_email: `${walletAddress.toLowerCase()}@web3.local`,
         user_type: 'web3',
@@ -148,12 +151,13 @@ export async function createDefaultUserUsage(
   walletAddress?: string
 ): Promise<UserUsage> {
   try {
+    const DEFAULT_NO_TYPE3: Omit<UserUsage, 'user_id' | 'user_email' | 'created_at' | 'updated_at'> = DEFAULT_USER_USAGE;
     const insertData = {
       user_id: userId,
       user_email: userEmail,
       user_type: userType,
       wallet_address: walletAddress?.toLowerCase(),
-      ...DEFAULT_USER_USAGE,
+      ...DEFAULT_NO_TYPE3,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };

@@ -131,6 +131,49 @@ export class SupabaseSessionManager {
   }
 
   /**
+   * 使用邮箱+密码创建 Supabase session（配合 Edge Function 返回的凭据）
+   * 带有限次重试，缓解密码更新后的短暂传播延迟
+   */
+  async createSupabaseSessionFromCredentials(email: string, password: string): Promise<Session | null> {
+    this.ensureInitialized()
+    console.log('🔑 使用凭据创建Supabase session (password grant) ...')
+
+    const tryOnce = async () => {
+      try {
+        const { data, error } = await this.supabase!.auth.signInWithPassword({ email, password })
+        if (error) {
+          console.warn('⚠️ signInWithPassword 失败:', error.message)
+          return { session: null as Session | null, error }
+        }
+        return { session: data.session as Session | null, error: null as any }
+      } catch (e: any) {
+        console.error('❌ 调用 signInWithPassword 异常:', e?.message || e)
+        return { session: null as Session | null, error: e }
+      }
+    }
+
+    // 最多重试3次，指数退避 200ms / 400ms / 800ms
+    const delays = [200, 400, 800]
+    for (let i = 0; i < delays.length; i++) {
+      const attempt = i + 1
+      const { session, error } = await tryOnce()
+      if (session && !error) {
+        console.log('✅ 使用凭据登录成功，session已创建')
+        // 额外验证访问
+        await this.validateSessionAccess().catch(() => {})
+        return session
+      }
+      if (i < delays.length - 1) {
+        console.log(`🔁 第${attempt}次尝试失败，${delays[i+1]}ms 后重试 ...`)
+        await new Promise(r => setTimeout(r, delays[i+1]))
+      }
+    }
+
+    console.error('❌ 多次尝试仍无法通过凭据创建session')
+    return null
+  }
+
+  /**
    * 恢复Web3用户的Supabase session
    * 从localStorage读取认证数据并重新设置session
    */
@@ -183,7 +226,7 @@ export class SupabaseSessionManager {
         },
         walletconnect_auth: {
           hasAuthToken: !!walletconnect_auth.auth_token,
-          hasRefreshToken: !!walletconnect_auth.refresh_token,
+          hasRefreshToken: !!(walletconnect_auth as any).refresh_token,
           wallet_address: walletconnect_auth.wallet_address,
           auth_method: walletconnect_auth.auth_method,
           expires_at: walletconnect_auth.expires_at

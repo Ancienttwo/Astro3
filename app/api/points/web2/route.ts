@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { verifyAuthToken } from '@/lib/api-auth';
+import { CacheManager } from '@/lib/redis-cache'
+import { invalidateByExactPath } from '@/lib/edge/invalidate'
 
 // Web2用户签到查询 (只返回签到状态，不涉及积分)
 export async function GET(request: NextRequest) {
@@ -125,6 +127,10 @@ export async function POST(request: NextRequest) {
         details: checkinError.message 
       }, { status: 500 });
     }
+
+    // 缓存失效
+    try { await CacheManager.clearUserCache(userId) } catch {}
+    try { await invalidateByExactPath('/api/user-usage', 'user') } catch {}
 
     return NextResponse.json({
       success: true,

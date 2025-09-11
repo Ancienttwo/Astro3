@@ -5,7 +5,7 @@ import { EarthlyBranch } from '@/lib/zodiac/branches';
 import { FiveElementsBureau } from '@/lib/zodiac/five-elements-bureau';
 import { StarName, StarBrightness, StarType, STARS, getStarBrightness } from '@/lib/zodiac/stars';
 import { produce } from 'immer';
-import { Solar } from 'lunar-typescript';
+import { Solar } from '@/lib/lunar';
 import { FIVE_TIGER_DUN } from '@/lib/zodiac/five-tiger-dun';
 import { HEAVENLY_STEMS, STEM_YIN_YANG } from '@/lib/zodiac/stems';
 import { EARTHLY_BRANCHES } from '@/lib/zodiac/branches';
@@ -538,8 +538,8 @@ export const useZiweiStore = create<ZiweiState>()(
               yearGan,
               sihuaInfo
             };
-          } catch (error) {
-            state.calculationError = error.message;
+          } catch (error: any) {
+            state.calculationError = (error && error.message) ? error.message : String(error);
           } finally {
             state.isCalculating = false;
           }

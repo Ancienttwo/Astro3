@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { verifyWeb3Auth } from '@/lib/auth';
+import { getMutualAidUser } from '@/lib/mutual-aid-auth';
 import { z } from 'zod';
 
 const supabase = createClient(
@@ -22,16 +22,16 @@ const GetMyRequestsSchema = z.object({
  */
 export async function GET(request: NextRequest) {
   try {
-    // 验证Web3身份
-    const authResult = await verifyWeb3Auth(request);
-    if (!authResult.success) {
+    // 认证用户
+    const user = await getMutualAidUser(request as any);
+    if (!user) {
       return NextResponse.json(
         {
           success: false,
           error: {
             code: 'AUTHENTICATION_REQUIRED',
             message: '需要Web3身份验证',
-            details: authResult.error,
+            details: 'No valid mutual-aid user',
           },
         },
         { status: 401 }
@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
           reason
         )
       `, { count: 'exact' })
-      .eq('requester_id', authResult.userId);
+      .eq('requester_id', user.id);
 
     // 应用筛选条件
     if (status) {
@@ -166,7 +166,7 @@ export async function GET(request: NextRequest) {
     const hasPrev = page > 1;
 
     // 获取用户统计信息
-    const userStats = await getUserRequestStats(authResult.userId);
+    const userStats = await getUserRequestStats(user.id);
 
     return NextResponse.json({
       success: true,

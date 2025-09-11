@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js'
+import { CacheManager } from '@/lib/redis-cache'
+import { invalidateByExactPath } from '@/lib/edge/invalidate'
 
 // 使用服务端角色的supabase客户端来绕过RLS
 const supabaseAdmin = createClient(
@@ -146,6 +148,19 @@ export async function POST(req: NextRequest) {
         }
 
         console.log(`✅ 用户 ${email} 次数更新成功`)
+
+        // 缓存失效：尝试根据邮箱查找用户ID并清除其缓存
+        try {
+          const { data: userByEmail } = await supabaseAdmin
+            .from('users')
+            .select('id')
+            .eq('email', email.toLowerCase())
+            .single()
+          if (userByEmail?.id) {
+            await CacheManager.clearUserCache(userByEmail.id)
+          }
+        } catch {}
+        try { await invalidateByExactPath('/api/user-usage', 'user') } catch {}
 
         // 4. 尝试记录派发历史（如果表存在的话）
         const grantReason = reason || `管理员派发 - ${activityName || '手动添加'}`

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { Solar } from 'lunar-typescript';
+import { Solar } from '@/lib/lunar';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
