@@ -246,7 +246,7 @@ export function getCrossDomainAuthUrl(authType: 'web2' | 'web3'): string | null 
   }
   
   if (authType === 'web3' && DEPLOYMENT_CONFIG.auth.web3AuthDomain) {
-    return `${DEPLOYMENT_CONFIG.auth.web3AuthDomain}/wallet-auth`;
+    return `${DEPLOYMENT_CONFIG.auth.web3AuthDomain}/login`;
   }
   
   return null;

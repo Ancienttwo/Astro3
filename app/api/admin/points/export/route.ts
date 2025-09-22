@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
+import { getSupabaseAdminClient } from '@/lib/server/db';
 import { verifyAuthToken } from '@/lib/api-auth';
+
+const supabaseAdmin = getSupabaseAdminClient();
 
 interface EligibilityRow {
   wallet_address: string;

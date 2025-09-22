@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSupabaseAdmin } from '@/lib/supabase'
+import { getSupabaseAdminClient } from '@/lib/server/db'
 import { invalidateByExactPath } from '@/lib/edge/invalidate'
 
-const supabaseAdmin = getSupabaseAdmin()
+const supabaseAdmin = getSupabaseAdminClient()
 
 interface TaskResult {
   id: string;

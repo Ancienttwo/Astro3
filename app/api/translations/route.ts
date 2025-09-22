@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
+import { getSupabaseAdminClient, getSupabaseReadonlyClient } from '@/lib/server/db';
 import { invalidateByExactPath } from '@/lib/edge/invalidate'
-import { supabaseReadonly } from '@/lib/supabase-optimized';
 
 // 获取翻译列表
 export async function GET(request: NextRequest) {
@@ -141,3 +140,5 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: '服务器错误' }, { status: 500 });
   }
 } 
+const supabaseAdmin = getSupabaseAdminClient();
+const supabaseReadonly = getSupabaseReadonlyClient();

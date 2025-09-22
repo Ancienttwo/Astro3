@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { getMutualAidUser } from '@/lib/mutual-aid-auth';
+import { resolveAuth } from '@/lib/auth-adapter';
+import { ok, err } from '@/lib/api-response'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -14,20 +15,8 @@ const supabase = createClient(
 export async function GET(request: NextRequest) {
   try {
     // 认证用户
-    const user = await getMutualAidUser(request as any);
-    if (!user) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'AUTHENTICATION_REQUIRED',
-            message: '需要Web3身份验证',
-            details: 'No valid mutual-aid user',
-          },
-        },
-        { status: 401 }
-      );
-    }
+    const auth = await resolveAuth(request)
+    if (!auth.ok || !auth.id) return err(401, 'AUTHENTICATION_REQUIRED', '需要Web3身份验证')
 
     // 获取用户基础信息
     const { data: userProfile, error: profileError } = await supabase
@@ -44,7 +33,7 @@ export async function GET(request: NextRequest) {
         created_at,
         role
       `)
-      .eq('id', user.id)
+      .eq('id', auth.id!)
       .single();
 
     if (profileError || !userProfile) {

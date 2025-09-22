@@ -9,7 +9,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { getSupabaseAdminClient } from '@/lib/server/db';
 import { 
   withMultilingualSupport, 
   MultilingualAPIMiddleware,
@@ -23,6 +23,8 @@ import type { FortuneSlipV2 } from '../slips/[temple_code]/[slip_number]/route';
 /**
  * 获取随机签文
  */
+const supabase = getSupabaseAdminClient();
+
 async function getRandomFortuneSlip(
   templeCode: string,
   language: SupportedLanguage,

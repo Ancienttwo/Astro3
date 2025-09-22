@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { getSupabaseAdminClient } from '@/lib/server/db'
 
 // 清理失败和卡住的任务
 export async function POST() {
@@ -9,7 +9,8 @@ export async function POST() {
     // 清理超时任务（5分钟前创建的pending或processing任务）
     const timeoutCutoff = new Date(Date.now() - 5 * 60 * 1000).toISOString()
     
-    const { data: timeoutTasks } = await supabase
+    const supabaseAdmin = getSupabaseAdminClient()
+    const { data: timeoutTasks } = await supabaseAdmin
       .from('analysis_tasks')
       .select('id, status, created_at')
       .in('status', ['pending', 'processing'])
@@ -18,7 +19,7 @@ export async function POST() {
     if (timeoutTasks && timeoutTasks.length > 0) {
       console.log(`⏰ 发现 ${timeoutTasks.length} 个超时任务`)
       
-      const { error: timeoutError } = await supabase
+      const { error: timeoutError } = await supabaseAdmin
         .from('analysis_tasks')
         .update({
           status: 'timeout',
@@ -35,7 +36,7 @@ export async function POST() {
     }
 
     // 清理失败任务（状态为failed的任务）
-    const { data: failedTasks } = await supabase
+    const { data: failedTasks } = await supabaseAdmin
       .from('analysis_tasks')
       .select('id, status, created_at')
       .eq('status', 'failed')
@@ -43,7 +44,7 @@ export async function POST() {
     if (failedTasks && failedTasks.length > 0) {
       console.log(`🗑️ 发现 ${failedTasks.length} 个失败任务`)
       
-      const { error: deleteError } = await supabase
+      const { error: deleteError } = await supabaseAdmin
         .from('analysis_tasks')
         .delete()
         .eq('status', 'failed')
@@ -58,7 +59,7 @@ export async function POST() {
     // 清理7天前的已完成任务
     const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
     
-    const { data: oldTasks } = await supabase
+    const { data: oldTasks } = await supabaseAdmin
       .from('analysis_tasks')
       .select('id')
       .in('status', ['completed', 'timeout'])
@@ -67,7 +68,7 @@ export async function POST() {
     if (oldTasks && oldTasks.length > 0) {
       console.log(`🧹 发现 ${oldTasks.length} 个7天前的旧任务`)
       
-      const { error: cleanError } = await supabase
+      const { error: cleanError } = await supabaseAdmin
         .from('analysis_tasks')
         .delete()
         .in('id', oldTasks.map(task => task.id))
@@ -102,7 +103,7 @@ export async function POST() {
 export async function GET() {
   try {
     // 获取任务统计信息
-    const { data: stats } = await supabase
+    const { data: stats } = await supabaseAdmin
       .from('analysis_tasks')
       .select('status, created_at')
       .order('created_at', { ascending: false })

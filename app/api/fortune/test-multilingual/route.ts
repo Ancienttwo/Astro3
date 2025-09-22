@@ -5,11 +5,13 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { getSupabaseReadonlyClient } from '@/lib/server/db';
 import { 
   withMultilingualSupport, 
   MultilingualAPIMiddleware
 } from '@/lib/middleware/multilingual-api';
+
+const supabase = getSupabaseReadonlyClient();
 
 type SupportedLanguage = 'zh-CN' | 'zh-TW' | 'en-US';
 

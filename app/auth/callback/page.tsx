@@ -43,7 +43,7 @@ export default function AuthCallbackPage() {
         
         // 5秒后跳转回登录页
         setTimeout(() => {
-          router.push('/auth')
+          router.push('/login')
         }, 5000)
       }
     }
@@ -114,7 +114,7 @@ export default function AuthCallbackPage() {
         {status === 'error' && (
           <div className="mt-6 text-center">
             <a 
-              href="/auth" 
+              href="/login" 
               className="text-sm text-muted-foreground dark:text-gray-400 hover:text-primary dark:hover:text-yellow-400"
             >
               ← 返回登录页

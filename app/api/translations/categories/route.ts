@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
+import { getSupabaseAdminClient, getSupabaseReadonlyClient } from '@/lib/server/db';
 import { invalidateByExactPath } from '@/lib/edge/invalidate'
-import { supabaseReadonly } from '@/lib/supabase-optimized';
+
+const supabaseAdmin = getSupabaseAdminClient();
+const supabaseReadonly = getSupabaseReadonlyClient();
 
 // 获取所有分类
 export async function GET(request: NextRequest) {

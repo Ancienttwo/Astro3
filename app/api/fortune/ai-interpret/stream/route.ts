@@ -9,7 +9,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { getSupabaseAdminClient } from '@/lib/server/db';
 import { 
   createAIInterpretationService,
   type InterpretationLevel,
@@ -37,7 +37,8 @@ async function getFortuneSlipData(
   language: SupportedLanguage = 'zh-CN'
 ): Promise<FortuneSlipData | null> {
   try {
-    const { data: templeData } = await supabase
+    const supabaseAdmin = getSupabaseAdminClient();
+    const { data: templeData } = await supabaseAdmin
       .from('temple_systems')
       .select('id, temple_name')
       .eq('temple_code', templeCode)
@@ -53,7 +54,7 @@ async function getFortuneSlipData(
       `historical_context${languageSuffix}`, `symbolism${languageSuffix}`
     ].join(', ');
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('fortune_slips')
       .select(selectFields)
       .eq('temple_system_id', templeData.id)

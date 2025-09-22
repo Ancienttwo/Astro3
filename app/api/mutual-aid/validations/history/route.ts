@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { getMutualAidUser } from '@/lib/mutual-aid-auth';
+import { resolveAuth } from '@/lib/auth-adapter';
+import { ok, err } from '@/lib/api-response'
 import { z } from 'zod';
 
 const supabase = createClient(
@@ -25,20 +26,8 @@ const GetValidationHistorySchema = z.object({
 export async function GET(request: NextRequest) {
   try {
     // 认证用户
-    const user = await getMutualAidUser(request as any);
-    if (!user) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'AUTHENTICATION_REQUIRED',
-            message: '需要Web3身份验证',
-            details: 'No valid mutual-aid user',
-          },
-        },
-        { status: 401 }
-      );
-    }
+    const auth = await resolveAuth(request)
+    if (!auth.ok || !auth.id) return err(401, 'AUTHENTICATION_REQUIRED', '需要Web3身份验证')
 
     // 解析查询参数
     const { searchParams } = new URL(request.url);
@@ -75,7 +64,7 @@ export async function GET(request: NextRequest) {
           )
         )
       `, { count: 'exact' })
-      .eq('validator_id', user.id);
+      .eq('validator_id', auth.id!);
 
     // 应用筛选条件
     if (vote) {
@@ -140,11 +129,9 @@ export async function GET(request: NextRequest) {
     const hasPrev = page > 1;
 
     // 获取验证统计信息
-    const validationStats = await getValidationStats(user.id, dateFrom, dateTo);
+    const validationStats = await getValidationStats(auth.id!, dateFrom, dateTo);
 
-    return NextResponse.json({
-      success: true,
-      data: formattedValidations,
+    return ok(formattedValidations, {
       pagination: {
         page,
         limit,
@@ -165,17 +152,7 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error('获取验证历史记录错误:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: {
-          code: 'GET_VALIDATION_HISTORY_FAILED',
-          message: '获取验证历史记录失败',
-          details: error instanceof z.ZodError ? error.errors : undefined,
-        },
-      },
-      { status: 500 }
-    );
+    return err(500, 'GET_VALIDATION_HISTORY_FAILED', '获取验证历史记录失败', error instanceof z.ZodError ? error.errors : undefined)
   }
 }
 

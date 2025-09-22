@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createWechatAuth } from '@/lib/wechat-auth'
-import { supabase } from '@/lib/supabase'
+import { getSupabaseAdminClient } from '@/lib/server/db'
 
 export async function POST(request: NextRequest) {
   try {
@@ -43,7 +43,8 @@ export async function POST(request: NextRequest) {
     const userInfo = await wechatAuth.getUserInfo(tokenData.access_token, tokenData.openid)
     
     // 创建或更新Supabase用户
-    const { user, session } = await createOrUpdateSupabaseUser(userInfo, tokenData)
+    const supabaseAdmin = getSupabaseAdminClient()
+    const { user, session } = await createOrUpdateSupabaseUser(supabaseAdmin, userInfo, tokenData)
     
     console.log('微信用户认证成功:', user)
     
@@ -62,17 +63,17 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function createOrUpdateSupabaseUser(userInfo: any, tokenData: any) {
+async function createOrUpdateSupabaseUser(supabaseAdmin: ReturnType<typeof getSupabaseAdminClient>, userInfo: any, tokenData: any) {
   try {
     // 使用OpenID作为邮箱创建唯一标识
     const wechatEmail = `${userInfo.openid}@wechat.local`
     
     // 先检查是否已存在该用户
-    const { data: existingUser, error: queryError } = await supabase.auth.admin.getUserByEmail(wechatEmail)
+    const { data: existingUser, error: queryError } = await supabaseAdmin.auth.admin.getUserByEmail(wechatEmail)
     
     if (existingUser && existingUser.user) {
       // 用户已存在，更新用户信息
-      const { data: updatedUser, error: updateError } = await supabase.auth.admin.updateUserById(
+      const { data: updatedUser, error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
         existingUser.user.id,
         {
           user_metadata: {
@@ -95,7 +96,7 @@ async function createOrUpdateSupabaseUser(userInfo: any, tokenData: any) {
       }
       
       // 创建会话
-      const { data: sessionData, error: sessionError } = await supabase.auth.admin.createSession({
+      const { data: sessionData, error: sessionError } = await supabaseAdmin.auth.admin.createSession({
         user_id: existingUser.user.id,
         session_data: {}
       })
@@ -110,7 +111,7 @@ async function createOrUpdateSupabaseUser(userInfo: any, tokenData: any) {
       }
     } else {
       // 创建新用户
-      const { data: newUserData, error: createError } = await supabase.auth.admin.createUser({
+      const { data: newUserData, error: createError } = await supabaseAdmin.auth.admin.createUser({
         email: wechatEmail,
         email_confirm: true, // 微信用户无需邮箱验证
         user_metadata: {
@@ -135,7 +136,7 @@ async function createOrUpdateSupabaseUser(userInfo: any, tokenData: any) {
       }
       
       // 创建会话
-      const { data: sessionData, error: sessionError } = await supabase.auth.admin.createSession({
+      const { data: sessionData, error: sessionError } = await supabaseAdmin.auth.admin.createSession({
         user_id: newUserData.user.id,
         session_data: {}
       })

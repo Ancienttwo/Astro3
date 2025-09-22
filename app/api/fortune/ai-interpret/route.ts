@@ -9,7 +9,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { getSupabaseAdminClient } from '@/lib/server/db';
 import { 
   AIInterpretationService,
   createAIInterpretationService,
@@ -60,6 +60,7 @@ async function getFortuneSlipData(
   language: SupportedLanguage = 'zh-TW'
 ): Promise<FortuneSlipData | null> {
   try {
+    const supabase = getSupabaseAdminClient();
     // 查询关帝庙ID
     const { data: templeData } = await supabase
       .from('temple_systems')

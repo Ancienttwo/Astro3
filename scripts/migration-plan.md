@@ -94,10 +94,10 @@ const PAGES_TO_MIGRATE = [
 ```json
 {
   "scripts": {
-    "build:web3-cn": "NEXT_PUBLIC_DEPLOYMENT_TARGET=web3-cn npm run build",
-    "build:web3-intl": "NEXT_PUBLIC_DEPLOYMENT_TARGET=web3-intl npm run build", 
-    "build:web2-global": "NEXT_PUBLIC_DEPLOYMENT_TARGET=web2-global npm run build",
-    "build:unified": "NEXT_PUBLIC_DEPLOYMENT_TARGET=unified-main npm run build"
+    "build:web3": "NEXT_PUBLIC_DEPLOYMENT_TARGET=web3 NEXT_PUBLIC_APP_MODE=web3 NEXT_PUBLIC_DEFAULT_LANGUAGE=en pnpm build",
+    "build:unified": "NEXT_PUBLIC_DEPLOYMENT_TARGET=unified NEXT_PUBLIC_APP_MODE=unified NEXT_PUBLIC_DEFAULT_LANGUAGE=zh pnpm build",
+    "deploy:web3": "./scripts/deployment-scripts.sh full-deploy web3",
+    "deploy:unified": "./scripts/deployment-scripts.sh full-deploy unified"
   }
 }
 ```

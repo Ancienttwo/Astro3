@@ -105,10 +105,23 @@ export interface SupabaseJWTPayload {
 }
 
 // 错误类型
+export type WalletIntegrationErrorCode =
+  | 'SIGNATURE_INVALID'
+  | 'USER_CREATE_FAILED'
+  | 'JWT_GENERATION_FAILED'
+  | 'SESSION_SET_FAILED'
+  | 'AUTHENTICATION_FAILED'
+  | 'SESSION_CREATION_FAILED'
+  | 'DISCONNECT_FAILED'
+  | 'WALLET_NOT_FOUND'
+  | 'USER_REJECTED'
+  | 'NETWORK_ERROR'
+  | 'UNKNOWN_ERROR';
+
 export class WalletIntegrationError extends Error {
   constructor(
     message: string,
-    public code: 'SIGNATURE_INVALID' | 'USER_CREATE_FAILED' | 'JWT_GENERATION_FAILED' | 'SESSION_SET_FAILED',
+    public code: WalletIntegrationErrorCode,
     public details?: any
   ) {
     super(message)

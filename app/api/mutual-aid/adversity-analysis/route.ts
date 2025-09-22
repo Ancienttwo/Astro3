@@ -186,9 +186,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Return analysis results
+    // Return analysis results (统一返回)
     return NextResponse.json({
       success: true,
+      data: {
+        id: prediction.id,
+        severityLevel: analysis.severityLevel,
+        mutualAidEligible: analysis.mutualAidEligible,
+        recommendedAidAmount: analysis.recommendedAidAmount,
+        timeframe: analysis.timeframe,
+        analysis: analysis.analysis,
+        supportRecommendations: analysis.supportRecommendations,
+        validationRequired: analysis.validationRequired,
+        estimatedValidationTime: analysis.estimatedValidationTime
+      },
       prediction: {
         id: prediction.id,
         severityLevel: analysis.severityLevel,
@@ -204,17 +215,7 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Adversity analysis error:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: {
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Internal server error during analysis',
-          requestId: generateRequestId()
-        }
-      },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: { code: 'INTERNAL_SERVER_ERROR', message: 'Internal server error during analysis', requestId: generateRequestId() } }, { status: 500 });
   }
 }
 

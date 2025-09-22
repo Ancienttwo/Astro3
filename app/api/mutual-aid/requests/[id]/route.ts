@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { getMutualAidUser } from '@/lib/mutual-aid-auth';
+import { resolveAuth } from '@/lib/auth-adapter';
+import { ok, err } from '@/lib/api-response'
 import { z } from 'zod';
 import { invalidateByExactPath } from '@/lib/edge/invalidate'
 
@@ -28,16 +29,7 @@ export async function GET(
 
     // 验证UUID格式
     if (!requestId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'INVALID_REQUEST_ID',
-            message: '无效的请求ID格式',
-          },
-        },
-        { status: 400 }
-      );
+      return err(400, 'INVALID_REQUEST_ID', '无效的请求ID格式')
     }
 
     // 获取详细的请求信息
@@ -82,16 +74,7 @@ export async function GET(
 
     if (error) {
       if (error.code === 'PGRST116') {
-        return NextResponse.json(
-          {
-            success: false,
-            error: {
-              code: 'REQUEST_NOT_FOUND',
-              message: '找不到指定的互助请求',
-            },
-          },
-          { status: 404 }
-        );
+        return err(404, 'REQUEST_NOT_FOUND', '找不到指定的互助请求')
       }
       throw error;
     }
@@ -102,15 +85,15 @@ export async function GET(
     let canValidate = false;
 
     try {
-      const user = await getMutualAidUser(request as any);
-      if (user) {
-        isOwner = requestData.requester_id === user.id;
+      const auth = await resolveAuth(request)
+      if (auth.ok && auth.id) {
+        isOwner = requestData.requester_id === auth.id;
         
         // 检查是否是管理员
         const { data: adminData } = await supabase
           .from('user_profiles')
           .select('role')
-          .eq('id', user.id)
+          .eq('id', auth.id!)
           .single();
         
         isAdmin = adminData?.role === 'admin';
@@ -120,11 +103,11 @@ export async function GET(
           const { data: validatorData } = await supabase
             .from('user_profiles')
             .select('reputation_score, validation_accuracy, is_active_validator')
-            .eq('id', user.id)
+            .eq('id', auth.id!)
             .single();
 
           const hasValidated = requestData.validations?.some(
-            (v: any) => v.validator_id === user.id
+            (v: any) => v.validator_id === auth.id
           );
 
           canValidate = validatorData && 
@@ -219,23 +202,11 @@ export async function GET(
       },
     };
 
-    return NextResponse.json({
-      success: true,
-      request: formattedResponse,
-    });
+    return ok(formattedResponse, { request: formattedResponse });
 
   } catch (error) {
     console.error('获取互助请求详情错误:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: {
-          code: 'GET_REQUEST_FAILED',
-          message: '获取互助请求详情失败',
-        },
-      },
-      { status: 500 }
-    );
+    return err(500, 'GET_REQUEST_FAILED', '获取互助请求详情失败')
   }
 }
 
@@ -253,19 +224,8 @@ export async function PUT(
     const validatedData = UpdateRequestSchema.parse(body);
 
     // 认证用户
-    const user = await getMutualAidUser(request as any);
-    if (!user) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'AUTHENTICATION_REQUIRED',
-            message: '需要身份验证',
-          },
-        },
-        { status: 401 }
-      );
-    }
+    const auth = await resolveAuth(request)
+    if (!auth.ok || !auth.id) return err(401, 'AUTHENTICATION_REQUIRED', '需要身份验证')
 
     // 获取请求信息
     const { data: requestData, error: fetchError } = await supabase
@@ -275,39 +235,21 @@ export async function PUT(
       .single();
 
     if (fetchError || !requestData) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'REQUEST_NOT_FOUND',
-            message: '找不到指定的互助请求',
-          },
-        },
-        { status: 404 }
-      );
+      return err(404, 'REQUEST_NOT_FOUND', '找不到指定的互助请求')
     }
 
     // 检查权限
-    const isOwner = requestData.requester_id === user.id;
+    const isOwner = requestData.requester_id === auth.id;
     const { data: userData } = await supabase
       .from('user_profiles')
       .select('role')
-      .eq('id', user.id)
+      .eq('id', auth.id!)
       .single();
     
     const isAdmin = userData?.role === 'admin';
 
     if (!isOwner && !isAdmin) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'INSUFFICIENT_PERMISSIONS',
-            message: '没有权限修改此请求',
-          },
-        },
-        { status: 403 }
-      );
+      return err(403, 'INSUFFICIENT_PERMISSIONS', '没有权限修改此请求')
     }
 
     // 构建更新数据
@@ -318,16 +260,7 @@ export async function PUT(
     if (validatedData.status) {
       // 验证状态转换是否有效
       if (!isValidStatusTransition(requestData.status, validatedData.status)) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: {
-              code: 'INVALID_STATUS_TRANSITION',
-              message: `不能将状态从 ${requestData.status} 更改为 ${validatedData.status}`,
-            },
-          },
-          { status: 400 }
-        );
+        return err(400, 'INVALID_STATUS_TRANSITION', `不能将状态从 ${requestData.status} 更改为 ${validatedData.status}`)
       }
 
       updateData.status = validatedData.status;
@@ -357,7 +290,7 @@ export async function PUT(
           request_id: requestId,
           from_status: requestData.status,
           to_status: validatedData.status,
-          changed_by: user.id,
+          changed_by: auth.id!,
           reason: validatedData.adminNotes,
         });
     }
@@ -370,25 +303,11 @@ export async function PUT(
       await invalidateByExactPath('/api/mutual-aid/validations/history','user')
     } catch {}
 
-    return NextResponse.json({
-      success: true,
-      request: updatedRequest,
-      message: '请求状态已更新',
-    });
+    return ok(updatedRequest, { message: '请求状态已更新' });
 
   } catch (error) {
     console.error('更新互助请求错误:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: {
-          code: 'UPDATE_REQUEST_FAILED',
-          message: '更新互助请求失败',
-          details: error instanceof z.ZodError ? error.errors : undefined,
-        },
-      },
-      { status: 500 }
-    );
+    return err(500, 'UPDATE_REQUEST_FAILED', '更新互助请求失败', error instanceof z.ZodError ? error.errors : undefined)
   }
 }
 
@@ -438,31 +357,13 @@ export async function DELETE(
     }
 
     // 检查是否是申请者
-    if (requestData.requester_id !== user.id) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'INSUFFICIENT_PERMISSIONS',
-            message: '只能取消自己的申请',
-          },
-        },
-        { status: 403 }
-      );
+    if (requestData.requester_id !== auth.id) {
+      return err(403, 'INSUFFICIENT_PERMISSIONS', '只能取消自己的申请')
     }
 
     // 检查状态是否允许取消
     if (!['pending', 'under_review'].includes(requestData.status)) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'CANNOT_CANCEL',
-            message: '当前状态不允许取消申请',
-          },
-        },
-        { status: 400 }
-      );
+      return err(400, 'CANNOT_CANCEL', '当前状态不允许取消申请')
     }
 
     // 软删除：更改状态为cancelled
@@ -486,7 +387,7 @@ export async function DELETE(
         request_id: requestId,
         from_status: requestData.status,
         to_status: 'cancelled',
-        changed_by: user.id,
+        changed_by: auth.id!,
         reason: '用户主动取消',
       });
 
@@ -498,23 +399,11 @@ export async function DELETE(
       await invalidateByExactPath('/api/mutual-aid/validations/history','user')
     } catch {}
 
-    return NextResponse.json({
-      success: true,
-      message: '互助申请已取消',
-    });
+    return ok({ message: '互助申请已取消' });
 
   } catch (error) {
     console.error('取消互助请求错误:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: {
-          code: 'CANCEL_REQUEST_FAILED',
-          message: '取消互助请求失败',
-        },
-      },
-      { status: 500 }
-    );
+    return err(500, 'CANCEL_REQUEST_FAILED', '取消互助请求失败')
   }
 }
 

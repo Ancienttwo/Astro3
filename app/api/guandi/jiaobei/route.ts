@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
+import { getSupabaseAdminClient } from '@/lib/server/db';
 import { isAddress } from 'viem';
 import { CacheManager } from '@/lib/redis-cache'
 import { invalidateByExactPath } from '@/lib/edge/invalidate'
+
+const supabaseAdmin = getSupabaseAdminClient();
 
 // 筊杯投掷结果处理 API
 export async function POST(request: NextRequest) {

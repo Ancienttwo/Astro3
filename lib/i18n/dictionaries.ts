@@ -960,8 +960,8 @@ export const zhDict: Dictionary = {
       subtitle: '紫微斗数命盘分析',
     },
     auth: {
-      title: '用户登录',
-      subtitle: '请登录您的账户',
+      title: 'Web3 钱包登录',
+      subtitle: '连接钱包后即可使用 AstroZi 全部功能',
     },
     settings: {
       title: '设置',
@@ -1766,8 +1766,8 @@ export const enDict: Dictionary = {
       subtitle: 'Ancient Chinese Astrology Chart Analysis',
     },
     auth: {
-      title: 'User Login',
-      subtitle: 'Please login to your account',
+      title: 'Web3 Login',
+      subtitle: 'Connect your wallet to access AstroZi',
     },
     settings: {
       title: 'Settings',
@@ -2552,8 +2552,8 @@ export const jaDict: Dictionary = {
       subtitle: '紫微斗数命盤分析',
     },
     auth: {
-      title: 'ユーザーログイン',
-      subtitle: 'アカウントにログインしてください',
+      title: 'Web3 ログイン',
+      subtitle: 'ウォレットを接続して AstroZi の全機能を利用',
     },
     settings: {
       title: '設定',

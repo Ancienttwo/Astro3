@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
-import { supabaseReadonly } from '@/lib/supabase-optimized';
+import { getSupabaseAdminClient, getSupabaseReadonlyClient } from '@/lib/server/db';
 import { isAddress } from 'viem';
+import { ok, err } from '@/lib/api-response'
+
+const supabaseAdmin = getSupabaseAdminClient();
+const supabaseReadonly = getSupabaseReadonlyClient();
 
 // 获取积分排行榜
 export async function GET(request: NextRequest) {
@@ -40,7 +43,7 @@ export async function GET(request: NextRequest) {
 
     if (web3Error) {
       console.error('Error fetching Web3 leaderboard:', web3Error);
-      return NextResponse.json({ error: 'Failed to fetch leaderboard' }, { status: 500 });
+      return err(500, 'FETCH_FAILED', 'Failed to fetch leaderboard');
     }
 
     // 获取统计数据
@@ -88,25 +91,22 @@ export async function GET(request: NextRequest) {
       };
     }) || [];
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        leaderboard: formattedLeaderboard,
-        stats,
-        pagination: {
-          limit,
-          offset,
-          total: stats.totalUsers,
-          hasMore: offset + limit < stats.totalUsers
-        },
-        category,
-        lastUpdated: new Date().toISOString()
-      }
+    return ok({
+      leaderboard: formattedLeaderboard,
+      stats,
+      pagination: {
+        limit,
+        offset,
+        total: stats.totalUsers,
+        hasMore: offset + limit < stats.totalUsers
+      },
+      category,
+      lastUpdated: new Date().toISOString()
     });
 
   } catch (error) {
     console.error('Points leaderboard API error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return err(500, 'INTERNAL_ERROR', 'Internal server error');
   }
 }
 

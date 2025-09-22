@@ -49,10 +49,10 @@ export default function HelpCenterPage() {
       account: '账户安全',
       faq: '常见问题',
       quickStartItems: [
-        { title: '注册与登录', description: '使用邮箱注册账户，安全登录系统' },
-        { title: '完善个人资料', description: '设置个人信息，选择喜欢的主题风格' },
-        { title: '开始排盘', description: '创建您的第一个八字或紫微命盘' },
-        { title: 'AI分析', description: '使用AI大师功能获得专业命理分析' }
+        { title: '连接 Web3 钱包', description: '通过 WalletConnect + Privy 完成统一登录' },
+        { title: '了解 Privy', description: '没有钱包？Privy 可一键生成并绑定社交账号' },
+        { title: '完善个人资料', description: '绑定首选语言与界面主题，开启 AstroZi 体验' },
+        { title: '开始排盘', description: '创建您的第一个八字或紫微命盘' }
       ],
       dailyFeaturesItems: [
         { title: '每日签到', description: '每天登录签到获得免费AI分析次数' },
@@ -66,19 +66,19 @@ export default function HelpCenterPage() {
         { title: '命书管理', description: '保存和管理您的命盘记录' }
       ],
       accountItems: [
-        { title: '密码安全', description: '定期更新密码，保护账户安全', action: '修改密码' },
-        { title: '数据备份', description: '命盘数据自动同步到云端', action: undefined },
-        { title: '隐私保护', description: '严格保护您的个人信息安全', action: undefined }
+        { title: '钱包安全', description: '仅在信任的站点中确认签名请求，切勿泄露助记词', action: undefined },
+        { title: 'Privy 社交登录', description: '在 Privy 控制台管理绑定的社交账号与嵌入式钱包', action: undefined },
+        { title: '旧邮箱密码管理', description: '早期邮箱用户仍可更新密码以保障数据安全', action: '管理旧密码' }
       ],
       faqs: [
-        { question: '如何获得更多AI分析次数？', answer: '通过每日签到、购买会员或单次充值都可以获得更多分析次数。' },
-        { question: '命盘数据会丢失吗？', answer: '不会，您的命盘数据会自动同步到云端，可在不同设备间使用。' },
-        { question: '如何联系客服？', answer: '您可以通过设置页面的联系我们功能，或发送邮件联系我们。' },
-        { question: '忘记密码怎么办？', answer: '在登录页面点击"忘记密码"，通过邮箱重置密码。' }
+        { question: '没有钱包可以登录吗？', answer: '可以。选择 Privy 社交登录即可自动生成钱包，并可在需要时导出密钥。' },
+        { question: '钱包签名失败怎么办？', answer: '刷新页面重新连接，或在钱包中撤销挂起的请求后再试。' },
+        { question: '如何切换到其他钱包？', answer: '在 AstroZi 右上角退出登录后，重新打开登录页面选择新的钱包即可。' },
+        { question: '旧邮箱账号如何迁移？', answer: '请联系支持团队，我们会协助将历史数据绑定到您的 Web3 身份。' }
       ],
       passwordDialog: {
-        title: '修改密码',
-        currentPassword: '当前密码',
+        title: '旧邮箱账号密码管理',
+        currentPassword: '当前密码（旧账号）',
         newPassword: '新密码',
         confirmPassword: '确认新密码',
         cancel: '取消',
@@ -103,10 +103,10 @@ export default function HelpCenterPage() {
       account: 'Account Security',
       faq: 'FAQ',
       quickStartItems: [
-        { title: 'Register & Login', description: 'Register an account with email and login securely' },
-        { title: 'Complete Profile', description: 'Set personal information and choose your preferred theme' },
-        { title: 'Start Chart Reading', description: 'Create your first BaZi or ZiWei chart' },
-        { title: 'AI Analysis', description: 'Use AI masters for professional astrological analysis' }
+        { title: 'Connect Your Wallet', description: 'Use WalletConnect + Privy for unified login' },
+        { title: 'Explore Privy', description: 'No wallet yet? Privy can generate one and bind a social account' },
+        { title: 'Complete Profile', description: 'Set your preferred language, theme, and personalization options' },
+        { title: 'Start Chart Reading', description: 'Create your first BaZi or ZiWei chart' }
       ],
       dailyFeaturesItems: [
         { title: 'Daily Check-in', description: 'Login daily to earn free AI analysis credits' },
@@ -120,21 +120,21 @@ export default function HelpCenterPage() {
         { title: 'Chart Management', description: 'Save and manage your natal chart records' }
       ],
       accountItems: [
-        { title: 'Password Security', description: 'Regularly update password to protect account security', action: 'Change Password' },
-        { title: 'Data Backup', description: 'Chart data automatically synced to cloud', action: undefined },
-        { title: 'Privacy Protection', description: 'Strictly protect your personal information security', action: undefined }
+        { title: 'Wallet Security', description: 'Only approve signature requests from trusted dapps and protect your seed phrase', action: undefined },
+        { title: 'Privy Social Login', description: 'Manage linked social accounts and embedded wallets via the Privy console', action: undefined },
+        { title: 'Legacy Email Passwords', description: 'Early email users can still update their password for archival access', action: 'Manage Legacy Password' }
       ],
       faqs: [
-        { question: 'How to get more AI analysis credits?', answer: 'Through daily check-in, purchasing membership, or one-time top-up to get more analysis credits.' },
-        { question: 'Will chart data be lost?', answer: 'No, your chart data is automatically synced to the cloud and can be used across different devices.' },
-        { question: 'How to contact customer service?', answer: 'You can use the Contact Us feature in settings or send us an email.' },
-        { question: 'What if I forget my password?', answer: 'Click "Forgot Password" on the login page to reset via email.' }
+        { question: 'Can I log in without a wallet?', answer: 'Yes. Choose Privy social login to generate a wallet instantly and export keys whenever needed.' },
+        { question: 'What if wallet signature fails?', answer: 'Reconnect your wallet, clear pending requests, or try a different connector before signing again.' },
+        { question: 'How do I switch wallets?', answer: 'Sign out from AstroZi, then reopen the login page and select the wallet you want to connect.' },
+        { question: 'How do I migrate a legacy email account?', answer: 'Contact support and we will help bind your historical data to the new Web3 identity.' }
       ],
       passwordDialog: {
-        title: 'Change Password',
-        currentPassword: 'Current Password',
+        title: 'Legacy Password Management',
+        currentPassword: 'Current Password (legacy)',
         newPassword: 'New Password',
-        confirmPassword: 'Confirm Password',
+        confirmPassword: 'Confirm New Password',
         cancel: 'Cancel',
         confirm: 'Confirm Change',
         changing: 'Changing...',

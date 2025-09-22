@@ -68,7 +68,7 @@ export default function Web3ProfilePage() {
         const web3User = await supabaseSessionManager.restoreWeb3Session()
         
         if (!web3User) {
-          router.push('/en/wallet-auth')
+          router.push('/en/login')
           return
         }
 
@@ -92,7 +92,7 @@ export default function Web3ProfilePage() {
 
       } catch (error) {
         console.error('❌ Profile initialization failed:', error)
-        router.push('/en/wallet-auth')
+        router.push('/en/login')
       } finally {
         setLoading(false)
       }

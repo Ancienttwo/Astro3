@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { getMutualAidUser } from '@/lib/mutual-aid-auth';
+import { resolveAuth } from '@/lib/auth-adapter';
 import { z } from 'zod';
 import { invalidateByExactPath } from '@/lib/edge/invalidate'
 import { checkRateLimitRedis } from '@/lib/rate-limit-redis'
+import { ok, err } from '@/lib/api-response'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -41,40 +42,19 @@ const GetPendingValidationsSchema = z.object({
  */
 export async function GET(request: NextRequest) {
   try {
-    // 认证用户
-    const user = await getMutualAidUser(request as any);
-    if (!user) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'AUTHENTICATION_REQUIRED',
-            message: '需要身份验证',
-            details: 'No valid mutual-aid user',
-          },
-        },
-        { status: 401 }
-      );
-    }
+    // 认证用户（统一适配器）
+    const auth = await resolveAuth(request)
+    if (!auth.ok || !auth.id) return err(401, 'AUTHENTICATION_REQUIRED', '需要身份验证')
 
     // 检查验证者资格
     const { data: validatorData, error: validatorError } = await supabase
       .from('user_profiles')
       .select('reputation_score, validation_accuracy, is_active_validator, total_validations')
-      .eq('id', user.id)
+      .eq('id', auth.id)
       .single();
 
     if (validatorError || !validatorData) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'VALIDATOR_DATA_NOT_FOUND',
-            message: '找不到验证者信息',
-          },
-        },
-        { status: 404 }
-      );
+      return err(404, 'VALIDATOR_DATA_NOT_FOUND', '找不到验证者信息')
     }
 
     // 验证验证者资格
@@ -84,23 +64,13 @@ export async function GET(request: NextRequest) {
       validatorData.is_active_validator;
 
     if (!isQualifiedValidator) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'INSUFFICIENT_VALIDATOR_QUALIFICATIONS',
-            message: '您暂时不符合验证者要求',
-            requirements: {
-              minReputationScore: 3.0,
-              currentReputationScore: validatorData.reputation_score,
-              minValidationAccuracy: 0.7,
-              currentValidationAccuracy: validatorData.validation_accuracy,
-              isActiveValidator: validatorData.is_active_validator,
-            },
-          },
-        },
-        { status: 403 }
-      );
+      return err(403, 'INSUFFICIENT_VALIDATOR_QUALIFICATIONS', '您暂时不符合验证者要求', {
+        minReputationScore: 3.0,
+        currentReputationScore: validatorData.reputation_score,
+        minValidationAccuracy: 0.7,
+        currentValidationAccuracy: validatorData.validation_accuracy,
+        isActiveValidator: validatorData.is_active_validator,
+      })
     }
 
     // 解析查询参数
@@ -145,7 +115,7 @@ export async function GET(request: NextRequest) {
         )
       `, { count: 'exact' })
       .eq('status', 'pending')
-      .neq('requester_id', user.id); // 不能验证自己的申请
+      .neq('requester_id', auth.id); // 不能验证自己的申请
 
     // 应用筛选条件
     if (category) {
@@ -174,7 +144,7 @@ export async function GET(request: NextRequest) {
     // 过滤掉用户已经验证过的请求
     const filteredRequests = requests?.filter(request => {
       const hasValidated = request.validations?.some(
-        (validation: any) => validation.validator_id === user.id
+        (validation: any) => validation.validator_id === auth.id
       );
       return !hasValidated;
     }) || [];
@@ -233,11 +203,9 @@ export async function GET(request: NextRequest) {
     const hasPrev = page > 1;
 
     // 获取验证者统计信息
-    const validatorStats = await getValidatorStats(user.id);
+    const validatorStats = await getValidatorStats(auth.id!);
 
-    return NextResponse.json({
-      success: true,
-      data: formattedRequests,
+    return ok(formattedRequests, {
       pagination: {
         page,
         limit,
@@ -245,34 +213,15 @@ export async function GET(request: NextRequest) {
         totalPages,
         hasNext,
         hasPrev,
-        availableTotal: count || 0, // 总的待验证请求数（包括已验证过的）
+        availableTotal: count || 0,
       },
-      filters: {
-        category,
-        urgency,
-        severityLevel,
-        sortBy,
-        sortOrder,
-      },
-      validatorInfo: {
-        qualifications: validatorData,
-        stats: validatorStats,
-      },
+      filters: { category, urgency, severityLevel, sortBy, sortOrder },
+      validatorInfo: { qualifications: validatorData, stats: validatorStats }
     });
 
   } catch (error) {
     console.error('获取待验证请求列表错误:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: {
-          code: 'GET_PENDING_VALIDATIONS_FAILED',
-          message: '获取待验证请求列表失败',
-          details: error instanceof z.ZodError ? error.errors : undefined,
-        },
-      },
-      { status: 500 }
-    );
+    return err(500, 'GET_PENDING_VALIDATIONS_FAILED', '获取待验证请求列表失败', error instanceof z.ZodError ? error.errors : undefined);
   }
 }
 
@@ -384,17 +333,8 @@ export async function POST(request: NextRequest) {
     }
 
     // 验证不是自己的申请
-    if (requestData.requester_id === user.id) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'CANNOT_VALIDATE_OWN_REQUEST',
-            message: '不能验证自己的申请',
-          },
-        },
-        { status: 403 }
-      );
+    if (requestData.requester_id === auth.id) {
+      return err(403, 'CANNOT_VALIDATE_OWN_REQUEST', '不能验证自己的申请')
     }
 
     // 检查是否已经验证过

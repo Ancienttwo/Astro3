@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
+import { getSupabaseAdminClient } from '@/lib/server/db';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { isAddress } from 'viem';
 
 // 获取任务列表及用户完成状态
+const supabaseAdmin: SupabaseClient = getSupabaseAdminClient();
+
 export async function GET(request: NextRequest) {
   try {
     // 验证用户身份 - 支持Web2和Web3用户

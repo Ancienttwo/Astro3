@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { getSupabaseAdminClient } from '@/lib/server/db'
 import { getCurrentUnifiedUser } from '@/lib/auth'
+
+const supabaseAdmin = getSupabaseAdminClient()
 
 // 获取现有分析结果
 export async function GET(request: NextRequest) {
@@ -23,7 +25,7 @@ export async function GET(request: NextRequest) {
     console.log('🔍 当前用户状态:', user ? `${user.email} (${user.id})` : '未登录')
     
     // 查询数据库 - 对于未登录用户，只通过缓存键查询
-    let query = supabase
+    let query = supabaseAdmin
       .from('ziwei_analyses')
       .select('*')
       .eq('cache_key', cacheKey)
@@ -52,7 +54,7 @@ export async function GET(request: NextRequest) {
       
       // 删除不完整的记录
       if (user?.id) {
-        await supabase
+        await supabaseAdmin
           .from('ziwei_analyses')
           .delete()
           .eq('id', data.id)
@@ -125,7 +127,7 @@ export async function POST(request: NextRequest) {
 
     // 检查是否已有不完整的记录，如果有则先删除
     if (user?.id) {
-      const { data: existingData } = await supabase
+      const { data: existingData } = await supabaseAdmin
         .from('ziwei_analyses')
         .select('*')
         .eq('user_id', user.id)
@@ -135,7 +137,7 @@ export async function POST(request: NextRequest) {
 
       if (existingData && (!existingData.analysis_result || existingData.analysis_result.trim() === '')) {
         console.log('🗑️ 删除之前不完整的分析记录')
-        await supabase
+        await supabaseAdmin
           .from('ziwei_analyses')
           .delete()
           .eq('id', existingData.id)
@@ -153,7 +155,7 @@ export async function POST(request: NextRequest) {
     // 保存到数据库（只有登录用户才保存）
     if (user?.id) {
       console.log('💾 保存分析结果到数据库...')
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from('ziwei_analyses')
         .insert({
           user_id: user.id,
@@ -270,7 +272,7 @@ export async function DELETE(request: NextRequest) {
     console.log(`🗑️ 清理用户 ${user.email} 的分析记录: ${cacheKey}-${analysisType}`)
 
     // 删除指定的分析记录
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('ziwei_analyses')
       .delete()
       .eq('user_id', user.id)

@@ -32,7 +32,7 @@ export default function AuthPageClient({ language = 'en' }: AuthPageClientProps)
   const [isLoading, setIsLoading] = useState(false)
   const [isResettingPassword, setIsResettingPassword] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
-  const [useWeb3Auth, setUseWeb3Auth] = useState(false) // 默认使用邮箱登录
+  const [useWeb3Auth, setUseWeb3Auth] = useState(true) // 默认使用钱包登录
 
   const [showForgotPassword, setShowForgotPassword] = useState(false)
   const [error, setError] = useState('')
@@ -398,7 +398,7 @@ export default function AuthPageClient({ language = 'en' }: AuthPageClientProps)
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
         <div className="w-full max-w-md space-y-6">
           {/* WalletConnect组件 */}
-          <WalletConnectAuth />
+          <WalletConnectAuth locale="en" redirectPath="/en/home" disconnectRedirectPath="/en/login" />
           
           {/* 切换到传统认证 */}
           <div className="text-center">
@@ -408,7 +408,7 @@ export default function AuthPageClient({ language = 'en' }: AuthPageClientProps)
               onClick={() => setUseWeb3Auth(false)}
               className="text-sm text-muted-foreground dark:text-gray-400 hover:text-primary dark:hover:text-yellow-400"
             >
-              Switch to Traditional Auth
+              Use Legacy Email Login
             </Button>
           </div>
           

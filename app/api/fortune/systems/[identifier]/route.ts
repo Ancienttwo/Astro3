@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseReadonly as supabase } from '@/lib/supabase-optimized';
+import { getSupabaseReadonlyClient } from '@/lib/server/db';
+
+const supabase = getSupabaseReadonlyClient();
 import type { APIResponse } from '@/types/fatebook';
 import type { TempleSystem } from '../route';
 

@@ -1,19 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
-import { verifyAuthToken } from '@/lib/api-auth';
+import { getSupabaseAdminClient } from '@/lib/server/db';
 import { CacheManager } from '@/lib/redis-cache'
 import { invalidateByExactPath } from '@/lib/edge/invalidate'
+import { resolveAuth } from '@/lib/auth-adapter'
+import { ok, err } from '@/lib/api-response'
+
+const supabaseAdmin = getSupabaseAdminClient();
 
 // Web2用户签到查询 (只返回签到状态，不涉及积分)
 export async function GET(request: NextRequest) {
   try {
-    // 验证Web2用户身份
-    const authResult = await verifyAuthToken(request);
-    if (!authResult.success || !authResult.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const userId = authResult.user.id;
+    const auth = await resolveAuth(request)
+    if (!auth.ok || !auth.id) return err(401, 'UNAUTHORIZED', 'Unauthorized')
+    const userId = auth.id!
     const today = new Date().toISOString().split('T')[0];
 
     // 使用新的签到状态检查函数
@@ -24,7 +23,7 @@ export async function GET(request: NextRequest) {
 
     if (statusError) {
       console.error('Error checking Web2 checkin status:', statusError);
-      return NextResponse.json({ error: 'Failed to check checkin status' }, { status: 500 });
+      return err(500, 'STATUS_FAILED', 'Failed to check checkin status')
     }
 
     // 获取最近的签到记录
@@ -35,37 +34,29 @@ export async function GET(request: NextRequest) {
 
     if (recentError) {
       console.error('Error fetching recent checkins:', recentError);
-      // 不阻塞响应，使用空数组
     }
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        hasCheckedInToday: !checkinStatus.can_checkin,
-        consecutiveDays: checkinStatus.consecutive_days,
-        expectedReports: checkinStatus.expected_reports,
-        bonusMultiplier: checkinStatus.bonus_multiplier,
-        todayCheckin: checkinStatus.today_checkin,
-        recentCheckins: recentCheckinsResult?.recent_checkins || []
-      }
-    });
+    return ok({
+      hasCheckedInToday: !checkinStatus.can_checkin,
+      consecutiveDays: checkinStatus.consecutive_days,
+      expectedReports: checkinStatus.expected_reports,
+      bonusMultiplier: checkinStatus.bonus_multiplier,
+      todayCheckin: checkinStatus.today_checkin,
+      recentCheckins: recentCheckinsResult?.recent_checkins || []
+    })
 
   } catch (error) {
     console.error('Web2 checkin status API error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return err(500, 'INTERNAL_ERROR', 'Internal server error')
   }
 }
 
 // Web2用户签到 (直接给予AI报告次数，无积分)
 export async function POST(request: NextRequest) {
   try {
-    // 验证Web2用户身份
-    const authResult = await verifyAuthToken(request);
-    if (!authResult.success || !authResult.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const userId = authResult.user.id;
+    const auth = await resolveAuth(request)
+    if (!auth.ok || !auth.id) return err(401, 'UNAUTHORIZED', 'Unauthorized')
+    const userId = auth.id!
     const today = new Date().toISOString().split('T')[0];
 
     // 检查今天是否已经签到
@@ -76,12 +67,7 @@ export async function POST(request: NextRequest) {
       .eq('checkin_date', today)
       .single();
 
-    if (existingCheckin) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Already checked in today' 
-      }, { status: 400 });
-    }
+    if (existingCheckin) return err(400, 'ALREADY_CHECKED', 'Already checked in today')
 
     // 获取用户最近签到记录来计算连续天数
     const { data: lastCheckin } = await supabaseAdmin
@@ -114,7 +100,7 @@ export async function POST(request: NextRequest) {
     // 使用原子性签到函数确保数据一致性
     const { data: checkinResult, error: checkinError } = await supabaseAdmin.rpc('atomic_web2_checkin', {
       p_user_id: userId,
-      p_user_email: authResult.user.email,
+      p_user_email: auth.email || '',
       p_checkin_date: today,
       p_consecutive_days: consecutiveDays,
       p_reports_earned: reportsEarned
@@ -122,29 +108,23 @@ export async function POST(request: NextRequest) {
 
     if (checkinError) {
       console.error('Error performing atomic Web2 checkin:', checkinError);
-      return NextResponse.json({ 
-        error: 'Failed to complete checkin', 
-        details: checkinError.message 
-      }, { status: 500 });
+      return err(500, 'CHECKIN_FAILED', 'Failed to complete checkin', checkinError.message)
     }
 
     // 缓存失效
     try { await CacheManager.clearUserCache(userId) } catch {}
     try { await invalidateByExactPath('/api/user-usage', 'user') } catch {}
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        consecutiveDays: checkinResult.consecutive_days,
-        reportsEarned: checkinResult.reports_earned,
-        bonusMultiplier: checkinResult.bonus_multiplier,
-        message: checkinResult.message
-      }
-    });
+    return ok({
+      consecutiveDays: checkinResult.consecutive_days,
+      reportsEarned: checkinResult.reports_earned,
+      bonusMultiplier: checkinResult.bonus_multiplier,
+      message: checkinResult.message
+    })
 
   } catch (error) {
     console.error('Web2 checkin API error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return err(500, 'INTERNAL_ERROR', 'Internal server error')
   }
 }
 

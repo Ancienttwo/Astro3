@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { z } from 'zod'
-import { getCurrentUnifiedUser } from '@/lib/auth'
+import { resolveAuth } from '@/lib/auth-adapter'
+import { ok, err } from '@/lib/api-response'
 import { invalidateByExactPath } from '@/lib/edge/invalidate'
 import { checkRateLimitRedis } from '@/lib/rate-limit-redis'
 
@@ -26,11 +27,8 @@ const SubmitRequestSchema = z.object({
  */
 export async function GET(request: NextRequest) {
   try {
-    // 使用现有认证检查
-    const currentUser = await getCurrentUnifiedUser(request)
-    if (!currentUser) {
-      return NextResponse.json({ error: '需要登录' }, { status: 401 })
-    }
+    const auth = await resolveAuth(request)
+    if (!auth.ok || !auth.id) return err(401, 'UNAUTHORIZED', '需要登录')
 
     const { searchParams } = new URL(request.url)
     const page = Math.max(1, parseInt(searchParams.get('page') || '1'))
@@ -46,12 +44,10 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('获取请求列表失败:', error)
-      return NextResponse.json({ error: '获取请求列表失败' }, { status: 500 })
+      return err(500, 'LIST_FAILED', '获取请求列表失败')
     }
 
-    return NextResponse.json({
-      success: true,
-      data: requests || [],
+    return ok(requests || [], {
       pagination: {
         page,
         limit,
@@ -62,7 +58,7 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error('获取请求列表错误:', error)
-    return NextResponse.json({ error: '服务器错误' }, { status: 500 })
+    return err(500, 'INTERNAL_ERROR', '服务器错误')
   }
 }
 
@@ -78,12 +74,9 @@ export async function POST(request: NextRequest) {
       blockDurationMs: 10 * 60 * 1000,
       bucket: 'mutual_aid_request_post'
     })
-    if (!rl.allowed) return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 })
-    // 使用现有认证检查
-    const currentUser = await getCurrentUnifiedUser(request)
-    if (!currentUser) {
-      return NextResponse.json({ error: '需要登录' }, { status: 401 })
-    }
+    if (!rl.allowed) return err(429, 'RATE_LIMITED', 'Too Many Requests')
+    const auth = await resolveAuth(request)
+    if (!auth.ok || !auth.id) return err(401, 'UNAUTHORIZED', '需要登录')
 
     // 验证输入数据
     const body = await request.json()
@@ -92,17 +85,14 @@ export async function POST(request: NextRequest) {
     // 检查简单的金额限制
     const amount = parseFloat(validatedData.amount)
     if (amount > 1000) {
-      return NextResponse.json({ 
-        error: '请求金额不能超过1000',
-        maxAmount: 1000
-      }, { status: 400 })
+      return err(400, 'AMOUNT_LIMIT', '请求金额不能超过1000', { maxAmount: 1000 })
     }
 
     // 创建互助请求
     const { data: newRequest, error: insertError } = await supabase
       .from('mutual_aid_requests')
       .insert({
-        requester_id: currentUser.id,
+        requester_id: auth.id!,
         amount: validatedData.amount,
         reason: validatedData.reason,
         category: validatedData.category,
@@ -117,7 +107,7 @@ export async function POST(request: NextRequest) {
 
     if (insertError) {
       console.error('创建请求失败:', insertError)
-      return NextResponse.json({ error: '提交请求失败' }, { status: 500 })
+      return err(500, 'CREATE_FAILED', '提交请求失败')
     }
 
     try {
@@ -127,21 +117,14 @@ export async function POST(request: NextRequest) {
       await invalidateByExactPath('/api/mutual-aid/user/stats','user')
     } catch {}
 
-    return NextResponse.json({
-      success: true,
-      data: newRequest,
-      message: '互助请求已成功提交'
-    }, { status: 201 })
+    return ok(newRequest, { message: '互助请求已成功提交' }, { status: 201 })
 
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({
-        error: '请求数据格式错误',
-        details: error.errors
-      }, { status: 400 })
+      return err(400, 'INVALID_PAYLOAD', '请求数据格式错误', error.errors)
     }
 
     console.error('提交互助请求错误:', error)
-    return NextResponse.json({ error: '提交请求失败' }, { status: 500 })
+    return err(500, 'INTERNAL_ERROR', '提交请求失败')
   }
 }

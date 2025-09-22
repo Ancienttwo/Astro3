@@ -4,7 +4,6 @@ export { default as AdminAuthGuard } from './AdminAuthGuard';
 export { default as AnalysisLayout } from './AnalysisLayout';
 export { default as AnalyticsManager } from './AnalyticsManager';
 export { default as AuthGuard } from './AuthGuard';
-export { default as AuthMethodSelector } from './AuthMethodSelector';
 export { default as Background } from './Background';
 export { default as ChatBotLayout } from './ChatBotLayout';
 export { default as CollapsibleCard } from './CollapsibleCard';

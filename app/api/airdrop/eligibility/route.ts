@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
+import { getSupabaseAdminClient } from '@/lib/server/db';
 import { CacheManager } from '@/lib/redis-cache'
 import { invalidateByExactPath } from '@/lib/edge/invalidate'
 import { isAddress } from 'viem';
+
+const supabaseAdmin = getSupabaseAdminClient();
 
 // 获取用户空投资格
 export async function GET(request: NextRequest) {

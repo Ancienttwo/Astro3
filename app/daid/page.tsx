@@ -75,7 +75,7 @@ export default function DaidPage() {
         const currentUser = await getCurrentUnifiedUser()
         
         if (!currentUser) {
-          router.push('/en/wallet-auth')
+          router.push('/en/login')
           return
         }
 
@@ -97,7 +97,7 @@ export default function DaidPage() {
 
       } catch (error) {
         console.error('❌ D\'aid initialization failed:', error)
-        router.push('/en/wallet-auth')
+        router.push('/en/login')
       } finally {
         setLoading(false)
       }

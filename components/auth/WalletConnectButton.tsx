@@ -111,6 +111,11 @@ export function WalletConnectButton({
       const data = await authResponse.json();
       const { jwt, user, session } = data;
 
+      // Prefer the custom JWT for our API auth while still retaining Supabase tokens
+      const authToken = jwt;
+      const supabaseAccessToken = session?.access_token || null;
+      const supabaseRefreshToken = session?.refresh_token || null;
+
       // 5. Store unified local state for API client
       // current_user for unified header builder
       localStorage.setItem('current_user', JSON.stringify({
@@ -123,14 +128,16 @@ export function WalletConnectButton({
       // walletconnect_auth for Web3 header builder compatibility
       const expSec = Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60;
       localStorage.setItem('walletconnect_auth', JSON.stringify({
-        auth_token: (session?.access_token || jwt),
-        refresh_token: (session?.refresh_token || jwt),
+        auth_token: supabaseAccessToken || authToken,
+        refresh_token: supabaseRefreshToken || supabaseAccessToken || authToken,
+        api_token: authToken,
+        supabase_access_token: supabaseAccessToken || null,
         wallet_address: resolvedAddr,
         auth_method: 'walletconnect',
         expires_at: session?.expires_at || expSec,
       }));
       // Keep legacy keys for backward compatibility
-      localStorage.setItem('wallet_jwt', jwt);
+      localStorage.setItem('wallet_jwt', authToken);
       localStorage.setItem('wallet_session', JSON.stringify({
         walletAddress: resolvedAddr,
         userId: user.id,
@@ -174,7 +181,7 @@ export function WalletConnectButton({
       await fetch('/api/auth/walletconnect', {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('wallet_jwt')}`
+          'Authorization': `Bearer ${localStorage.getItem('wallet_jwt') || localStorage.getItem('supabase_jwt') || ''}`
         }
       });
       

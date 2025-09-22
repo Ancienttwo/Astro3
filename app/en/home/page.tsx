@@ -246,8 +246,8 @@ export default function EnglishHomePage() {
   const handleReferral = () => {
     if (!user) {
       // 根据配置确定认证路由
-      const authRoute = APP_CONFIG.mode === 'web3' ? '/wallet-auth' : '/auth';
-      router.push(`/en${authRoute}`);
+      const authRoute = '/en/login';
+      router.push(authRoute);
       return;
     }
     // Logged in users show referral dialog
@@ -258,8 +258,8 @@ export default function EnglishHomePage() {
   const handleRedeem = () => {
     if (!user) {
       // 根据配置确定认证路由
-      const authRoute = APP_CONFIG.mode === 'web3' ? '/wallet-auth' : '/auth';
-      router.push(`/en${authRoute}`);
+      const authRoute = '/en/login';
+      router.push(authRoute);
       return;
     }
     // Logged in users show redeem dialog

@@ -14,7 +14,8 @@ import {
   useIsWalletConnected,
   useUserProfile,
   useUnreadNotifications,
-  useUIActions
+  useUIActions,
+  useWeb3Actions
 } from '@/lib/stores/mutualAidStore';
 import {
   Menu,
@@ -37,6 +38,7 @@ import {
   TrendingUp
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { supabaseSessionManager } from '@/lib/services/supabase-session-manager';
 
 interface NavigationItem {
   label: string;
@@ -119,6 +121,8 @@ export default function MutualAidLayout({
   const unreadNotifications = useUnreadNotifications();
   const { sidebarOpen, theme, language } = useMutualAidStore((state) => state.ui);
   const { setSidebarOpen, setTheme, setLanguage, addNotification } = useUIActions();
+  const { disconnectWallet } = useWeb3Actions();
+  const walletAddress = useMutualAidStore((state) => state.user.walletAddress);
   
   const [isMobile, setIsMobile] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -176,6 +180,51 @@ export default function MutualAidLayout({
 
   const canAccessRoute = (item: NavigationItem) => {
     return !item.requiresWallet || isWalletConnected;
+  };
+
+  const formatWalletAddress = (addr?: string | null) => {
+    if (!addr) return language === 'en' ? 'Not connected' : '未连接';
+    return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+  };
+
+  const handleLogout = async () => {
+    try {
+      await supabaseSessionManager.clearWeb3Session();
+    } catch (error) {
+      console.error('Failed to clear Supabase session:', error);
+    }
+
+    if (typeof window !== 'undefined') {
+      try {
+        const bearer = window.localStorage.getItem('wallet_jwt') || window.localStorage.getItem('supabase_jwt');
+        if (bearer) {
+          await fetch('/api/auth/walletconnect', {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${bearer}` }
+          });
+        }
+      } catch (error) {
+        console.error('Wallet logout API failed:', error);
+      }
+
+      const keysToClear = [
+        'walletconnect_auth',
+        'current_user',
+        'wallet_session',
+        'wallet_jwt',
+        'supabase_jwt',
+        'web3_auth',
+        'web3_user'
+      ];
+      keysToClear.forEach((key) => window.localStorage.removeItem(key));
+    }
+
+    disconnectWallet();
+    addNotification({
+      type: 'info',
+      title: language === 'en' ? 'Wallet logged out' : '钱包已登出',
+      message: language === 'en' ? 'You have securely logged out of your wallet session.' : '您已安全退出钱包会话。'
+    });
   };
 
   return (
@@ -420,6 +469,32 @@ export default function MutualAidLayout({
                 </div>
 
                 <div className="flex items-center gap-2">
+                  {/* Wallet Status */}
+                  {isWalletConnected ? (
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        variant="secondary"
+                        className="flex items-center gap-1 px-2 py-1 text-xs sm:text-sm"
+                      >
+                        <Wallet className="w-4 h-4" />
+                        <span>{formatWalletAddress(walletAddress)}</span>
+                      </Badge>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleLogout}
+                      >
+                        {language === 'en' ? 'Logout' : '退出' }
+                      </Button>
+                    </div>
+                  ) : (
+                    <Link href="/auth">
+                      <Button size="sm" variant="default">
+                        {language === 'en' ? 'Connect Wallet' : '连接钱包'}
+                      </Button>
+                    </Link>
+                  )}
+
                   {/* Notifications */}
                   <Button
                     variant="ghost"

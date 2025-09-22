@@ -66,8 +66,8 @@ interface AppConfig {
 const CONFIG_TEMPLATES: Record<AppMode, Partial<AppConfig>> = {
   web3: {
     mode: 'web3',
-    supportedLanguages: ['en'],
-    defaultLanguage: 'en',
+    supportedLanguages: ['zh', 'en', 'ja'],
+    defaultLanguage: 'zh',
     auth: {
       web2: { enabled: false, providers: [] },
       web3: { enabled: true, providers: ['metamask', 'walletconnect'] }
@@ -92,7 +92,7 @@ const CONFIG_TEMPLATES: Record<AppMode, Partial<AppConfig>> = {
         tagline: 'Professional ZiWei Astrology & BaZi Natal'
       },
       navigation: {
-        showLanguageSwitcher: false, // Web3版本只支持英文
+        showLanguageSwitcher: true,
         showAuthSwitcher: false
       }
     }

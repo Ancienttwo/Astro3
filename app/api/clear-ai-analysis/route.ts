@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { getSupabaseAdminClient } from '@/lib/server/db'
 import { getCurrentUnifiedUser } from '@/lib/auth'
 
 export async function POST(request: NextRequest) {
@@ -17,6 +17,7 @@ export async function POST(request: NextRequest) {
     const user = await getCurrentUnifiedUser()
     
     if (user?.id) {
+      const supabase = getSupabaseAdminClient()
       // 删除数据库中的分析记录
       const { error } = await supabase
         .from('ziwei_analyses')

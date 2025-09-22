@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { getSupabaseAdminClient } from '@/lib/server/db';
 import type { APIResponse } from '@/types/fatebook';
 
 export interface FortuneSlip {
@@ -50,6 +50,7 @@ export async function GET(
   { params }: RouteParams
 ): Promise<NextResponse> {
   try {
+    const supabaseAdmin = getSupabaseAdminClient();
     const { temple_code, slip_number } = await params;
     const { searchParams } = new URL(request.url);
     const language = searchParams.get('language') || 'zh-CN';
@@ -68,7 +69,7 @@ export async function GET(
 
     // 尝试使用新的多语言系统
     try {
-      const multilingualResult = await supabase
+      const multilingualResult = await supabaseAdmin
         .rpc('get_fortune_slip_by_language', {
           p_temple_code: temple_code,
           p_slip_number: slipNum,
@@ -108,7 +109,7 @@ export async function GET(
     }
 
     // 回退到原始查询方式
-    const { data: fortuneSlip, error } = await supabase
+    const { data: fortuneSlip, error } = await supabaseAdmin
       .from('fortune_slips')
       .select(`
         *,

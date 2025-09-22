@@ -1037,7 +1037,12 @@ export async function getCurrentUnifiedUser(request?: Request): Promise<UnifiedU
       }
       
       // 确保用户邮箱不是Web3虚拟邮箱
-      if (data.user.email.endsWith('@web3.local') || data.user.email.endsWith('@web3.astrozi.app') || data.user.email.endsWith('@astrozi.ai')) {
+      if (
+        data.user.email.endsWith('@web3.local') || 
+        data.user.email.endsWith('@web3.astrozi.app') || 
+        data.user.email.endsWith('@astrozi.ai') ||
+        data.user.email.endsWith('@web3.wallet')
+      ) {
         console.log('🔍 检测到Web3虚拟邮箱，跳过Web2处理')
         return null
       }

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { getSupabaseAdminClient } from '@/lib/server/db'
+
+const supabaseAdmin = getSupabaseAdminClient()
 
 // 简化的认证函数
 async function authenticateRequest(request: NextRequest) {

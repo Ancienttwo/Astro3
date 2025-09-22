@@ -13,7 +13,6 @@ import {
   Flame,
   Sparkles
 } from 'lucide-react';
-// import LoginGuidanceModal from '@/components/auth/LoginGuidanceModal'; // 移除，改为直接跳转
 import AIPromptMaterialsDebug from '@/components/debug/AIPromptMaterialsDebug';
 
 interface GuandiFortuneSlip {

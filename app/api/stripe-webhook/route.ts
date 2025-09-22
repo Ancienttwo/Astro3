@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe-server'
-import { supabase } from '@/lib/supabase'
+import { getSupabaseAdminClient } from '@/lib/server/db'
 import Stripe from 'stripe'
 import { CacheManager } from '@/lib/redis-cache'
 import { invalidateByExactPath } from '@/lib/edge/invalidate'
+
+const supabaseAdmin = getSupabaseAdminClient()
 
 export async function POST(request: NextRequest) {
   const body = await request.text()
@@ -66,7 +68,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     
     if (!userId && session.customer_email) {
       // 通过邮箱在应用用户表查找用户
-      const { data: userRow } = await supabase
+      const { data: userRow } = await supabaseAdmin
         .from('users')
         .select('id')
         .eq('email', session.customer_email.toLowerCase())
@@ -101,7 +103,7 @@ async function handleReportPurchase(userId: string, metadata: any, session: Stri
   
   try {
     // 查询当前用户的使用统计
-    const { data: currentUsage } = await supabase
+    const { data: currentUsage } = await supabaseAdmin
       .from('user_usage')
       .select('*')
       .eq('user_id', userId)
@@ -109,7 +111,7 @@ async function handleReportPurchase(userId: string, metadata: any, session: Stri
 
     if (currentUsage) {
       // 更新现有记录
-      const { error: updateError } = await supabase
+      const { error: updateError } = await supabaseAdmin
         .from('user_usage')
         .update({
           paid_reports_purchased: (currentUsage.paid_reports_purchased || 0) + reportCount,
@@ -121,7 +123,7 @@ async function handleReportPurchase(userId: string, metadata: any, session: Stri
       if (updateError) throw updateError
     } else {
       // 创建新记录
-      const { error: insertError } = await supabase
+      const { error: insertError } = await supabaseAdmin
         .from('user_usage')
         .insert({
           user_id: userId,
@@ -137,7 +139,7 @@ async function handleReportPurchase(userId: string, metadata: any, session: Stri
     }
 
     // 记录购买历史
-    const { error: historyError } = await supabase
+    const { error: historyError } = await supabaseAdmin
       .from('purchase_history')
       .insert({
         user_id: userId,
@@ -184,7 +186,7 @@ async function handleMembershipPurchase(userId: string, metadata: any, session: 
     const expiresAt = new Date(now.getTime() + duration)
 
     // 更新用户会员状态
-    const { error: membershipError } = await supabase
+    const { error: membershipError } = await supabaseAdmin
       .from('user_memberships')
       .upsert({
         user_id: userId,

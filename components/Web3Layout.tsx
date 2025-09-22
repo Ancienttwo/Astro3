@@ -156,6 +156,54 @@ export default function Web3Layout({ children, showNavigation = true, user }: We
   const [settingsDialog, setSettingsDialog] = useState<string | null>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
 
+  const closeMobileMenus = () => {
+    setShowMobileMenu(false);
+    setExpandedMobileNav(null);
+  };
+
+  const scrollToSection = (sectionId: string, basePath?: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (typeof window !== 'undefined') {
+        const pathForHash = basePath && basePath.length > 0 ? basePath : window.location.pathname;
+        const normalizedPath = pathForHash.startsWith('/') ? pathForHash : `/${pathForHash}`;
+        window.history.replaceState(null, '', `${normalizedPath}#${sectionId}`);
+      }
+    }
+  };
+
+  const handleSubItemClick = (subItem: any) => {
+    if (subItem.href) {
+      if ((subItem as any).external) {
+        window.open(subItem.href, '_blank');
+        return;
+      }
+
+      const [routePath, hash] = subItem.href.split('#');
+      const normalizedRoutePath = routePath || pathname;
+
+      if (hash && normalizedRoutePath === pathname) {
+        scrollToSection(hash, normalizedRoutePath);
+      } else if (hash && normalizedRoutePath !== pathname) {
+        router.push(subItem.href);
+      } else {
+        router.push(subItem.href);
+      }
+      return;
+    }
+
+    if (subItem.anchor === '#disconnect') {
+      setSettingsDialog('disconnect');
+      return;
+    }
+
+    if (subItem.anchor) {
+      const targetId = subItem.anchor.replace('#', '');
+      scrollToSection(targetId);
+    }
+  };
+
   // 处理移动端菜单外部点击关闭
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -265,8 +313,8 @@ export default function Web3Layout({ children, showNavigation = true, user }: We
                                 if (item.subItems && item.subItems.length > 0) {
                                   setExpandedMobileNav(isExpanded ? null : item.name);
                                 } else {
-                                  router.push(item.href);
-                                  setShowMobileMenu(false);
+                                  handleSubItemClick(item);
+                                  closeMobileMenus();
                                 }
                               }}
                               className="w-full flex items-center justify-between p-3 text-left hover:bg-[#FBCB0A]/10 dark:hover:bg-[#FBCB0A]/10 rounded-md transition-colors"
@@ -291,17 +339,8 @@ export default function Web3Layout({ children, showNavigation = true, user }: We
                                   <button
                                     key={`${subItem.name}-${index}`}
                                     onClick={() => {
-                                      if (subItem.href) {
-                                        if ((subItem as any).external) {
-                                          window.open(subItem.href, '_blank');
-                                        } else {
-                                          router.push(subItem.href);
-                                        }
-                                      } else if (subItem.anchor === '#disconnect') {
-                                        setSettingsDialog('disconnect');
-                                      }
-                                      setShowMobileMenu(false);
-                                      setExpandedMobileNav(null);
+                                      handleSubItemClick(subItem);
+                                      closeMobileMenus();
                                     }}
                                     className="w-full text-left p-2 text-sm text-[#333333] dark:text-[#E0E0E0] hover:text-[#3D0B5B] dark:hover:text-[#FBCB0A] hover:bg-[#FBCB0A]/10 dark:hover:bg-[#FBCB0A]/10 rounded-md transition-colors font-rajdhani"
                                   >
@@ -483,33 +522,8 @@ export default function Web3Layout({ children, showNavigation = true, user }: We
                   <button 
                     key={`${subItem.name}-${index}`}
                     onClick={() => {
-                      if (subItem.href) {
-                        if ((subItem as any).external) {
-                          window.open(subItem.href, '_blank');
-                        } else {
-                          router.push(subItem.href);
-                        }
-                      } else if (subItem.anchor === '#disconnect') {
-                        setSettingsDialog('disconnect');
-                      } else if (subItem.anchor) {
-                        // 处理其他锚点功能
-                        if (subItem.anchor === '#daily-tasks') {
-                          const element = document.getElementById('daily-tasks');
-                          if (element) {
-                            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                          }
-                        } else if (subItem.anchor === '#privileges') {
-                          const element = document.getElementById('privileges');
-                          if (element) {
-                            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                          }
-                        } else if (subItem.anchor === '#quick-actions') {
-                          const element = document.getElementById('quick-actions');
-                          if (element) {
-                            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                          }
-                        }
-                      }
+                      handleSubItemClick(subItem);
+                      closeMobileMenus();
                     }}
                     className={`flex items-center p-3 rounded-md font-rajdhani ${
                       isActive 

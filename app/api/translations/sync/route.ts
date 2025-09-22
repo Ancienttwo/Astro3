@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
+import { getSupabaseAdminClient } from '@/lib/server/db';
 import { writeFile } from 'fs/promises';
 import path from 'path';
+
+const supabaseAdmin = getSupabaseAdminClient();
 
 // 同步翻译到字典文件
 export async function POST(request: NextRequest) {

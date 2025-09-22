@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { getSupabaseAdminClient } from '@/lib/server/db'
 import { invalidateByExactPath } from '@/lib/edge/invalidate'
+
+const supabaseAdmin = getSupabaseAdminClient()
 
 // 简化的认证函数
 async function authenticateRequest(request: NextRequest) {

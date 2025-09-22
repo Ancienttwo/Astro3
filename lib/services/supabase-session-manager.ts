@@ -186,6 +186,38 @@ export class SupabaseSessionManager {
     console.log('🔄 尝试恢复Web3用户的Supabase session')
 
     try {
+      // 优先尝试直接从 Supabase 的持久化 session 中恢复（无密码方案）
+      try {
+        this.ensureInitialized()
+        const { data: { session }, error } = await this.supabase!.auth.getSession()
+        if (!error && session?.user) {
+          const user = session.user as any
+          const email: string | undefined = user?.email
+          const meta = user?.user_metadata || {}
+          const wallet = (meta.wallet_address || '').toLowerCase()
+          const isWeb3Email = typeof email === 'string' && email.endsWith('@web3.wallet')
+
+          if (wallet || isWeb3Email || meta?.auth_type === 'web3') {
+            const web3User: UnifiedWeb3User = {
+              id: user.id,
+              email: email || `${wallet || 'unknown'}@web3.wallet`,
+              username: meta?.display_name || `Web3User${(wallet || 'unknown').slice(-6)}`,
+              wallet_address: wallet,
+              auth_type: 'web3',
+              auth_provider: meta?.auth_provider || 'walletconnect',
+              display_name: meta?.display_name,
+              created_at: user.created_at || new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            }
+
+            console.log('✅ 通过Supabase持久化session恢复Web3用户:', web3User.wallet_address || email)
+            return web3User
+          }
+        }
+      } catch (e) {
+        console.log('⚠️ 通过Supabase持久化session恢复失败，尝试本地存储路径:', (e as any)?.message || e)
+      }
+
       // 读取localStorage中的认证数据
       const storedAuthData = this.getStoredAuthData()
       if (!storedAuthData) {
@@ -472,7 +504,10 @@ export class SupabaseSessionManager {
       const walletconnectAuth = localStorage.getItem('walletconnect_auth')
       if (walletconnectAuth) {
         const authData = JSON.parse(walletconnectAuth)
-        authData.auth_token = tokens.customJWT
+        authData.auth_token = tokens.supabaseJWT
+        authData.refresh_token = tokens.supabaseJWT
+        authData.supabase_access_token = tokens.supabaseJWT
+        authData.api_token = tokens.customJWT
         authData.expires_at = tokens.expiresAt
         localStorage.setItem('walletconnect_auth', JSON.stringify(authData))
         
@@ -546,6 +581,10 @@ export const supabaseSessionManager = {
   // 代理所有方法
   getSupabaseClient() {
     return this.instance.getSupabaseClient()
+  },
+
+  async createSupabaseSessionFromCredentials(email: string, password: string) {
+    return this.instance.createSupabaseSessionFromCredentials(email, password)
   },
 
   async setStandardSession(session: Session): Promise<void> {

@@ -9,7 +9,9 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseReadonly as supabase } from '@/lib/supabase-optimized';
+import { getSupabaseReadonlyClient } from '@/lib/server/db';
+
+const supabase = getSupabaseReadonlyClient();
 
 // 支持的语言类型
 type SupportedLanguage = 'zh-CN' | 'zh-TW' | 'en-US';

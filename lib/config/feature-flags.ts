@@ -44,9 +44,9 @@ const BASE_FEATURES: FeatureFlag[] = [
   },
   {
     key: 'web2-auth',
-    enabled: APP_CONFIG.auth.web2.enabled,
+    enabled: false,
     environments: ['development', 'staging', 'production'],
-    description: '传统邮箱/社交登录认证'
+    description: '传统邮箱/社交登录认证（Web3 统一版本下默认禁用）'
   },
   {
     key: 'chatbot',

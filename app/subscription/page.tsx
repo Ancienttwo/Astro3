@@ -249,7 +249,7 @@ export default function SubscriptionPage() {
       
       // 如果用户未登录，跳转到wallet connect
       if (!user) {
-        window.location.href = '/wallet-auth'
+        window.location.href = '/login'
         return
       }
 

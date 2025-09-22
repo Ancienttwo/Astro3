@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { getSupabaseAdminClient } from '@/lib/server/db';
 import { getCurrentUnifiedUser } from '@/lib/auth';
 import { analyzeFortuneSlipWithDify } from '@/lib/services/dify-integration';
 import type { APIResponse } from '@/types/fatebook';
@@ -60,6 +60,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<APIRespon
     }
 
     // Get fortune slip with temple information
+    const supabase = getSupabaseAdminClient();
     const { data: fortuneSlip, error: slipError } = await supabase
       .from('fortune_slips')
       .select(`

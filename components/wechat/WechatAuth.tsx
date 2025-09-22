@@ -150,7 +150,7 @@ export default function WechatAuth({ onAuthSuccess, onAuthError, redirectUrl }: 
         
         // 检查是否是配置缺失错误
         if (response.status === 500 && errorData.error?.includes('微信认证配置缺失')) {
-          throw new Error('微信登录功能暂未配置，请使用邮箱登录')
+          throw new Error('微信登录功能暂未配置，请使用 Web3 登录')
         }
         
         throw new Error('获取授权链接失败')

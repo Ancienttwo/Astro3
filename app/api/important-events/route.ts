@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { getSupabaseAdminClient } from '@/lib/server/db'
 import { invalidateByExactPath } from '@/lib/edge/invalidate'
+
+const supabase = getSupabaseAdminClient()
 
 export async function GET(request: NextRequest) {
   try {

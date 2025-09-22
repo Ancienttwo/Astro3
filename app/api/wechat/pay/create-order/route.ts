@@ -6,7 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createWechatPay, generateOutTradeNo } from '@/lib/wechat-pay'
 import { getWechatUser } from '@/components/wechat/WechatAuth'
-import { supabase } from '@/lib/supabase'
+import { getSupabaseAdminClient } from '@/lib/server/db'
 
 export async function POST(request: NextRequest) {
   try {
@@ -72,6 +72,7 @@ export async function POST(request: NextRequest) {
     const jsApiParams = wechatPay.generateJSAPIParams(payResult.prepay_id!)
     
     // 保存订单信息到数据库
+    const supabaseAdmin = getSupabaseAdminClient()
     await saveOrderToDatabase({
       orderId: outTradeNo,
       openid: openid,
@@ -131,7 +132,7 @@ async function saveOrderToDatabase(orderData: {
   status: string
 }) {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('wechat_orders')
       .insert({
         order_id: orderData.orderId,

@@ -6,7 +6,7 @@
  * Provides hooks and utilities for Web3 authentication
  */
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { PrivyProvider, usePrivy, useWallets, User as PrivyUser } from '@privy-io/react-auth';
 import { privyConfig, PRIVY_APP_ID, formatWalletAddress } from '@/lib/privy-config';
 import { toast } from 'sonner';
@@ -365,6 +365,28 @@ function InternalAuthProvider({ children }: { children: React.ReactNode }) {
  * Main Privy provider component
  * Wraps the app with Privy SDK provider
  */
+const PRIVY_WALLETCONNECT_PROJECT_ID =
+  process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ||
+  process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID ||
+  '';
+
+const BSC_CHAIN = {
+  id: 56,
+  network: 'bsc',
+  name: 'BNB Smart Chain',
+  nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 },
+  rpcUrls: {
+    default: { http: ['https://bsc-dataseed.binance.org'] },
+    public: { http: ['https://bsc-dataseed.binance.org'] },
+  },
+  blockExplorers: {
+    bscscan: { name: 'BscScan', url: 'https://bscscan.com' },
+    default: { name: 'BscScan', url: 'https://bscscan.com' },
+  },
+} as const;
+
+const PRIVY_LOGIN_METHODS = ['wallet', 'google', 'twitter', 'discord', 'github', 'apple'] as const;
+
 export function PrivyAuthProvider({ children }: { children: React.ReactNode }) {
   if (!PRIVY_APP_ID) {
     console.error('Privy App ID is not configured');
@@ -378,40 +400,23 @@ export function PrivyAuthProvider({ children }: { children: React.ReactNode }) {
     );
   }
   
-  // Define BSC chain for Privy (not included in default chains package)
-  const BSC_CHAIN = {
-    id: 56,
-    network: 'bsc',
-    name: 'BNB Smart Chain',
-    nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 },
-    rpcUrls: {
-      default: { http: ['https://bsc-dataseed.binance.org'] },
-      public: { http: ['https://bsc-dataseed.binance.org'] },
-    },
-    blockExplorers: {
-      bscscan: { name: 'BscScan', url: 'https://bscscan.com' },
-      default: { name: 'BscScan', url: 'https://bscscan.com' },
-    },
-  } as any;
+  const privyProviderConfig = useMemo(
+    () => ({
+      appearance: privyConfig.appearance,
+      loginMethods: [...PRIVY_LOGIN_METHODS],
+      embeddedWallets: privyConfig.embeddedWallets,
+      walletConnectCloudProjectId: PRIVY_WALLETCONNECT_PROJECT_ID || undefined,
+      supportedChains: [BSC_CHAIN as any],
+      defaultChain: BSC_CHAIN as any,
+      mfa: privyConfig.mfa,
+    }),
+    [privyConfig.appearance, privyConfig.embeddedWallets, privyConfig.mfa]
+  );
 
   return (
     <PrivyProvider
       appId={PRIVY_APP_ID}
-      config={{
-        appearance: privyConfig.appearance,
-        loginMethods: ['wallet', 'google', 'twitter', 'discord', 'github', 'apple'],
-        embeddedWallets: privyConfig.embeddedWallets,
-        // Let Privy determine supported chains by default to avoid SDK shape mismatches
-        // Pass WalletConnect project ID for enhanced wallet UX
-        walletConnectCloudProjectId:
-          (process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID as string) ||
-          (process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID as string) ||
-          undefined,
-        // Explicitly target BSC as the default/supported chain
-        supportedChains: [BSC_CHAIN],
-        defaultChain: BSC_CHAIN,
-        mfa: privyConfig.mfa,
-      }}
+      config={privyProviderConfig}
     >
       <InternalAuthProvider>
         {children}

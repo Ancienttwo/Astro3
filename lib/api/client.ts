@@ -73,20 +73,93 @@ class APIClient {
     };
   }
 
-  // Get current auth token
-  private getAuthToken(): string | undefined {
+  // Gather authentication details from store/localStorage
+  private getAuthContext(): {
+    bearerToken?: string;
+    web3Token?: string;
+    supabaseToken?: string;
+    walletAddress?: string;
+  } {
     const state = useMutualAidStore.getState();
-    return state.web3.walletAddress; // Use wallet address as auth token
+    let walletAddress = state.web3.walletAddress;
+    let supabaseToken: string | undefined;
+    let customToken: string | undefined;
+
+    if (typeof window !== 'undefined') {
+      try {
+        const raw = localStorage.getItem('walletconnect_auth');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed?.supabase_access_token) {
+            supabaseToken = parsed.supabase_access_token as string;
+          } else if (parsed?.auth_token) {
+            supabaseToken = parsed.auth_token as string;
+          }
+          if (parsed?.api_token) {
+            customToken = parsed.api_token as string;
+          }
+          if (!walletAddress && parsed?.wallet_address) {
+            walletAddress = parsed.wallet_address as string;
+          }
+        }
+
+        // Fallbacks for legacy/local Supabase storage
+        if (!supabaseToken) {
+          const supabaseJwt = localStorage.getItem('supabase_jwt');
+          if (supabaseJwt) {
+            supabaseToken = supabaseJwt;
+          }
+        }
+
+        if (!customToken) {
+          const legacyJwt = localStorage.getItem('wallet_jwt');
+          if (legacyJwt) {
+            customToken = legacyJwt;
+          }
+        }
+
+        if (!walletAddress) {
+          const currentUserRaw = localStorage.getItem('current_user');
+          if (currentUserRaw) {
+            const currentUser = JSON.parse(currentUserRaw);
+            if (currentUser?.wallet_address) {
+              walletAddress = currentUser.wallet_address as string;
+            }
+          }
+        }
+      } catch (error) {
+        console.warn('Failed to read Web3 auth context:', error);
+      }
+    }
+
+    const bearerToken = customToken || supabaseToken;
+    const web3Token = customToken;
+    return { bearerToken, web3Token, supabaseToken, walletAddress };
   }
 
   // Build headers with auth
   private buildHeaders(customHeaders?: Record<string, string>): Record<string, string> {
     const headers = { ...this.defaultHeaders, ...customHeaders };
-    
-    const authToken = this.getAuthToken();
-    if (authToken) {
-      headers['Authorization'] = `Bearer ${authToken}`;
-      headers['X-Wallet-Address'] = authToken;
+
+    const { bearerToken, web3Token, supabaseToken, walletAddress } = this.getAuthContext();
+    if (bearerToken) {
+      headers['Authorization'] = `Bearer ${bearerToken}`;
+      if (walletAddress) {
+        const normalizedAddress = walletAddress.toLowerCase();
+        headers['X-Wallet-Address'] = normalizedAddress;
+        const payload: Record<string, string> = {
+          wallet_address: normalizedAddress,
+          auth_token: (web3Token || bearerToken) ?? '',
+          auth_method: 'walletconnect'
+        };
+        if (web3Token) {
+          payload.custom_token = web3Token;
+        }
+        if (supabaseToken) {
+          payload.supabase_token = supabaseToken;
+        }
+        headers['X-Web3-Auth'] = JSON.stringify(payload);
+      }
     }
 
     return headers;

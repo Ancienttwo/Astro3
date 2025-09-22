@@ -355,7 +355,7 @@ export default function LandingPage() {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="space-y-4">
-                    <a href={language === 'zh' ? "/wallet-auth" : "/wallet-auth"} className="w-full block">
+                    <a href={language === 'zh' ? '/login' : language === 'ja' ? '/ja/login' : '/en/login'} className="w-full block">
                       <button 
                         className="relative w-full py-5 px-6 text-lg font-bold rounded-xl shadow-2xl transform hover:scale-105 transition-all duration-300 overflow-hidden group border-2 bg-[#FBCB0A] text-[#3D0B5B] border-[#FBCB0A] hover:bg-[#e6b709] hover:shadow-[0_0_30px_rgba(251,203,10,0.5)]"
                       >
@@ -370,7 +370,7 @@ export default function LandingPage() {
                       </button>
                     </a>
                     
-                    <a href={language === 'zh' ? "/auth" : "/en/auth"} className="w-full block">
+                    <a href={language === 'zh' ? '/login' : language === 'ja' ? '/ja/login' : '/en/login'} className="w-full block">
                       <button 
                         className="relative w-full py-5 px-6 text-lg font-bold rounded-xl shadow-2xl transform hover:scale-105 transition-all duration-300 overflow-hidden group border-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white border-purple-500"
                       >
@@ -645,7 +645,7 @@ export default function LandingPage() {
                   
                   {/* CTA Buttons */}
                   <div className="flex flex-col sm:flex-row gap-4 w-full max-w-3xl mx-auto mb-6">
-                    <a href={language === 'zh' ? "/wallet-auth" : "/wallet-auth"} className="flex-1">
+                    <a href={language === 'zh' ? '/login' : language === 'ja' ? '/ja/login' : '/en/login'} className="flex-1">
                       <button 
                         className="relative w-full px-8 py-6 text-2xl font-bold rounded-2xl shadow-2xl transform hover:scale-105 transition-all duration-300 overflow-hidden group border-2 bg-[#FBCB0A] text-[#3D0B5B] border-[#FBCB0A] hover:bg-[#e6b709] hover:shadow-[0_0_40px_rgba(251,203,10,0.6)]"
                       >
@@ -660,7 +660,7 @@ export default function LandingPage() {
                       </button>
                     </a>
                     
-                    <a href={language === 'zh' ? "/auth" : "/en/auth"} className="flex-1">
+                    <a href={language === 'zh' ? '/login' : language === 'ja' ? '/ja/login' : '/en/login'} className="flex-1">
                       <button 
                         className="relative w-full px-8 py-6 text-2xl font-bold rounded-2xl shadow-2xl transform hover:scale-105 transition-all duration-300 overflow-hidden group border-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white border-purple-500"
                       >
@@ -669,7 +669,7 @@ export default function LandingPage() {
                         </span>
                         <span className="flex items-center justify-center gap-3">
                           <Mail className="w-6 h-6" />
-                          {language === 'zh' ? '邮箱登录' : 'Email Login'}
+                          {language === 'zh' ? '打开 Web3 登录' : language === 'ja' ? 'Web3 ログインを開く' : 'Open Web3 Login'}
                         </span>
                       </button>
                     </a>

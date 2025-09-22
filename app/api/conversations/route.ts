@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { getSupabaseAdminClient } from '@/lib/server/db'
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,7 +16,8 @@ export async function GET(request: NextRequest) {
     console.log(`📱 获取用户 ${userId} 的对话列表`)
 
     // 获取用户的所有对话
-    const { data: conversations, error: conversationsError } = await supabase
+    const supabaseAdmin = getSupabaseAdminClient()
+    const { data: conversations, error: conversationsError } = await supabaseAdmin
       .from('chat_conversations')
       .select('*')
       .eq('user_id', userId)
@@ -35,7 +36,7 @@ export async function GET(request: NextRequest) {
     const conversationsWithStats = await Promise.all(
       conversations.map(async (conversation) => {
         try {
-          const { data: messages, error: messagesError } = await supabase
+          const { data: messages, error: messagesError } = await supabaseAdmin
             .from('chat_messages')
             .select('content, is_user, created_at')
             .eq('conversation_id', conversation.id)
@@ -52,7 +53,7 @@ export async function GET(request: NextRequest) {
             }
           }
 
-          const allMessages = await supabase
+          const allMessages = await supabaseAdmin
             .from('chat_messages')
             .select('is_user')
             .eq('conversation_id', conversation.id)

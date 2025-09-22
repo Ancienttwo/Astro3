@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { getSupabaseAdminClient } from '@/lib/server/db'
 import { createClient } from '@supabase/supabase-js'
 import { invalidateByExactPath } from '@/lib/edge/invalidate'
+
+const supabaseAdmin = getSupabaseAdminClient()
 
 export async function PUT(request: NextRequest) {
   try {
@@ -61,7 +63,7 @@ export async function PUT(request: NextRequest) {
     console.log(`👤 用户 ${user.email} 更新昵称为: ${username}`)
 
     // 更新用户信息
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('users')
       .update({ 
         username: username.trim(),

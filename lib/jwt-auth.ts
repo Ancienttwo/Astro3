@@ -1,5 +1,5 @@
-import { createClient } from '@supabase/supabase-js'
 import * as jwt from 'jsonwebtoken'
+import { getSupabaseAdminClient } from '@/lib/server/db'
 
 // 安全的JWT实现 - 使用标准jsonwebtoken库
 function secureJWTSign(payload: any, secret: string, expiresIn: string = '24h'): string {
@@ -43,10 +43,7 @@ function secureJWTVerify(token: string, secret: string): any | null {
 }
 
 // 使用管理员权限的Supabase客户端
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+const supabaseAdmin = getSupabaseAdminClient()
 
 export interface JWTPayload {
   userId: string

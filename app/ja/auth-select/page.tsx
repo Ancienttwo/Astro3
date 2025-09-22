@@ -1,5 +1,5 @@
-import AuthSelectPage from '@/app/auth-select/page'
+import { redirect } from 'next/navigation'
 
-export default function JapaneseAuthSelectPage() {
-  return <AuthSelectPage />
+export default function AuthSelectRedirectJA() {
+  redirect('/ja/login')
 }

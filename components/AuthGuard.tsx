@@ -16,6 +16,9 @@ interface AuthGuardProps {
     '/auth',
     '/auth-select',
     '/auth/callback',
+    '/login',
+    '/ja/login',
+    '/en/login',
     '/wallet-auth',  // Web3钱包登录页面
     '/privy-auth',   // Privy 登录页面（Web2入口）
     '/privacy-policy',
@@ -70,7 +73,7 @@ export default function AuthGuard({ children }: AuthGuardProps) {
         if (!currentUser) {
           // 未登录，重定向到认证页面
           console.log('❌ 用户未登录，重定向到认证页面')
-          router.push('/auth')
+          router.push('/login')
           return
         }
 
@@ -80,7 +83,7 @@ export default function AuthGuard({ children }: AuthGuardProps) {
       } catch (error) {
         console.error('❌ 认证检查失败:', error)
         // 认证检查失败，重定向到认证页面
-        router.push('/auth')
+        router.push('/login')
       } finally {
         setLoading(false)
         setIsChecking(false)

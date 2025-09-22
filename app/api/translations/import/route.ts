@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
+import { getSupabaseAdminClient } from '@/lib/server/db';
 import { invalidateByExactPath } from '@/lib/edge/invalidate'
+
+const supabaseAdmin = getSupabaseAdminClient();
 
 // 批量导入翻译
 export async function POST(request: NextRequest) {

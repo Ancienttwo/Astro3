@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
+import { getSupabaseAdminClient } from '@/lib/server/db';
 import { checkRateLimitRedis } from '@/lib/rate-limit-redis'
 import { CacheManager } from '@/lib/redis-cache'
 import { invalidateByExactPath } from '@/lib/edge/invalidate'
+
+const supabaseAdmin = getSupabaseAdminClient();
 import { isAddress } from 'viem';
 
 // 关帝灵签每日抽签 API

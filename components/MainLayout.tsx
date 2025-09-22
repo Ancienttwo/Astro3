@@ -56,6 +56,7 @@ interface MainLayoutProps {
 
 export default function MainLayout({ children, language, setLanguage, t }: MainLayoutProps) {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+    const loginHref = language === "en" ? "/en/login" : language === "ja" ? "/ja/login" : "/login"
 
     return (
         <div className="relative min-h-screen">
@@ -100,7 +101,7 @@ export default function MainLayout({ children, language, setLanguage, t }: MainL
                             {language === "zh" ? "日本語" : language === "ja" ? "EN" : "中文"}
                         </Button>
                         {language === "en" ? (
-                            <Link href="/en/auth-select">
+                            <Link href="/en/login">
                                 <Button className="relative px-6 py-2 bg-gradient-to-r from-[#FBCB0A] to-yellow-500 hover:from-yellow-400 hover:to-[#FBCB0A] text-[#3D0B5B] font-semibold rounded-xl border border-[#FBCB0A]/30 hover:border-[#FBCB0A] transition-all duration-300 hover:scale-105 hover:shadow-[0_0_20px_rgba(251,203,10,0.4)] overflow-hidden group">
                                     <span className="relative z-10 flex items-center gap-2">
                                         <LinkIcon className="w-4 h-4" />
@@ -110,7 +111,7 @@ export default function MainLayout({ children, language, setLanguage, t }: MainL
                                 </Button>
                             </Link>
                         ) : (
-                            <Link href="/auth-select">
+                            <Link href={loginHref}>
                                 <Button className="relative px-6 py-2 bg-gradient-to-r from-[#FBCB0A] to-yellow-500 hover:from-yellow-400 hover:to-[#FBCB0A] text-[#3D0B5B] font-semibold rounded-xl border border-[#FBCB0A]/30 hover:border-[#FBCB0A] transition-all duration-300 hover:scale-105 hover:shadow-[0_0_20px_rgba(251,203,10,0.4)] overflow-hidden group">
                                     <span className="relative z-10">{t.nav.login}</span>
                                     <div className="absolute inset-0 bg-gradient-to-r from-[#FBCB0A]/20 to-yellow-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -136,7 +137,7 @@ export default function MainLayout({ children, language, setLanguage, t }: MainL
                                     {language === "zh" ? "English" : "中文"}
                                 </Button>
                                 {language === "en" ? (
-                                    <Link href="/en/auth-select">
+                                    <Link href="/en/login">
                                         <Button className="relative w-full px-6 py-3 bg-gradient-to-r from-[#FBCB0A] to-yellow-500 hover:from-yellow-400 hover:to-[#FBCB0A] text-[#3D0B5B] font-semibold rounded-xl border border-[#FBCB0A]/30 hover:border-[#FBCB0A] transition-all duration-300 hover:scale-105 hover:shadow-[0_0_20px_rgba(251,203,10,0.4)] overflow-hidden group" onClick={() => setMobileMenuOpen(false)}>
                                             <span className="relative z-10 flex items-center justify-center gap-2">
                                                 <LinkIcon className="w-4 h-4" />
@@ -146,7 +147,7 @@ export default function MainLayout({ children, language, setLanguage, t }: MainL
                                         </Button>
                                     </Link>
                                 ) : (
-                                    <Link href="/auth-select">
+                                    <Link href={loginHref}>
                                         <Button className="relative w-full px-6 py-3 bg-gradient-to-r from-[#FBCB0A] to-yellow-500 hover:from-yellow-400 hover:to-[#FBCB0A] text-[#3D0B5B] font-semibold rounded-xl border border-[#FBCB0A]/30 hover:border-[#FBCB0A] transition-all duration-300 hover:scale-105 hover:shadow-[0_0_20px_rgba(251,203,10,0.4)] overflow-hidden group" onClick={() => setMobileMenuOpen(false)}>
                                             <span className="relative z-10">{t.nav.login}</span>
                                             <div className="absolute inset-0 bg-gradient-to-r from-[#FBCB0A]/20 to-yellow-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>

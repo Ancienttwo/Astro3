@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { getMutualAidUser } from '@/lib/mutual-aid-auth';
+import { resolveAuth } from '@/lib/auth-adapter';
+import { ok, err } from '@/lib/api-response'
 import { z } from 'zod';
 
 const supabase = createClient(
@@ -23,20 +24,8 @@ const GetMyRequestsSchema = z.object({
 export async function GET(request: NextRequest) {
   try {
     // 认证用户
-    const user = await getMutualAidUser(request as any);
-    if (!user) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'AUTHENTICATION_REQUIRED',
-            message: '需要Web3身份验证',
-            details: 'No valid mutual-aid user',
-          },
-        },
-        { status: 401 }
-      );
-    }
+    const auth = await resolveAuth(request)
+    if (!auth.ok || !auth.id) return err(401, 'AUTHENTICATION_REQUIRED', '需要Web3身份验证')
 
     // 解析查询参数
     const { searchParams } = new URL(request.url);
@@ -79,7 +68,7 @@ export async function GET(request: NextRequest) {
           reason
         )
       `, { count: 'exact' })
-      .eq('requester_id', user.id);
+      .eq('requester_id', auth.id!);
 
     // 应用筛选条件
     if (status) {
@@ -166,11 +155,9 @@ export async function GET(request: NextRequest) {
     const hasPrev = page > 1;
 
     // 获取用户统计信息
-    const userStats = await getUserRequestStats(user.id);
+    const userStats = await getUserRequestStats(auth.id!);
 
-    return NextResponse.json({
-      success: true,
-      data: formattedRequests,
+    return ok(formattedRequests, {
       pagination: {
         page,
         limit,
@@ -179,11 +166,7 @@ export async function GET(request: NextRequest) {
         hasNext,
         hasPrev,
       },
-      filters: {
-        status,
-        sortBy,
-        sortOrder,
-      },
+      filters: { status, sortBy, sortOrder },
       userStats,
     });
 

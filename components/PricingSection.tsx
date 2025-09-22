@@ -195,16 +195,18 @@ export default function PricingSection({ language = 'zh' }: PricingSectionProps)
     }
   }
   
+  const loginHref = language === 'en' ? '/en/login' : language === 'ja' ? '/ja/login' : '/login'
+
   const handlePurchase = (stripeUrl: string | null, planIndex: number) => {
     // 如果用户未登录，跳转到wallet connect
     if (!user) {
-      window.location.href = '/wallet-auth'
+      window.location.href = loginHref
       return
     }
 
     // 如果是免费计划（没有stripeUrl）
     if (!stripeUrl) {
-      window.location.href = '/wallet-auth'
+      window.location.href = loginHref
       return
     }
 

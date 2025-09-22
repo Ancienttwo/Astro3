@@ -1,0 +1,41 @@
+{
+  "master": {
+    "metadata": {
+      "created": "2025-09-19T12:20:00.000Z",
+      "updated": "2025-09-19T12:16:46.918Z",
+      "description": "Primary backlog"
+    },
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Implement user login page",
+        "description": "Build login UI and authentication flow",
+        "details": "Create login form, connect to auth API",
+        "testStrategy": "",
+        "status": "pending",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design login form UI",
+            "description": "Create responsive login form layout",
+            "details": "Include email, password, remember me",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 1
+          },
+          {
+            "id": 2,
+            "title": "Implement authentication API call",
+            "description": "Connect form submission to auth API",
+            "details": "Use existing /api/auth/login",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 1
+          }
+        ]
+      }
+    ]
+  }
+}

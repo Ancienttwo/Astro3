@@ -48,6 +48,7 @@ export async function POST(request: NextRequest) {
       ? user.email.addresses[0]
       : (typeof (user as any).email === 'string' ? (user as any).email : null)
     const walletAddress: string | undefined = user.wallet?.address || undefined
+    const normalizedWalletAddress = walletAddress?.toLowerCase() || null
 
     // Build a stable email for Supabase Auth if missing
     const effectiveEmail = email || `${privyId.replace(':', '_')}@privy.astrozi.app`
@@ -67,10 +68,10 @@ export async function POST(request: NextRequest) {
         email: effectiveEmail,
         email_confirm: true,
         user_metadata: {
-          auth_type: 'web2',
+          auth_type: 'web3',
           auth_provider: 'privy',
           privy_id: privyId,
-          wallet_address: walletAddress,
+          wallet_address: normalizedWalletAddress,
         },
       })
       if (createErr || !created?.user) {
@@ -83,10 +84,10 @@ export async function POST(request: NextRequest) {
       await supabaseAdmin.auth.admin.updateUserById(supabaseUser.id, {
         user_metadata: {
           ...(supabaseUser.user_metadata || {}),
-          auth_type: 'web2',
+          auth_type: 'web3',
           auth_provider: 'privy',
           privy_id: privyId,
-          wallet_address: walletAddress || (supabaseUser.user_metadata as any)?.wallet_address,
+          wallet_address: normalizedWalletAddress || (supabaseUser.user_metadata as any)?.wallet_address,
         },
       }).catch((e) => console.warn('Update supabase user metadata failed:', e?.message))
     }
@@ -104,8 +105,8 @@ export async function POST(request: NextRequest) {
         .insert({
           email: effectiveEmail.toLowerCase(),
           username: (user?.google?.name || user?.twitter?.username || user?.discord?.username || 'PrivyUser'),
-          wallet_address: walletAddress?.toLowerCase() || null,
-          auth_type: 'web2',
+          wallet_address: normalizedWalletAddress,
+          auth_type: 'web3',
           auth_provider: 'privy',
           privy_did: privyId,
         })
@@ -114,8 +115,8 @@ export async function POST(request: NextRequest) {
       await supabaseAdmin
         .from('users')
         .update({
-          wallet_address: walletAddress?.toLowerCase() || existingAppUser.wallet_address || null,
-          auth_type: 'web2',
+          wallet_address: normalizedWalletAddress || existingAppUser.wallet_address || null,
+          auth_type: 'web3',
           auth_provider: 'privy',
           updated_at: new Date().toISOString(),
           privy_did: privyId,
@@ -178,10 +179,10 @@ export async function POST(request: NextRequest) {
         },
         user_metadata: {
           ...(supabaseUser.user_metadata || {}),
-          auth_type: 'web2',
+          auth_type: 'web3',
           auth_provider: 'privy',
           privy_id: privyId,
-          wallet_address: walletAddress,
+          wallet_address: normalizedWalletAddress,
         },
         identities: [],
         created_at: supabaseUser.created_at,

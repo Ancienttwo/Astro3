@@ -89,44 +89,22 @@ components/
 ```
 
 ### `/lib` - Core Libraries
-Business logic and utilities:
+Business logic, infrastructure helpers, and shared utilities:
 
 ```
 lib/
-├── supabase/                 # Supabase clients
-│   ├── client.ts            # Browser client
-│   ├── server.ts            # Server client
-│   └── admin.ts             # Admin client
-├── api/                      # API utilities
-│   ├── fetcher.ts
-│   ├── endpoints.ts
-│   └── errors.ts
-├── auth/                     # Auth utilities
-│   ├── session.ts
-│   ├── jwt.ts
-│   └── permissions.ts
-├── utils/                    # General utilities
-│   ├── format.ts
-│   ├── validation.ts
-│   ├── date.ts
-│   └── cn.ts                # Class name helper
-├── astrology/                # Astrology calculations
-│   ├── bazi.ts
-│   ├── ziwei.ts
-│   └── lunar.ts
-├── payment/                  # Payment processing
-│   ├── stripe.ts
-│   └── credits.ts
-├── email/                    # Email services
-│   ├── templates.ts
-│   └── sender.ts
-├── web3/                     # Web3 utilities
-│   ├── wallet.ts
-│   ├── contracts.ts
-│   └── chains.ts
-└── redis/                    # Redis caching
-    ├── client.ts
-    └── cache.ts
+├── server/                   # Server-only modules
+│   └── db/                   # Unified Supabase client factory (anon/admin/readonly)
+├── api/                      # API utilities and clients
+├── auth/                     # Authentication helpers and adapters
+├── edge/                     # Edge runtime utilities (rate limits, caching)
+├── middleware/               # Request/response middlewares
+├── modules/                  # Domain modules (fortune, etc.)
+├── services/                 # Service-layer logic (AI, credits, auth)
+├── supabase.ts               # Browser Supabase client (legacy public access)
+├── supabase-optimized.ts     # High-throughput Supabase helpers (to be consolidated)
+├── utils/                    # General utilities (formatting, validation, etc.)
+└── web3/                     # Web3 integrations and wallet utilities
 ```
 
 ### `/hooks` - Custom React Hooks

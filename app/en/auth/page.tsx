@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
 
 export default function AuthPage() {
-  redirect('/en/privy-auth')
+  redirect('/en/login')
 }

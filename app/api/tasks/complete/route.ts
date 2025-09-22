@@ -1,58 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
+import { getSupabaseAdminClient } from '@/lib/server/db';
 import { CacheManager } from '@/lib/redis-cache'
 import { invalidateByExactPath } from '@/lib/edge/invalidate'
 import { isAddress } from 'viem';
+import { resolveAuth } from '@/lib/auth-adapter'
+import { ok, err } from '@/lib/api-response'
+
+const supabaseAdmin = getSupabaseAdminClient();
 
 // 完成任务并领取奖励
 export async function POST(request: NextRequest) {
   try {
-    // 验证用户身份 - 支持Web2和Web3用户
-    let userId: string | null = null;
-    let walletAddress: string | null = null;
-
-    // 尝试获取Web3用户信息
-    const web3UserHeader = request.headers.get('X-Web3-User');
-    if (web3UserHeader) {
-      try {
-        const web3User = JSON.parse(decodeURIComponent(atob(web3UserHeader)));
-        walletAddress = web3User.walletAddress?.toLowerCase();
-        if (!isAddress(walletAddress as `0x${string}`)) {
-          walletAddress = null;
-        }
-      } catch (e) {
-        console.warn('Failed to parse Web3 user header:', e);
-      }
-    }
-
-    // 尝试获取Web2用户信息
-    const authHeader = request.headers.get('Authorization');
-    if (authHeader?.startsWith('Bearer ') && !walletAddress) {
-      try {
-        const token = authHeader.replace('Bearer ', '');
-        const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
-        if (!authError && user) {
-          userId = user.id;
-        }
-      } catch (e) {
-        console.warn('Failed to authenticate Web2 user:', e);
-      }
-    }
-
-    if (!userId && !walletAddress) {
-      return NextResponse.json({ 
-        error: 'Authentication required' 
-      }, { status: 401 });
-    }
+    // 认证统一
+    const auth = await resolveAuth(request)
+    const userId: string | null = auth.ok ? auth.id! : null
+    const walletAddress: string | null = auth.walletAddress || null
+    if (!userId && !walletAddress) return err(401, 'UNAUTHORIZED', 'Authentication required')
 
     const body = await request.json();
     const { taskKey, action = 'claim_reward' } = body;
 
-    if (!taskKey) {
-      return NextResponse.json({ 
-        error: 'Task key is required' 
-      }, { status: 400 });
-    }
+    if (!taskKey) return err(400, 'VALIDATION_FAILED', 'Task key is required')
 
     // 获取任务信息
     const { data: task, error: taskError } = await supabaseAdmin
@@ -62,11 +30,7 @@ export async function POST(request: NextRequest) {
       .eq('is_active', true)
       .single();
 
-    if (taskError || !task) {
-      return NextResponse.json({ 
-        error: 'Task not found or inactive' 
-      }, { status: 404 });
-    }
+    if (taskError || !task) return err(404, 'TASK_NOT_FOUND', 'Task not found or inactive')
 
     // 查找用户任务记录
     let userTaskQuery = supabaseAdmin
@@ -82,24 +46,12 @@ export async function POST(request: NextRequest) {
 
     const { data: userTask, error: userTaskError } = await userTaskQuery.single();
 
-    if (userTaskError || !userTask) {
-      return NextResponse.json({ 
-        error: 'Task not found for user or not completed' 
-      }, { status: 404 });
-    }
+    if (userTaskError || !userTask) return err(404, 'NOT_COMPLETED', 'Task not found for user or not completed')
 
     // 检查任务状态
-    if (userTask.status !== 'completed') {
-      return NextResponse.json({ 
-        error: 'Task is not completed yet' 
-      }, { status: 400 });
-    }
+    if (userTask.status !== 'completed') return err(400, 'NOT_COMPLETED', 'Task is not completed yet')
 
-    if (userTask.status === 'claimed') {
-      return NextResponse.json({ 
-        error: 'Reward already claimed' 
-      }, { status: 400 });
-    }
+    if (userTask.status === 'claimed') return err(400, 'ALREADY_CLAIMED', 'Reward already claimed')
 
     // 开始数据库事务来处理奖励发放
     const { error: transactionError } = await supabaseAdmin.rpc(
@@ -133,7 +85,7 @@ export async function POST(request: NextRequest) {
 
     if (updateError) {
       console.error('Error updating task status:', updateError);
-      return NextResponse.json({ error: 'Failed to update task status' }, { status: 500 });
+      return err(500, 'UPDATE_FAILED', 'Failed to update task status')
     }
 
     // 缓存失效：用户积分、排行榜
@@ -148,21 +100,18 @@ export async function POST(request: NextRequest) {
       await invalidateByExactPath('/api/airdrop/leaderboard', 'user')
     } catch {}
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        taskKey: task.task_key,
-        title: task.title,
-        pointsEarned: task.points_reward,
-        status: 'claimed',
-        claimedAt: updatedTask.claimed_at,
-        message: `恭喜！您获得了 ${task.points_reward} 积分奖励！`
-      }
-    });
+    return ok({
+      taskKey: task.task_key,
+      title: task.title,
+      pointsEarned: task.points_reward,
+      status: 'claimed',
+      claimedAt: updatedTask.claimed_at,
+      message: `恭喜！您获得了 ${task.points_reward} 积分奖励！`
+    })
 
   } catch (error) {
     console.error('Task complete API error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return err(500, 'INTERNAL_ERROR', 'Internal server error')
   }
 }
 

@@ -9,13 +9,15 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { getSupabaseAdminClient } from '@/lib/server/db';
 import { 
   withMultilingualSupport, 
   MultilingualAPIMiddleware,
   generateCacheKey,
   ResponseCacheMiddleware
 } from '@/lib/middleware/multilingual-api';
+
+const supabase = getSupabaseAdminClient();
 
 type SupportedLanguage = 'zh-CN' | 'zh-TW' | 'en-US';
 

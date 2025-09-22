@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     if (errorMessage.includes('微信认证配置缺失')) {
       return NextResponse.json({
         success: false,
-        error: '微信登录功能暂未配置，请使用邮箱登录',
+        error: '微信登录功能暂未配置，请使用 Web3 登录',
         code: 'WECHAT_CONFIG_MISSING'
       }, { status: 500 })
     }

@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
+import { getSupabaseAdminClient } from '@/lib/server/db';
 import { verifyAuthToken } from '@/lib/api-auth';
 import { getWeb2UserUsage, getWeb3UserUsage } from '@/lib/utils/user-usage-utils';
 import { ValidationMiddleware, ErrorFactory, createSuccessResponse, withErrorHandler } from '@/lib/middleware/error-handler';
+
+const supabaseAdmin = getSupabaseAdminClient();
 
 // 统一的用户余额查询API - 支持Web2和Web3用户
 export const GET = withErrorHandler(async (request: NextRequest) => {

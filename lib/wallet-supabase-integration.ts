@@ -273,8 +273,10 @@ export class WalletSupabaseIntegration {
 
       // 存储WalletConnect认证信息
       localStorage.setItem('walletconnect_auth', JSON.stringify({
-        auth_token: tokens.supabaseJWT, // 使用Supabase JWT而不是customJWT
-        refresh_token: tokens.supabaseJWT, // 添加refresh_token
+        auth_token: tokens.supabaseJWT,
+        refresh_token: tokens.supabaseJWT,
+        api_token: tokens.customJWT,
+        supabase_access_token: tokens.supabaseJWT,
         wallet_address: web3User.wallet_address,
         auth_method: 'walletconnect',
         expires_at: tokens.expiresAt

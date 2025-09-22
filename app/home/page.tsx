@@ -287,8 +287,8 @@ export default function HomePage() {
         return;
       }
       
-      const authRoute = APP_CONFIG.mode === 'web3' ? '/wallet-auth' : '/auth';
-      router.push(isEnglish ? `/en${authRoute}` : authRoute);
+      const authRoute = isEnglish ? '/en/login' : '/login';
+      router.push(authRoute);
       return;
     }
     // 已登录用户显示邀请弹窗
@@ -306,8 +306,8 @@ export default function HomePage() {
         return;
       }
       
-      const authRoute = APP_CONFIG.mode === 'web3' ? '/wallet-auth' : '/auth';
-      router.push(isEnglish ? `/en${authRoute}` : authRoute);
+      const authRoute = isEnglish ? '/en/login' : '/login';
+      router.push(authRoute);
       return;
     }
     // 已登录用户显示兑换码弹窗
@@ -434,8 +434,8 @@ export default function HomePage() {
                       return;
                     }
                     
-                    const authRoute = APP_CONFIG.mode === 'web3' ? '/wallet-auth' : '/auth';
-                    handleNavigation(isEnglish ? `/en${authRoute}` : authRoute);
+                    const authRoute = isEnglish ? '/en/login' : '/login';
+                    handleNavigation(authRoute);
                   }}
                   className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2"
                 >

@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
+import { getSupabaseAdminClient, getSupabaseReadonlyClient } from '@/lib/server/db';
+
+const supabaseAdmin = getSupabaseAdminClient();
+const supabaseReadonly = getSupabaseReadonlyClient();
 
 interface EligibilityRow {
   wallet_address: string;
@@ -11,7 +14,7 @@ interface EligibilityRow {
   is_eligible?: boolean;
   last_updated: string;
 }
-import { supabaseReadonly } from '@/lib/supabase-optimized';
+
 
 // 获取空投资格排行榜
 export async function GET(request: NextRequest) {

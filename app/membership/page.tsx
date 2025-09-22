@@ -74,6 +74,22 @@ export default function MembershipPage() {
   const [error, setError] = useState<string | null>(null)
   const [deleteLoading, setDeleteLoading] = useState(false)
 
+  const provider = user?.app_metadata?.provider ?? user?.user_metadata?.auth_provider ?? user?.user_metadata?.auth_type
+  const loginIndicator = (() => {
+    switch (provider) {
+      case 'walletconnect':
+      case 'wallet':
+      case 'web3':
+        return { color: 'bg-purple-500', label: isEnglish ? 'Web3 Wallet' : 'Web3 钱包' }
+      case 'privy':
+        return { color: 'bg-indigo-500', label: isEnglish ? 'Privy Social Login' : 'Privy 社交登录' }
+      case 'google':
+        return { color: 'bg-red-500', label: isEnglish ? 'Google Account' : 'Google 账号' }
+      default:
+        return { color: 'bg-blue-500', label: isEnglish ? 'Legacy Email' : '旧邮箱账号' }
+    }
+  })()
+
   const handleExportData = () => {
     alert(t.membership.exportDataInProgress)
   }
@@ -315,20 +331,11 @@ export default function MembershipPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-muted-foreground">登录方式</label>
+                  <label className="text-sm font-medium text-muted-foreground">{isEnglish ? 'Login Method' : '登录方式'}</label>
                   <div className="mt-1 p-3 bg-muted rounded-md">
                     <div className="flex items-center gap-2">
-                      {user?.app_metadata?.provider === 'google' ? (
-                        <>
-                          <div className="w-4 h-4 bg-red-500 rounded-full"></div>
-                          <span className="text-sm">Google 账号</span>
-                        </>
-                      ) : (
-                        <>
-                          <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
-                          <span className="text-sm">邮箱登录</span>
-                        </>
-                      )}
+                      <div className={`w-4 h-4 ${loginIndicator.color} rounded-full`}></div>
+                      <span className="text-sm">{loginIndicator.label}</span>
                     </div>
                   </div>
                 </div>

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { translationBackupManager } from '@/lib/translation-backup';
-import { supabaseAdmin } from '@/lib/supabase';
+import { getSupabaseAdminClient } from '@/lib/server/db';
+
+const supabaseAdmin = getSupabaseAdminClient();
 
 // 获取备份列表
 export async function GET(request: NextRequest) {

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
-import { supabaseReadonly } from '@/lib/supabase-optimized';
+import { getSupabaseAdminClient, getSupabaseReadonlyClient } from '@/lib/server/db';
+
+const supabaseAdmin = getSupabaseAdminClient();
+const supabaseReadonly = getSupabaseReadonlyClient();
 
 // 获取翻译统计
 export async function GET(request: NextRequest) {

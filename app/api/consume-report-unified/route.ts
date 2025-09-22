@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
+import { getSupabaseAdminClient } from '@/lib/server/db';
 import { verifyAuthToken } from '@/lib/api-auth';
 import { isAddress } from 'viem';
 import { CacheManager } from '@/lib/redis-cache'
 import { invalidateByExactPath } from '@/lib/edge/invalidate'
+
+const supabaseAdmin = getSupabaseAdminClient();
 
 // 统一的报告消费API - 支持Web2和Web3用户
 export async function POST(request: NextRequest) {

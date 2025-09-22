@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase, supabaseAdmin } from '@/lib/supabase'
+import { getSupabaseAdminClient } from '@/lib/server/db'
 import { invalidateByExactPath } from '@/lib/edge/invalidate'
 
 // 简化的认证函数
@@ -14,6 +14,7 @@ async function authenticateRequest(request: NextRequest) {
     const token = authHeader.substring(7)
     
     // 验证token
+    const supabaseAdmin = getSupabaseAdminClient()
     const { data: { user }, error } = await supabaseAdmin.auth.getUser(token)
     
     if (error || !user) {
@@ -47,7 +48,8 @@ export async function POST(request: NextRequest) {
     console.log(`👤 用户: ${user.email}`)
 
     // 查询任务是否存在且属于当前用户
-    const { data: task, error: taskError } = await supabase
+    const supabaseAdmin = getSupabaseAdminClient()
+    const { data: task, error: taskError } = await supabaseAdmin
       .from('analysis_tasks')
       .select('*')
       .eq('id', taskId)
@@ -67,7 +69,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 更新任务状态为已取消
-    const { error: updateError } = await supabase
+    const { error: updateError } = await supabaseAdmin
       .from('analysis_tasks')
       .update({
         status: 'failed',
@@ -115,7 +117,7 @@ export async function DELETE(request: NextRequest) {
     console.log(`👤 用户: ${user.email}`)
 
     // 查询用户的所有进行中任务
-    const { data: tasks, error: tasksError } = await supabase
+    const { data: tasks, error: tasksError } = await supabaseAdmin
       .from('analysis_tasks')
       .select('id, task_type, status, input_data')
       .eq('user_id', user.id)
@@ -135,7 +137,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // 批量取消所有进行中的任务
-    const { error: updateError } = await supabase
+    const { error: updateError } = await supabaseAdmin
       .from('analysis_tasks')
       .update({
         status: 'failed',

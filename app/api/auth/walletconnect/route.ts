@@ -251,12 +251,12 @@ export async function POST(request: NextRequest) {
     }
 
     const now = new Date()
-    const expiresAt = Math.floor((now.getTime() + 24 * 60 * 60 * 1000) / 1000)
+    const sessionExpiresAt = Math.floor((now.getTime() + 24 * 60 * 60 * 1000) / 1000)
     const session = accessToken ? {
       access_token: accessToken,
       refresh_token: refreshToken || accessToken,
       expires_in: 86400,
-      expires_at: expiresAt,
+      expires_at: sessionExpiresAt,
       token_type: 'bearer' as const,
       user: {
         id: existingUser.id,

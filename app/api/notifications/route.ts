@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSupabaseAdmin } from '@/lib/supabase'
+import { getSupabaseAdminClient } from '@/lib/server/db'
 import { isAddress } from 'viem'
+import { resolveAuth, requireAuth } from '@/lib/auth-adapter'
 
 /**
  * GET /api/notifications
@@ -8,30 +9,27 @@ import { isAddress } from 'viem'
  */
 export async function GET(request: NextRequest) {
   try {
+    // 强制要求认证，缺少/无效token则直接返回401
+    let mustAuth
+    try {
+      mustAuth = await requireAuth(request)
+    } catch (e: any) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
     const { searchParams } = new URL(request.url)
     const page = Math.max(parseInt(searchParams.get('page') || '1', 10), 1)
     const limit = Math.max(parseInt(searchParams.get('limit') || '20', 10), 1)
     const offset = (page - 1) * limit
 
-    const supabase = getSupabaseAdmin()
-
-    // 用户识别：优先 X-Wallet-Address，再尝试 Authorization Bearer（钱包或Supabase token）
-    let wallet = request.headers.get('X-Wallet-Address') || ''
-    if (wallet && !isAddress(wallet as `0x${string}`)) wallet = ''
-
-    let userId: string | null = null
-    const authHeader = request.headers.get('Authorization')
-    if (authHeader?.startsWith('Bearer ')) {
-      const token = authHeader.replace('Bearer ', '')
-      if (isAddress(token as `0x${string}`)) {
-        wallet = wallet || token
-      } else {
-        try {
-          const { data: { user } } = await supabase.auth.getUser(token)
-          userId = user?.id || null
-        } catch {}
-      }
-    }
+    const supabase = getSupabaseAdminClient()
+    // 认证通过后再解析详细身份（wallet/id）
+    const auth = await resolveAuth(request)
+    const wallet = auth.walletAddress || mustAuth.walletAddress || ''
+    const userId = auth.id || mustAuth.id
 
     // 查询 user_tasks 作为事件源（如无记录则返回空）
     let query = supabase
@@ -40,8 +38,14 @@ export async function GET(request: NextRequest) {
       .order('updated_at', { ascending: false })
       .range(offset, offset + limit - 1)
 
-    if (wallet) query = query.eq('wallet_address', wallet.toLowerCase())
-    if (!wallet && userId) query = query.eq('user_id', userId)
+    // 安全过滤：必须绑定到当前用户（wallet或userId），否则返回空
+    if (wallet) {
+      query = query.eq('wallet_address', wallet.toLowerCase())
+    } else if (userId) {
+      query = query.eq('user_id', userId)
+    } else {
+      return NextResponse.json({ success: true, data: [], pagination: { page, limit, hasNext: false, hasPrev: page > 1 } })
+    }
 
     const { data: rows, error } = await query
     if (error) {
@@ -71,9 +75,10 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     console.error('Notifications API error:', error)
-    return NextResponse.json(
-      { success: false, error: 'Failed to fetch notifications' },
-      { status: 500 }
-    )
+    const anyErr: any = error
+    if (anyErr?.status === 401) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+    }
+    return NextResponse.json({ success: false, error: 'Failed to fetch notifications' }, { status: 500 })
   }
 }

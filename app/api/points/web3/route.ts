@@ -1,24 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
-import { verifyJWTToken } from '@/lib/jwt-auth';
+import { getSupabaseAdminClient } from '@/lib/server/db';
 import { CacheManager } from '@/lib/redis-cache'
 import { invalidateByExactPath } from '@/lib/edge/invalidate'
 import { isAddress } from 'viem';
+import { resolveAuth } from '@/lib/auth-adapter'
+import { ok, err } from '@/lib/api-response'
+
+const supabaseAdmin = getSupabaseAdminClient();
 
 // Web3用户积分查询
 export async function GET(request: NextRequest) {
   try {
-    // 验证Web3用户身份
-    const web3UserHeader = request.headers.get('X-Web3-User');
-    if (!web3UserHeader) {
-      return NextResponse.json({ error: 'Web3 user header missing' }, { status: 401 });
-    }
-
-    const web3User = JSON.parse(decodeURIComponent(atob(web3UserHeader)));
-    const walletAddress = web3User.walletAddress?.toLowerCase();
-
-    if (!walletAddress || !isAddress(walletAddress as `0x${string}`)) {
-      return NextResponse.json({ error: 'Invalid wallet address' }, { status: 400 });
+    const auth = await resolveAuth(request)
+    const walletAddress = (auth.walletAddress || '').toLowerCase()
+    if (!auth.ok || !walletAddress || !isAddress(walletAddress as `0x${string}`)) {
+      return err(401, 'UNAUTHORIZED', 'Web3 authentication required')
     }
 
     // 获取用户Web3积分信息
@@ -30,7 +26,7 @@ export async function GET(request: NextRequest) {
 
     if (pointsError && pointsError.code !== 'PGRST116') {
       console.error('Error fetching Web3 points:', pointsError);
-      return NextResponse.json({ error: 'Failed to fetch points' }, { status: 500 });
+      return err(500, 'FETCH_FAILED', 'Failed to fetch points')
     }
 
     // 如果用户没有记录，创建一个
@@ -50,13 +46,10 @@ export async function GET(request: NextRequest) {
 
       if (createError) {
         console.error('Error creating Web3 points record:', createError);
-        return NextResponse.json({ error: 'Failed to create points record' }, { status: 500 });
+        return err(500, 'CREATE_FAILED', 'Failed to create points record')
       }
 
-      return NextResponse.json({
-        success: true,
-        data: newPointsData
-      });
+      return ok(newPointsData)
     }
 
     // 获取最近的签到记录
@@ -76,35 +69,25 @@ export async function GET(request: NextRequest) {
       .limit(1)
       .single();
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        ...pointsData,
-        recentCheckins: recentCheckins || [],
-        airdropEligibility: airdropInfo || null
-      }
-    });
+    return ok({
+      ...pointsData,
+      recentCheckins: recentCheckins || [],
+      airdropEligibility: airdropInfo || null
+    })
 
   } catch (error) {
     console.error('Web3 points API error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return err(500, 'INTERNAL_ERROR', 'Internal server error')
   }
 }
 
 // Web3用户签到数据同步
 export async function POST(request: NextRequest) {
   try {
-    // 验证Web3用户身份
-    const web3UserHeader = request.headers.get('X-Web3-User');
-    if (!web3UserHeader) {
-      return NextResponse.json({ error: 'Web3 user header missing' }, { status: 401 });
-    }
-
-    const web3User = JSON.parse(decodeURIComponent(atob(web3UserHeader)));
-    const walletAddress = web3User.walletAddress?.toLowerCase();
-
-    if (!walletAddress || !isAddress(walletAddress as `0x${string}`)) {
-      return NextResponse.json({ error: 'Invalid wallet address' }, { status: 400 });
+    const auth = await resolveAuth(request)
+    const walletAddress = (auth.walletAddress || '').toLowerCase()
+    if (!auth.ok || !walletAddress || !isAddress(walletAddress as `0x${string}`)) {
+      return err(401, 'UNAUTHORIZED', 'Web3 authentication required')
     }
 
     const body = await request.json();
@@ -120,7 +103,7 @@ export async function POST(request: NextRequest) {
 
     // 验证必需字段
     if (!txHash || !consecutiveDays || !pointsEarned || !airdropWeightEarned || !bnbPaid) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+      return err(400, 'VALIDATION_FAILED', 'Missing required fields')
     }
 
     // 检查交易哈希是否已存在
@@ -131,10 +114,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (existingRecord) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Transaction already recorded' 
-      }, { status: 400 });
+      return err(400, 'DUP_TX', 'Transaction already recorded')
     }
 
     const today = new Date().toISOString().split('T')[0];
@@ -159,7 +139,7 @@ export async function POST(request: NextRequest) {
 
     if (syncError) {
       console.error('Error syncing Web3 checkin:', syncError);
-      return NextResponse.json({ error: 'Failed to sync checkin data' }, { status: 500 });
+      return err(500, 'SYNC_FAILED', 'Failed to sync checkin data')
     }
 
     // 更新空投资格
@@ -171,22 +151,19 @@ export async function POST(request: NextRequest) {
     try { await invalidateByExactPath('/api/airdrop/leaderboard', 'user') } catch {}
     try { await invalidateByExactPath('/api/points/leaderboard', 'user') } catch {}
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        txHash,
-        consecutiveDays,
-        pointsEarned,
-        airdropWeightEarned,
-        reportsEarned,
-        totalPoints: result?.new_points_balance || 0,
-        totalAirdropWeight: result?.new_airdrop_weight || 0
-      }
-    });
+    return ok({
+      txHash,
+      consecutiveDays,
+      pointsEarned,
+      airdropWeightEarned,
+      reportsEarned,
+      totalPoints: result?.new_points_balance || 0,
+      totalAirdropWeight: result?.new_airdrop_weight || 0
+    })
 
   } catch (error) {
     console.error('Web3 checkin sync API error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return err(500, 'INTERNAL_ERROR', 'Internal server error')
   }
 }
 

@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase, getSupabaseAdmin } from '@/lib/supabase'
+import { getSupabaseAnonClient, getSupabaseAdminClient } from '@/lib/server/db'
 import { invalidateByExactPath } from '@/lib/edge/invalidate'
 import { difyService } from '@/lib/services/dify-integration'
 
 // 获取服务端管理员客户端
-const supabaseAdmin = getSupabaseAdmin()
+const supabase = getSupabaseAnonClient()
+const supabaseAdmin = getSupabaseAdminClient()
 
 // 简化的认证函数
 async function authenticateRequest(request: NextRequest) {

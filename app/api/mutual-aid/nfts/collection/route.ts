@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSupabaseAdmin } from '@/lib/supabase'
+import { getSupabaseAdminClient } from '@/lib/server/db'
 import { isAddress } from 'viem'
+import { resolveAuth } from '@/lib/auth-adapter'
 
 /**
  * GET /api/mutual-aid/nfts/collection
@@ -8,21 +9,10 @@ import { isAddress } from 'viem'
  */
 export async function GET(request: NextRequest) {
   try {
-    const supabase = getSupabaseAdmin()
+  const supabase = getSupabaseAdminClient()
+    const auth = await resolveAuth(request)
+    const wallet = auth.walletAddress || ''
 
-    // Web3地址为主
-    let wallet = request.headers.get('X-Wallet-Address') || ''
-    if (wallet && !isAddress(wallet as `0x${string}`)) wallet = ''
-
-    if (!wallet) {
-      const authHeader = request.headers.get('Authorization')
-      if (authHeader?.startsWith('Bearer ')) {
-        const token = authHeader.replace('Bearer ', '')
-        if (isAddress(token as `0x${string}`)) wallet = token
-      }
-    }
-
-    // 未登录/未连接钱包返回空集合
     if (!wallet) {
       return NextResponse.json({ success: true, data: emptyCollection() })
     }

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSupabaseAdmin } from '@/lib/supabase'
+import { getSupabaseAdminClient } from '@/lib/server/db'
 import { difyService } from '@/lib/services/dify-integration'
 
-const supabaseAdmin = getSupabaseAdmin()
+const supabaseAdmin = getSupabaseAdminClient()
 
 // 十神英文术语映射表（基于项目字典组件的官方翻译）
 const TEN_GODS_ENGLISH_MAP: Record<string, string> = {

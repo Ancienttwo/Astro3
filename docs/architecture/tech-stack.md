@@ -40,6 +40,7 @@
   - Row Level Security (RLS)
   - Authentication service
   - Edge Functions support
+  - Unified server-side client factory (`lib/server/db`) providing cached anon/admin/readonly instances for Next.js API routes
 
 ### Authentication
 - **Supabase Auth** - Primary authentication

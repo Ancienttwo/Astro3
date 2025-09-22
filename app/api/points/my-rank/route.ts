@@ -1,47 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
+import { getSupabaseAdminClient } from '@/lib/server/db';
 import { isAddress } from 'viem';
+import { resolveAuth } from '@/lib/auth-adapter'
+import { ok, err } from '@/lib/api-response'
+
+const supabaseAdmin = getSupabaseAdminClient();
 
 // 获取当前用户的排名信息
 export async function GET(request: NextRequest) {
   try {
-    // 验证用户身份 - 支持Web2和Web3用户
-    let userId: string | null = null;
-    let walletAddress: string | null = null;
-
-    // 尝试获取Web3用户信息
-    const web3UserHeader = request.headers.get('X-Web3-User');
-    if (web3UserHeader) {
-      try {
-        const web3User = JSON.parse(decodeURIComponent(atob(web3UserHeader)));
-        walletAddress = web3User.walletAddress?.toLowerCase();
-        if (!isAddress(walletAddress as `0x${string}`)) {
-          walletAddress = null;
-        }
-      } catch (e) {
-        console.warn('Failed to parse Web3 user header:', e);
-      }
-    }
-
-    // 尝试获取Web2用户信息
-    const authHeader = request.headers.get('Authorization');
-    if (authHeader?.startsWith('Bearer ') && !walletAddress) {
-      try {
-        const token = authHeader.replace('Bearer ', '');
-        const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
-        if (!authError && user) {
-          userId = user.id;
-        }
-      } catch (e) {
-        console.warn('Failed to authenticate Web2 user:', e);
-      }
-    }
-
-    if (!userId && !walletAddress) {
-      return NextResponse.json({ 
-        error: 'Authentication required. Please login or connect wallet.' 
-      }, { status: 401 });
-    }
+    // 统一认证
+    const auth = await resolveAuth(request)
+    let userId: string | null = auth.ok ? auth.id! : null
+    let walletAddress: string | null = auth.walletAddress || null
+    if (!userId && !walletAddress) return err(401, 'UNAUTHORIZED', 'Authentication required. Please login or connect wallet.')
 
     // 查询用户积分数据
     let userData = null;
@@ -65,23 +37,20 @@ export async function GET(request: NextRequest) {
 
     if (userError || !userPointsData) {
       // 返回默认的新用户状态
-      return NextResponse.json({
-        success: true,
-        data: {
-          rank: null,
-          userData: {
-            [userField]: userValue,
-            displayAddress: walletAddress ? formatWalletAddress(walletAddress) : `User-${userId?.slice(0, 8)}`,
-            chainPointsBalance: 0,
-            totalChainEarned: 0,
-            consecutiveDays: 0,
-            tier: getTierFromPoints(0),
-            isNewUser: true
-          },
-          stats: await getUserRankStats(),
-          message: 'Welcome! Complete your first task to appear on the leaderboard.'
-        }
-      });
+      return ok({
+        rank: null,
+        userData: {
+          [userField]: userValue,
+          displayAddress: walletAddress ? formatWalletAddress(walletAddress) : `User-${userId?.slice(0, 8)}`,
+          chainPointsBalance: 0,
+          totalChainEarned: 0,
+          consecutiveDays: 0,
+          tier: getTierFromPoints(0),
+          isNewUser: true
+        },
+        stats: await getUserRankStats(),
+        message: 'Welcome! Complete your first task to appear on the leaderboard.'
+      })
     }
 
     // 计算用户在总积分排行榜中的排名
@@ -157,36 +126,33 @@ export async function GET(request: NextRequest) {
     const nextTier = getNextTier(userPointsData.total_chain_earned);
     const pointsToNextTier = nextTier ? nextTier.minPoints - userPointsData.total_chain_earned : 0;
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        rank: {
-          total: totalRank,
-          balance: balanceRank,
-          consecutive: consecutiveRank
-        },
-        userData: {
-          [userField]: userValue,
-          displayAddress: walletAddress ? formatWalletAddress(walletAddress) : `User-${userId?.slice(0, 8)}`,
-          chainPointsBalance: userPointsData.chain_points_balance,
-          totalChainEarned: userPointsData.total_chain_earned,
-          consecutiveDays: userPointsData.consecutive_days,
-          lastCheckinDate: userPointsData.last_checkin_date,
-          tier: currentTier,
-          nextTier,
-          pointsToNextTier,
-          completedTasks,
-          totalTaskPoints,
-          isNewUser: false
-        },
-        stats: rankStats,
-        achievements: generateUserAchievements(userPointsData, completedTasks)
-      }
-    });
+    return ok({
+      rank: {
+        total: totalRank,
+        balance: balanceRank,
+        consecutive: consecutiveRank
+      },
+      userData: {
+        [userField]: userValue,
+        displayAddress: walletAddress ? formatWalletAddress(walletAddress) : `User-${userId?.slice(0, 8)}`,
+        chainPointsBalance: userPointsData.chain_points_balance,
+        totalChainEarned: userPointsData.total_chain_earned,
+        consecutiveDays: userPointsData.consecutive_days,
+        lastCheckinDate: userPointsData.last_checkin_date,
+        tier: currentTier,
+        nextTier,
+        pointsToNextTier,
+        completedTasks,
+        totalTaskPoints,
+        isNewUser: false
+      },
+      stats: rankStats,
+      achievements: generateUserAchievements(userPointsData, completedTasks)
+    })
 
   } catch (error) {
     console.error('My rank API error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return err(500, 'INTERNAL_ERROR', 'Internal server error')
   }
 }
 

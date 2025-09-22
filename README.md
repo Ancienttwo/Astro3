@@ -402,7 +402,7 @@ astro-workspace/
   - Astro2: Stripe
   - Astro3: 加密货币支付
 - **特定 UI**：
-  - Astro2: 邮箱登录表单
+  - Astro2: 邮箱登录表单（Legacy，已停用）
   - Astro3: 钱包连接按钮
 
 ### 4. 实际迁移步骤

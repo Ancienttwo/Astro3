@@ -383,7 +383,6 @@ export class DatabaseOperations {
 // 导出主要接口
 export {
   supabaseMaster as supabaseAdmin,
-  supabaseReplica,
   POOL_CONFIG
 };
 

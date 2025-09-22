@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSupabaseAdmin } from '@/lib/supabase'
+import { getSupabaseAdminClient } from '@/lib/server/db'
 import { isAddress } from 'viem'
+import { resolveAuth } from '@/lib/auth-adapter'
 
 function fmt(addr: string) {
   return addr ? `${addr.slice(0, 6)}...${addr.slice(-4)}` : ''
@@ -12,26 +13,10 @@ function fmt(addr: string) {
  */
 export async function GET(request: NextRequest) {
   try {
-    const supabase = getSupabaseAdmin()
-
-    // 获取用户上下文：优先 Web3 地址
-    let wallet = request.headers.get('X-Wallet-Address') || ''
-    if (wallet && !isAddress(wallet as `0x${string}`)) wallet = ''
-
-    let userId: string | null = null
-    const authHeader = request.headers.get('Authorization')
-    if (!wallet && authHeader?.startsWith('Bearer ')) {
-      const token = authHeader.replace('Bearer ', '')
-      // 如果是钱包地址，则不作为Supabase Token处理
-      if (!isAddress(token as `0x${string}`)) {
-        try {
-          const { data: { user } } = await supabase.auth.getUser(token)
-          userId = user?.id || null
-        } catch {}
-      } else {
-        wallet = token
-      }
-    }
+    const supabase = getSupabaseAdminClient()
+    const auth = await resolveAuth(request)
+    const wallet = auth.walletAddress || ''
+    const userId: string | null = auth.id
 
     if (!wallet && !userId) {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 })

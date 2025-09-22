@@ -32,7 +32,7 @@ export function EmailLogin() {
     <form onSubmit={handleSubmit} className="space-y-4">
       <input
         type="email"
-        placeholder="邮箱"
+        placeholder="Legacy email (deprecated)"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         className="w-full px-4 py-2 border rounded-lg"
@@ -40,7 +40,7 @@ export function EmailLogin() {
       />
       <input
         type="password"
-        placeholder="密码"
+        placeholder="Legacy password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         className="w-full px-4 py-2 border rounded-lg"
@@ -51,7 +51,7 @@ export function EmailLogin() {
         disabled={loading}
         className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
       >
-        {loading ? '登录中...' : '邮箱登录'}
+        {loading ? 'Legacy login…' : 'Legacy Email Login'}
       </button>
     </form>
   );

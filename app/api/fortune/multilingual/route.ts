@@ -4,7 +4,9 @@
 // 创建日期: 2025-01-31
 
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { getSupabaseAdminClient } from '@/lib/server/db';
+
+const supabase = getSupabaseAdminClient();
 
 // 支持的语言类型
 export type SupportedLanguage = 'zh-CN' | 'zh-TW' | 'en-US';

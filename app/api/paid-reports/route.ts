@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { getSupabaseAdminClient } from '@/lib/server/db'
 import { getCurrentUnifiedUser } from '@/lib/auth'
 
 // 检查用户是否已为特定生日+性别付费
@@ -29,6 +29,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 查询付费记录
+    const supabase = getSupabaseAdminClient()
     const { data: paidReport, error } = await supabase
       .from('paid_reports')
       .select('*')
@@ -179,4 +180,3 @@ export async function POST(request: NextRequest) {
     }, { status: 500 })
   }
 }
-
