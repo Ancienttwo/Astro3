@@ -1,4 +1,4 @@
-import { getSupabaseAdmin } from '@/lib/supabase';
+import { getSupabaseAdminClient } from '@/lib/server/db';
 import { verifyMessage } from 'viem';
 import { NextRequest } from 'next/server';
 
@@ -71,7 +71,7 @@ export class UnifiedWeb3AuthService {
       }
       
       // Get or create user in database
-      const supabase = getSupabaseAdmin();
+      const supabase = getSupabaseAdminClient();
       
       // Check if wallet already exists
       const { data: existingWallet } = await supabase
@@ -174,7 +174,7 @@ export class UnifiedWeb3AuthService {
         };
       }
       
-      const supabase = getSupabaseAdmin();
+      const supabase = getSupabaseAdminClient();
       
       // Check if wallet is already linked
       const { data: existing } = await supabase
@@ -233,7 +233,7 @@ export class UnifiedWeb3AuthService {
   
   // Get user wallets
   async getUserWallets(userId: string) {
-    const supabase = getSupabaseAdmin();
+      const supabase = getSupabaseAdminClient();
     
     const { data, error } = await supabase
       .from('user_wallets')
@@ -251,7 +251,7 @@ export class UnifiedWeb3AuthService {
   
   // Remove wallet from user
   async removeWallet(userId: string, address: string) {
-    const supabase = getSupabaseAdmin();
+    const supabase = getSupabaseAdminClient();
     
     // Check if it's the primary wallet
     const { data: wallet } = await supabase

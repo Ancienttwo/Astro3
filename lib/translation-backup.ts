@@ -1,6 +1,8 @@
-import { supabaseAdmin } from '@/lib/supabase';
+import { getSupabaseAdminClient } from '@/lib/server/db';
 import { writeFile, readFile, readdir } from 'fs/promises';
 import path from 'path';
+
+const supabaseAdmin = getSupabaseAdminClient();
 
 interface BackupMetadata {
   version: string;

@@ -1,4 +1,4 @@
-import { getSupabaseAdmin } from '@/lib/supabase';
+import { getSupabaseAdminClient } from '@/lib/server/db';
 
 interface ErrorLog {
   message: string;
@@ -143,7 +143,7 @@ export class ErrorTracker {
         // 客户端环境不直接写库，可在此改为调用后端API
         return;
       }
-      const supabase = getSupabaseAdmin();
+      const supabase = getSupabaseAdminClient();
       
       const { error } = await supabase
         .from('error_logs')

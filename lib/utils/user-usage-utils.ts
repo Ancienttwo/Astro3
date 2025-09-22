@@ -1,7 +1,9 @@
 // 用户使用统计工具函数
 // 统一处理用户余额查询、更新和验证逻辑
 
-import { supabaseAdmin } from '@/lib/supabase';
+import { getSupabaseAdminClient } from '@/lib/server/db';
+
+const supabaseAdmin = getSupabaseAdminClient();
 import { 
   UserUsage, 
   UserUsageResponse, 

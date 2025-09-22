@@ -1,17 +1,16 @@
-import {supabase, getSupabaseAdmin} from '@/lib/supabase';
+import { getSupabaseAnonClient, getSupabaseAdminClient, type SupabaseClient } from '@/lib/server/db';
 
 // Simple factory to get a supabase client depending on environment
 export function createClient() {
   if (typeof window !== 'undefined') {
-    return supabase;
+    return getSupabaseAnonClient();
   }
   try {
-    return getSupabaseAdmin();
+    return getSupabaseAdminClient();
   } catch {
     // Fallback to public client if admin is unavailable in some environments
-    return supabase;
+    return getSupabaseAnonClient();
   }
 }
 
-export type {UserChart, AIAnalysis} from '@/lib/supabase';
-
+export type { SupabaseClient };

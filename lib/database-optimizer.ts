@@ -1,6 +1,8 @@
 // 数据库查询优化工具
-import { supabaseAdmin } from '@/lib/supabase'
+import { getSupabaseAdminClient } from '@/lib/server/db'
 import { getCache } from '@/lib/redis'
+
+const supabaseAdmin = getSupabaseAdminClient()
 
 // 查询性能监控
 class QueryPerformanceMonitor {

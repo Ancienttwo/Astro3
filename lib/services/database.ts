@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase'
+import { getSupabaseAdminClient } from '@/lib/server/db'
 // 轻量类型定义（避免跨模块导出依赖）
 export interface ZiweiChart {
   id: string
@@ -38,6 +38,8 @@ export interface ChatConversation {
   updated_at?: string
 }
 import { randomUUID } from 'crypto'
+
+const supabase = getSupabaseAdminClient()
 
 // 用户服务
 export class UserService {

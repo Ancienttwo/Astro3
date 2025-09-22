@@ -52,19 +52,31 @@
 - **Documentation alignment**
   - Updated `docs/architecture/tech-stack.md` and `docs/architecture/source-tree.md` to describe the new server-side Supabase factory and refreshed `lib/` layout.
 
-### High-priority migration buckets
-- **Points & Rewards** (`app/api/points/*`, `app/api/user-balance/route.ts`, `app/api/consume-report-unified/route.ts`): require admin client with transactional helpers; candidate for first service extraction.
-- **Fortune & AI Interpretation** (`app/api/fortune/**`, `app/api/guandi/**`): mix of read-heavy and write flows; evaluate readonly client plus caching, then move logic into `lib/server/fortune` module.
-- **Translations & Localization** (`app/api/translations/**`): primarily bulk read/write; suitable for readonly/admin split and batch queues.
-- **Notifications & Mutual Aid** (`app/api/notifications/route.ts`, `app/api/mutual-aid/**`): confirm RLS expectations before swapping clients; pair with auth middleware rollout.
-- **Legacy utility endpoints** (`app/api/clear-failed-tasks`, `app/api/clear-ai-analysis`, `app/api/conversations`): low risk but good candidates for codemod validation once shared guard is ready.
+### Post-migration clean-up priorities
+- **Legacy wrappers**: plan removal/refactor of `lib/supabase.ts`, `lib/supabase-optimized.ts`, and `lib/database-pool.ts` once dependent modules are reworked.
+- **Client usage audit**: review new admin/readonly clients per domain and tighten usage (e.g., points with transactional guards, fortune read paths using readonly helper).
+- **Service extraction**: identify top domains (points, fortune, mutual-aid) for service/repository layering now that client access is centralized.
+
+### Legacy wrapper usage assessment (2025-09-22)
+- **Server/client hybrid modules still importing `@/lib/supabase`**: `lib/unified-auth.ts`, `lib/auth.ts`, `lib/api-client.ts`, `lib/i18n/enhanced-language-manager.ts`. *Action*: split client/server responsibilities or wrap new helpers so server paths avoid direct `@/lib/supabase` usage.
+- **Browser-facing helpers/components**: hooks and UI modules under `components/` and `hooks/` legitimately use `@/lib/supabase` for client auth/session management. *Action*: keep `lib/supabase.ts` as browser client factory but document it as client-only, removing `supabaseAdmin` export once server refactors land.
+- **`lib/supabase/server.ts`**: reworked to delegate to `lib/server/db` helpers (anon/admin). Evaluate whether any consumers remain before deprecating.
+- **`lib/database-pool.ts` & `lib/supabase-optimized.ts`**: no longer referenced by API routes; evaluate whether any remaining usage justifies retaining them or migrate metrics/pooling logic into the new factory before deletion.
+- **Documentation/Code hygiene**: after refactors, add lint rule or codemod to block new `@/lib/supabase` imports in server directories and update developer docs accordingly.
+
+### Verification & tooling strategy (2025-09-22)
+- **TypeScript stability**: update package scripts/CI to run `NODE_OPTIONS="--max-old-space-size=4096" pnpm exec tsc --noEmit` so the compiler no longer OOMs; add README note for local devs.
+- **API smoke tests**: create a lightweight script (e.g. `pnpm smoke:api`) hitting critical endpoints (`/api/tasks`, `/api/points/*`, `/api/fortune/*`, `/api/async-analysis`) with mock tokens to ensure unified client wiring stays healthy.
+- **Lint guard**: configure ESLint (or custom lint rule) to forbid `@/lib/supabase` imports under `app/api/**` and `lib/server/**`, steering developers toward `lib/server/db` helpers.
+- **Automated diff check**: optional pre-commit hook/codemod to rewrite accidental `@/lib/supabase` imports during refactors.
+- **Monitoring hooks**: instrument new clients to emit basic metrics/logs (success/error counters, latency) feeding into existing monitoring backlog before legacy wrappers are removed.
 
 ## Sprint Tracking (2025-09-22)
 
 ### Sprint 1 · 基础架构重构
 - ✅ **Task 1.1.1** – Created unified Supabase factory (`lib/server/db/client.ts`).
 - ✅ **Task 1.1.2** – Re-routed server codepaths to the factory (core API routes + points/fortune modules).
-- ✅ **Task 1.1.5** – Migrated priority API routes (`tasks`, `analysis`, `points`, `fortune`, `user-balance`, `consume-report`) to new clients.
+- ✅ **Task 1.1.5** – Migrated priority API routes (`tasks`, `analysis`, `points`, `fortune`, `user-balance`, `consume-report`, mutual-aid, airdrop, WeChat, admin exports, cleanup utilities) to new clients.
 - ⏳ **Task 1.1.3 / 1.1.4** – Legacy wrappers (`lib/supabase-optimized.ts`, `lib/database-pool.ts`) still referenced; scheduled for removal after remaining routes migrate.
 - ⏳ **Task 1.2.x** – Layered architecture scaffolding pending (controller/service/repository foundations not yet started).
 

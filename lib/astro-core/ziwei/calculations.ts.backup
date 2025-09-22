@@ -1,0 +1,2067 @@
+/**
+ * 紫微斗数计算工具函数
+ * Calculation utility functions for ZiWei DouShu
+ * 
+ * 本文件包含紫微斗数所有核心计算算法的实现，基于传统命理学理论和 tyme4ts 农历库。
+ * 
+ * ## 📐 双重/三重数值体系设计标准
+ * 
+ * ### 基础双重数值 (Dual-Value)
+ * - `value`: 计算意义数值 (用于显示，如"命宫"、"紫微"、"庙")
+ * - `index`: 渲染意义数值 (用于处理，如0-11宫位索引)
+ * 
+ * ### 三重数值结构 (Triple-Value) - 宫位叠加场景
+ * - `value`: 原始意义 (如"身宫"、"大财"、"年命")
+ * - `index`: 渲染位置 (实际所在宫位索引)
+ * - `name`: 叠加说明 (如"身宫在疾厄宫")
+ * 
+ * 需要三重数值的场景：身宫、主星、辅星、四化、大运、流年、来因宫
+ * 
+ * @version 2.0.0
+ * @lastUpdated 2025-01-03
+ */
+
+/**
+ * 🗂️ 函数索引 (Function Index)
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 
+ * ## 📚 数据转换与预处理 (Data Conversion & Preprocessing)
+ * ├── createBaZiParams()              - 从tyme4ts创建统一八字参数对象 ⭐ 推荐入口
+ * └── calculateYearGanZhi()           - 计算年干支 [DEPRECATED: 使用tyme4ts]
+ * 
+ * ## 🏛️ 宫位计算 (Palace Calculations)
+ * ├── calculateLifePalace()           - 计算命宫位置
+ * ├── calculateBodyPalace()           - 计算身宫位置
+ * ├── getPalaceName()                 - 获取宫位名称
+ * └── calculateLaiyinPalace()         - 计算来因宫
+ * 
+ * ## 🌟 主星安星 (Main Star Placements)
+ * ├── calculateZiweiPosition()        - 计算紫微星位置
+ * ├── calculateTianfuPosition()       - 计算天府星位置
+ * └── calculateMainStarPositions()    - 计算所有主星位置
+ * 
+ * ## ⭐ 辅星安星 (Auxiliary Star Placements)
+ * ├── calculateAuxiliaryStarPositions() - 计算吉星位置 (文昌文曲左辅右弼等)
+ * ├── calculateMaleficStarPositions()  - 计算煞星位置 (擎羊陀罗火铃空劫等)
+ * ├── calculateRomanceStarPositions()  - 计算桃花星位置 (红鸾天喜天姚咸池)
+ * └── calculateMinorStarPositions()    - 计算小星位置 (天官天福等)
+ * 
+ * ## 🔄 四化计算 (Four Transformations)
+ * ├── calculateBirthYearSihua()       - 计算生年四化
+ * ├── calculateFlyingPalaceSihua()    - 计算飞宫四化
+ * └── calculateSelfTransformations()  - 计算自化 (宫干引发的四化)
+ * 
+ * ## 👑 命主身主 (Life & Body Masters)
+ * ├── calculateMasters()              - 计算命主身主
+ * └── getInnateDauPalaceIndex()       - 获取先天斗君宫位索引
+ * 
+ * ## 📅 运程计算 (Period Calculations)
+ * ├── calculateMajorPeriodStartAge()  - 计算大运起运年龄
+ * ├── calculateMajorPeriods()         - 计算大运信息
+ * ├── calculateFleetingYears()        - 计算流年
+ * └── calculateMinorPeriod()          - 计算小限
+ * 
+ 
+ * ## ⚡ 五行局 (Five Elements Bureau)
+ * └── calculateFiveElementsBureauDetail() - 五行局详细信息（包含所有格式）
+ * 
+ * ## 🌟 星曜亮度 (Star Brightness)
+ * ├── getStarBrightness()             - 获取星曜亮度值 ⭐ 推荐
+ * 
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 
+ * @usage 推荐使用模式：
+ * ```typescript
+ * import { Solar } from 'tyme4ts'
+ * import { createBaZiParams } from './calculations'
+ * 
+ * const solar = Solar.fromYmd(1989, 2, 1)
+ * const baziParams = createBaZiParams(solar, 0) // 统一数据入口
+ * 
+ * // 使用 baziParams 中的数据进行各种计算
+ * const lifePalace = calculateLifePalace(baziParams.lunarMonth, baziParams.timeZhiIndex)
+ * ```
+ * 
+ * @note
+ * - ⭐ 标记为推荐使用的函数
+ * - [DEPRECATED] 标记为即将废弃的函数
+ * - 新项目请优先使用 createBaZiParams 作为数据入口
+ */
+
+import {
+  // Basic elements
+  STEMS,
+  BRANCHES,
+  PALACE_NAMES,
+  
+  // Five elements bureau
+  FIVE_ELEMENTS_BUREAU,
+  BUREAU_CODE_TO_COLUMN,
+  MAJOR_PERIOD_START_AGE,
+  
+  // Star systems
+  ZIWEI_POSITION_TABLE,
+  TIANFU_OFFSET_FROM_ZIWEI,
+  
+  // Master stars and sihua
+  BIRTH_YEAR_SIHUA,
+  FLYING_PALACE_SIHUA,
+  LIFE_MASTER_STARS,
+  BODY_MASTER_STARS,
+  
+  // Star brightness
+  STAR_BRIGHTNESS_TABLE,
+  STAR_BRIGHTNESS,
+  BRIGHTNESS_LEVEL_MAP,
+  
+  // Types
+  type StarBrightnessValue
+} from './constants'
+
+import { SolarDay, SolarTime } from 'tyme4ts'
+import { getMinorLimit } from './time-calculations'
+
+/**
+ * 统一八字参数结构
+ * Unified BaZi (Eight Characters) parameter structure
+ * 
+ * @description
+ * 从 tyme4ts 的八字对象中提取所有紫微斗数计算所需的基础数据，
+ * 确保所有计算都基于准确的农历和节气信息。
+ * 
+ * Extract all essential data for ZiWei calculations from tyme4ts BaZi object,
+ * ensuring all calculations are based on accurate lunar calendar and solar term information.
+ * 
+ * @example
+ * ```typescript
+ * import { Solar } from 'tyme4ts'
+ * 
+ * // 示例 1: 1989年2月1日 (立春前，年干支仍为1988年)
+ * const solar1 = Solar.fromYmd(1989, 2, 1)
+ * const baziParams1 = createBaZiParams(solar1)
+ * // baziParams1.yearStem = '戊', baziParams1.yearBranch = '辰' (1988年干支)
+ * 
+ * // 示例 2: 闰月处理 (tyme4ts 自动识别闰月)
+ * const solar2 = Solar.fromYmd(2023, 4, 10) // 假设为闰二月
+ * const baziParams2 = createBaZiParams(solar2)
+ * // baziParams2.isLeapMonth = true/false, lunarMonth = 实际农历月份
+ * 
+ * // 推荐用法：直接使用 createBaZiParams 而不是手动构建
+ * const baziParams: BaZiParams = createBaZiParams(solar1)
+ * ```
+ */
+export interface BaZiParams {
+  /** 年干 (甲乙丙丁戊己庚辛壬癸) */
+  yearStem: string
+  /** 年支 (子丑寅卯辰巳午未申酉戌亥) */
+  yearBranch: string
+  /** 月干 */
+  monthStem: string
+  /** 月支 */
+  monthBranch: string
+  /** 日干 */
+  dayStem: string
+  /** 日支 */
+  dayBranch: string
+  /** 时干 */
+  timeStem: string
+  /** 时支 */
+  timeBranch: string
+  /** 农历月份 (1-12) */
+  lunarMonth: number
+  /** 农历日期 (1-30) */
+  lunarDay: number
+  /** 是否闰月 */
+  isLeapMonth: boolean
+  /** 时支索引 (0-11，对应子丑寅卯辰巳午未申酉戌亥) */
+  timeZhiIndex: number
+  /** 大运干支数组 (8组大运，每组10年) */
+  majorPeriods: Array<{
+    stem: string
+    branch: string
+    startAge: number
+    endAge: number
+  }>
+  /** 起运岁数 (虚岁) */
+  startMajorPeriodAge: number
+  /** 起运详细时间信息 */
+  qiyunDetail: {
+    years: number
+    months: number  
+    days: number
+  }
+}
+
+/**
+ * 从 tyme4ts 创建 BaZi 参数对象
+ * Create BaZi parameters from tyme4ts objects
+ * 
+ * @description
+ * 此函数是所有紫微斗数计算的入口点，确保数据的准确性和一致性。
+ * This function is the entry point for all ZiWei calculations, ensuring data accuracy and consistency.
+ * 
+ * @param solar tyme4ts Solar 对象
+ * @param gender 性别 (0=男性，1=女性，影响大运起运方向)
+ * @returns BaZiParams 包含所有计算所需的基础数据
+ * 
+ * @example
+ * ```typescript
+ * import { Solar } from 'tyme4ts'
+ * const solar = Solar.fromYmd(1989, 2, 1)
+ * const baziParams = createBaZiParams(solar, 0) // 0=男性
+ * // baziParams.yearStem = '戊', baziParams.yearBranch = '辰' (正确处理立春分界)
+ * // baziParams.majorPeriods = 8组大运干支，起运方向根据性别自动计算
+ * ```
+ */
+export function createBaZiParams(solarTime: any, gender: number = 0): BaZiParams {
+  const { ChildLimit, Gender } = require('tyme4ts')
+  
+  const solar = solarTime.getSolarDay()
+  const lunar = solar.getLunarDay()
+  
+  // 从tyme4ts获取干支信息
+  const yearSixtyCycle = lunar.getYearSixtyCycle()
+  const monthSixtyCycle = lunar.getMonthSixtyCycle()
+  const daySixtyCycle = lunar.getSixtyCycle()
+  
+  // 从SixtyCycle对象中提取干支名称
+  const yearGanZhi = yearSixtyCycle.names[yearSixtyCycle.index].split('')
+  const monthGanZhi = monthSixtyCycle.names[monthSixtyCycle.index].split('')
+  const dayGanZhi = daySixtyCycle.names[daySixtyCycle.index].split('')
+  
+  // 获取时辰干支（需要从小时计算）
+  const hour = solarTime.getHour()
+  const timeZhiIndex = Math.floor((hour + 1) / 2) % 12
+  const timeBranch = BRANCHES[timeZhiIndex]
+  
+  // 计算时辰天干（时干根据日干推算，五鼠遁法）
+  const dayStemIndex = STEMS.indexOf(dayGanZhi[0])
+  const timeStemIndex = (dayStemIndex % 5 * 2 + timeZhiIndex) % 10
+  const timeStem = STEMS[timeStemIndex]
+  
+  // 使用tyme4ts的ChildLimit童限计算起运和大运！
+  const childLimit = ChildLimit.fromSolarTime(solarTime, gender === 0 ? Gender.MAN : Gender.WOMAN)
+  
+  // 获取详细的起运时间（年、月、日）
+  const qiyunYears = childLimit.getYearCount()
+  const qiyunMonths = childLimit.getMonthCount() 
+  const qiyunDays = childLimit.getDayCount()
+  
+  // 起运年龄是童限结束的年龄
+  const startAge = childLimit.getEndAge()
+  
+  // 从起始大运开始，手动计算后续大运
+  const majorPeriods = []
+  const startDecadeFortune = childLimit.getStartDecadeFortune()
+  const startSixtyCycle = startDecadeFortune.getSixtyCycle()
+  const startGanZhi = startSixtyCycle.names[startSixtyCycle.index].split('')
+  
+  // 添加第一个大运
+  majorPeriods.push({
+    stem: startGanZhi[0],
+    branch: startGanZhi[1], 
+    startAge: startDecadeFortune.getStartAge(),
+    endAge: startDecadeFortune.getEndAge()
+  })
+  
+  // 根据顺逆行方向计算后续7个大运
+  const isForward = childLimit.isForward()
+  const startSixtyCycleIndex = startSixtyCycle.index
+  
+  // 创建完整的60甲子数组以便计算
+  const allSixtyCycle = [
+    '甲子', '乙丑', '丙寅', '丁卯', '戊辰', '己巳', '庚午', '辛未', '壬申', '癸酉',
+    '甲戌', '乙亥', '丙子', '丁丑', '戊寅', '己卯', '庚辰', '辛巳', '壬午', '癸未',
+    '甲申', '乙酉', '丙戌', '丁亥', '戊子', '己丑', '庚寅', '辛卯', '壬辰', '癸巳',
+    '甲午', '乙未', '丙申', '丁酉', '戊戌', '己亥', '庚子', '辛丑', '壬寅', '癸卯',
+    '甲辰', '乙巳', '丙午', '丁未', '戊申', '己酉', '庚戌', '辛亥', '壬子', '癸丑',
+    '甲寅', '乙卯', '丙辰', '丁巳', '戊午', '己未', '庚申', '辛酉', '壬戌', '癸亥'
+  ]
+  
+  for (let i = 1; i < 8; i++) {
+    let nextIndex
+    if (isForward) {
+      // 顺行：从第一个大运开始+i
+      nextIndex = (startSixtyCycleIndex + i) % 60
+    } else {
+      // 逆行：从第一个大运开始-i  
+      nextIndex = (startSixtyCycleIndex - i + 60) % 60
+    }
+    
+    const nextGanZhi = allSixtyCycle[nextIndex].split('')
+    majorPeriods.push({
+      stem: nextGanZhi[0],
+      branch: nextGanZhi[1],
+      startAge: majorPeriods[0].startAge + i * 10,
+      endAge: majorPeriods[0].startAge + i * 10 + 9
+    })
+  }
+
+  return {
+    yearStem: yearGanZhi[0],
+    yearBranch: yearGanZhi[1],
+    monthStem: monthGanZhi[0],
+    monthBranch: monthGanZhi[1],
+    dayStem: dayGanZhi[0],
+    dayBranch: dayGanZhi[1],
+    timeStem: timeStem,
+    timeBranch: timeBranch,
+    lunarMonth: lunar.getMonth(),
+    lunarDay: lunar.getDay(),
+    isLeapMonth: lunar.getLunarMonth().isLeap(),
+    timeZhiIndex: timeZhiIndex,
+    // 八字起运和大运信息（来自tyme4ts ChildLimit API）
+    majorPeriods: majorPeriods,
+    startMajorPeriodAge: startAge,
+    qiyunDetail: {
+      years: qiyunYears,
+      months: qiyunMonths,
+      days: qiyunDays
+    }
+  }
+}
+
+// 已删除手动计算函数，现在使用tyme4ts的ChildLimit API获取准确的八字起运和大运信息
+
+/**
+ * 计算年干支
+ * Calculate year stem and branch
+ */
+/**
+ * @deprecated 建议使用 tyme4ts 的八字功能替代此函数
+ * @deprecated Use tyme4ts eight-character (八字) functionality instead
+ * 
+ * ⚠️ 重要准确性问题：此函数使用简单数学计算，忽略了农历年干支以立春为分界的规则！
+ * ⚠️ CRITICAL ACCURACY ISSUE: This function uses simple math calculation and ignores 
+ * the rule that lunar year stem-branch changes at 立春 (Start of Spring), not Jan 1st!
+ * 
+ * 例如：1989年2月1日的年干支应该是1988年的"戊辰"，而不是1989年的"己巳"
+ * Example: Feb 1, 1989 should have year stem-branch "戊辰" (1988), not "己巳" (1989)
+ * 
+ * tyme4ts 提供基于节气的精确计算，避免此类误差。
+ * tyme4ts provides precise calculations based on solar terms, avoiding such errors.
+ * 
+ * 推荐使用：
+ * Recommended usage:
+ * ```typescript
+ * import { Solar, LunarYear } from 'tyme4ts'
+ * const solar = Solar.fromYmd(1989, 2, 1)
+ * const lunar = solar.getLunar()
+ * const ganZhi = lunar.getYearGanZhi() // 正确返回 "戊辰"
+ * ```
+ */
+export function calculateYearGanZhi(year: number): { stem: string; branch: string } {
+  const stemIndex = (year - 4) % 10
+  const branchIndex = (year - 4) % 12
+  return {
+    stem: STEMS[stemIndex],
+    branch: BRANCHES[branchIndex]
+  }
+}
+
+/**
+ * 计算命宫位置
+ * Calculate Life Palace position
+ * 
+ * @description
+ * 紫微斗数标准算法：
+ * 1. 从寅宫起正月，顺数到出生月份
+ * 2. 从该宫起子时，逆数到出生时辰
+ * 3. 所得宫位即为命宫
+ * 
+ * @param month 农历生月 (1-12)
+ * @param timeZhiIndex 时辰索引 (0-11: 子丑寅卯辰巳午未申酉戌亥)
+ * @returns 命宫宫位索引 (0-11)
+ */
+export function calculateLifePalace(month: number, timeZhiIndex: number): number {
+  // 寅宫索引为2，从寅宫起正月顺数到出生月
+  const monthPalace = (2 + month - 1) % 12
+  
+  // 从月宫起子时(0)，逆数到出生时辰
+  // 逆数就是减法
+  let lifePalace = (monthPalace - timeZhiIndex + 12) % 12
+  
+  return lifePalace
+}
+
+/**
+ * 计算身宫位置
+ * Calculate Body Palace position
+ * 
+ * @description
+ * 紫微斗数标准算法：
+ * 1. 从寅宫起正月，顺数到出生月份
+ * 2. 从该宫起子时，顺数到出生时辰
+ * 3. 所得宫位即为身宫
+ * 
+ * @param month 农历生月 (1-12)
+ * @param timeZhiIndex 时辰索引 (0-11: 子丑寅卯辰巳午未申酉戌亥)
+ * @returns 身宫宫位索引 (0-11)
+ */
+export function calculateBodyPalace(month: number, timeZhiIndex: number): number {
+  // 寅宫索引为2，从寅宫起正月顺数到出生月
+  const monthPalace = (2 + month - 1) % 12
+  
+  // 从月宫起子时(0)，顺数到出生时辰
+  // 顺数就是加法
+  let bodyPalace = (monthPalace + timeZhiIndex) % 12
+  
+  return bodyPalace
+}
+
+/**
+ * 计算紫微星位置
+ * Calculate ZiWei star position
+ * 
+ * @param bureauCode 五行局代码 (如 "fire_6", "water_2")
+ * @param day 农历日 (1-30)
+ * @returns 紫微星所在宫位索引 (0-11)
+ */
+export function calculateZiweiPosition(bureauCode: string, day: number): number {
+  
+  // 获取五行局对应的列索引
+  const columnIndex = BUREAU_CODE_TO_COLUMN[bureauCode]
+  
+  // 输入验证
+  if (columnIndex === undefined) {
+    throw new Error(`Invalid bureau code: ${bureauCode}`)
+  }
+  if (day < 1 || day > 30) {
+    throw new Error(`Invalid day: ${day}. Must be between 1 and 30`)
+  }
+  
+  // 从表中获取紫微星位置（地支名称）
+  const rowIndex = day - 1 // 转换为0-based索引
+  const positionBranch = ZIWEI_POSITION_TABLE[rowIndex]?.[columnIndex]
+  
+  if (!positionBranch) {
+    // 如果超出表格范围，使用默认算法
+    return Math.floor((day - 1) / 3) % 12
+  }
+  
+  // 将地支名称转换为索引
+  const positionIndex = BRANCHES.indexOf(positionBranch)
+  
+  if (positionIndex === -1) {
+    throw new Error(`Could not find branch index for: ${positionBranch}`)
+  }
+  
+  return positionIndex
+}
+
+/**
+ * 计算天府星位置
+ * Calculate TianFu star position
+ */
+export function calculateTianfuPosition(ziweiPosition: number): number {
+  const offset = TIANFU_OFFSET_FROM_ZIWEI[ziweiPosition]
+  return (ziweiPosition + offset) % 12
+}
+
+/**
+ * 计算十四主星位置
+ * Calculate positions of 14 main stars
+ */
+export function calculateMainStarPositions(
+  ziweiPos: number,
+  tianfuPos: number
+): Map<string, number[]> {
+  const positions = new Map<string, number[]>()
+  
+  // 紫微系列
+  positions.set('紫微', [ziweiPos])
+  positions.set('天机', [(ziweiPos + 11) % 12])
+  positions.set('太阳', [(ziweiPos + 9) % 12])
+  positions.set('武曲', [(ziweiPos + 8) % 12])
+  positions.set('天同', [(ziweiPos + 7) % 12])
+  positions.set('廉贞', [(ziweiPos + 4) % 12])
+  
+  // 天府系列
+  positions.set('天府', [tianfuPos])
+  positions.set('太阴', [(tianfuPos + 1) % 12])
+  positions.set('贪狼', [(tianfuPos + 2) % 12])
+  positions.set('巨门', [(tianfuPos + 3) % 12])
+  positions.set('天相', [(tianfuPos + 4) % 12])
+  positions.set('天梁', [(tianfuPos + 5) % 12])
+  positions.set('七杀', [(tianfuPos + 6) % 12])
+  positions.set('破军', [(tianfuPos + 10) % 12])
+  
+  return positions
+}
+
+/**
+ * 计算辅星位置（吉星类）
+ * Calculate auxiliary star positions (Auspicious stars)
+ * 
+ * @ai-context 辅星包含：文昌、文曲、左辅、右弼、天魁、天钺、禄存、天马
+ * - 文昌（時系星）：从戌宫起子时，逆时针数到出生时辰
+ * - 文曲（時系星）：从辰宫起子时，顺时针数到出生时辰
+ * - 左辅（月系星）：从辰宫起正月，顺时针数到出生月份
+ * - 右弼（月系星）：从戌宫起正月，逆时针数到出生月份
+ * 
+ * @param month 农历月 (1-12)
+ * @param day 农历日 (1-30)
+ * @param timeZhiIndex 时辰索引 (0-11, 0=子时)
+ * @param yearStem 年干
+ * @param yearBranch 年支
+ */
+export function calculateAuxiliaryStarPositions(
+  month: number,
+  day: number,
+  timeZhiIndex: number,
+  yearStem: string,
+  yearBranch: string,
+  lifePalaceIndex?: number
+): Map<string, number[]> {
+  const positions = new Map<string, number[]>()
+  const yearBranchIndex = BRANCHES.indexOf(yearBranch as any)
+  
+  // 文昌星 - 根据年干查表
+  const wenchangTable: Record<string, number> = {
+    '甲': 5,   // 巳
+    '乙': 6,   // 午
+    '丙': 8,   // 申
+    '丁': 9,   // 酉
+    '戊': 8,   // 申
+    '己': 9,   // 酉
+    '庚': 11,  // 亥
+    '辛': 0,   // 子
+    '壬': 2,   // 寅
+    '癸': 3    // 卯
+  }
+  const wenchangPos = wenchangTable[yearStem] ?? 0
+  positions.set('文昌', [wenchangPos])
+  
+  // 文曲星 - 从辰宫（索引4）起子时，顺时针数到出生时辰
+  // 辰宫起点，顺行：辰(4) -> 巳(5) -> 午(6) -> ...
+  const wenquPos = (4 + timeZhiIndex) % 12
+  positions.set('文曲', [wenquPos])
+  
+  // 左辅星 - 从辰宫（索引4）起正月，顺时针数到出生月份
+  // 辰宫起点，顺行：辰(4) -> 巳(5) -> 午(6) -> ...
+  // month是1-12，需要减1作为偏移量
+  const zuofuPos = (4 + (month - 1)) % 12
+  positions.set('左辅', [zuofuPos])
+  
+  // 右弼星 - 从戌宫（索引10）起正月，逆时针数到出生月份
+  // 戌宫起点，逆行：戌(10) -> 酉(9) -> 申(8) -> ...
+  // month是1-12，需要减1作为偏移量
+  const youbiPos = (10 - (month - 1) + 12) % 12
+  positions.set('右弼', [youbiPos])
+  
+  // 天魁天钺 - 根据年干
+  const kuiYueTable: Record<string, [number, number]> = {
+    '甲': [1, 7],  // 丑未
+    '戊': [1, 7],  // 丑未
+    '庚': [1, 7],  // 丑未
+    '乙': [0, 8],  // 子申
+    '己': [0, 8],  // 子申
+    '丙': [11, 9], // 亥酉
+    '丁': [11, 9], // 亥酉
+    '辛': [6, 2],  // 午寅
+    '壬': [3, 5],  // 卯巳
+    '癸': [3, 5]   // 卯巳
+  }
+  
+  const [kuiPos, yuePos] = kuiYueTable[yearStem] || [0, 6]
+  positions.set('天魁', [kuiPos])
+  positions.set('天钺', [yuePos])
+  
+  // 禄存 - 根据年干
+  const lucunTable: Record<string, number> = {
+    '甲': 2,  // 寅
+    '乙': 3,  // 卯
+    '丙': 5,  // 巳
+    '戊': 5,  // 巳
+    '丁': 6,  // 午
+    '己': 6,  // 午
+    '庚': 8,  // 申
+    '辛': 9,  // 酉
+    '壬': 11, // 亥
+    '癸': 0   // 子
+  }
+  
+  const lucunPos = lucunTable[yearStem] || 0
+  positions.set('禄存', [lucunPos])
+  
+  // 天马 - 根据生年地支
+  // 规则：
+  // 申子辰年（猴鼠龙）-> 寅宫
+  // 亥卯未年（猪兔羊）-> 巳宫  
+  // 寅午戌年（虎马狗）-> 申宫
+  // 巳酉丑年（蛇鸡牛）-> 亥宫
+  const tianmaTable: Record<number, number> = {
+    0: 2,   // 子(鼠)年在寅宫
+    1: 11,  // 丑(牛)年在亥宫
+    2: 8,   // 寅(虎)年在申宫
+    3: 5,   // 卯(兔)年在巳宫
+    4: 2,   // 辰(龙)年在寅宫
+    5: 11,  // 巳(蛇)年在亥宫
+    6: 8,   // 午(马)年在申宫
+    7: 5,   // 未(羊)年在巳宫
+    8: 2,   // 申(猴)年在寅宫
+    9: 11,  // 酉(鸡)年在亥宫
+    10: 8,  // 戌(狗)年在申宫
+    11: 5   // 亥(猪)年在巳宫
+  }
+  
+  const tianmaPos = tianmaTable[yearBranchIndex] || 0
+  positions.set('天马', [tianmaPos])
+  
+  return positions
+}
+
+/**
+ * 计算煞星位置
+ * Calculate malefic star positions
+ * 
+ * @ai-context 煞星包含：擎羊、陀罗、火星、铃星、地空、地劫、天刑
+ * 
+ * @param month 农历月 (1-12)
+ * @param timeZhiIndex 时辰索引 (0-11)
+ * @param yearStem 年干
+ * @param yearBranch 年支
+ */
+export function calculateMaleficStarPositions(
+  month: number,
+  timeZhiIndex: number,
+  yearStem: string,
+  yearBranch: string
+): Map<string, number[]> {
+  const positions = new Map<string, number[]>()
+  
+  // 擎羊陀罗 - 根据年干
+  const yangTuoTable: Record<string, [number, number]> = {
+    '甲': [3, 1],  // 卯丑
+    '乙': [4, 2],  // 辰寅
+    '丙': [6, 4],  // 午辰
+    '戊': [6, 4],  // 午辰
+    '丁': [7, 5],  // 未巳
+    '己': [7, 5],  // 未巳
+    '庚': [9, 7],  // 酉未
+    '辛': [10, 8], // 戌申
+    '壬': [0, 10], // 子戌
+    '癸': [1, 11]  // 丑亥
+  }
+  
+  const [yangPos, tuoPos] = yangTuoTable[yearStem] || [0, 2]
+  positions.set('擎羊', [yangPos])
+  positions.set('陀罗', [tuoPos])
+  
+  // 火星 - 根据年支确定起始宫位，再顺数至时辰
+  const yearBranchIndex = BRANCHES.indexOf(yearBranch as any)
+  let huoxingStartPos: number
+  if ([2, 6, 10].includes(yearBranchIndex)) {  // 寅午戌年
+    huoxingStartPos = 1  // 从丑宫起
+  } else if ([8, 0, 4].includes(yearBranchIndex)) {  // 申子辰年
+    huoxingStartPos = 2  // 从寅宫起
+  } else if ([5, 9, 1].includes(yearBranchIndex)) {  // 巳酉丑年
+    huoxingStartPos = 3  // 从卯宫起
+  } else {  // 亥卯未年
+    huoxingStartPos = 9  // 从酉宫起
+  }
+  const huoxingPos = (huoxingStartPos + timeZhiIndex) % 12
+  positions.set('火星', [huoxingPos])
+  
+  // 铃星 - 类似火星但起始宫位不同（暂保留原算法，待确认）
+  const bellPos = (yearBranchIndex + timeZhiIndex + 6) % 12
+  positions.set('铃星', [bellPos])
+  
+  // 地空地劫 - 根据时支
+  positions.set('地空', [(11 - timeZhiIndex) % 12])
+  positions.set('地劫', [(11 + timeZhiIndex) % 12])
+  
+  // 天刑 - 根据月支
+  // 正月在酉，二月在戌...十二月在申
+  const tianxingPos = (9 + (month - 1)) % 12
+  positions.set('天刑', [tianxingPos])
+  
+  return positions
+}
+
+/**
+ * 计算桃花星位置
+ * Calculate romance star positions
+ * 
+ * @ai-context 桃花星包含：红鸾、天喜、天姚、咸池
+ * 
+ * @param yearBranch 年支
+ */
+export function calculateRomanceStarPositions(
+  yearBranch: string
+): Map<string, number[]> {
+  const positions = new Map<string, number[]>()
+  const yearBranchIndex = BRANCHES.indexOf(yearBranch as any)
+  
+  // 红鸾 - 根据年支
+  // 子年在卯，丑年在寅，寅年在丑...
+  const hongluanTable: Record<number, number> = {
+    0: 3,   // 子年在卯
+    1: 2,   // 丑年在寅
+    2: 1,   // 寅年在丑
+    3: 0,   // 卯年在子
+    4: 11,  // 辰年在亥
+    5: 10,  // 巳年在戌
+    6: 9,   // 午年在酉
+    7: 8,   // 未年在申
+    8: 7,   // 申年在未
+    9: 6,   // 酉年在午
+    10: 5,  // 戌年在巳
+    11: 4   // 亥年在辰
+  }
+  
+  const hongluanPos = hongluanTable[yearBranchIndex] || 0
+  positions.set('红鸾', [hongluanPos])
+  
+  // 天喜 - 红鸾对宫
+  const tianxiPos = (hongluanPos + 6) % 12
+  positions.set('天喜', [tianxiPos])
+  
+  // 天姚 - 根据年支
+  // 规律：子年在丑，丑年在寅...
+  const tianyaoPos = (yearBranchIndex + 1) % 12
+  positions.set('天姚', [tianyaoPos])
+  
+  // 咸池 - 根据年支（桃花位）
+  // 申子辰在酉，巳酉丑在午，寅午戌在卯，亥卯未在子
+  const xianchiTable: Record<number, number> = {
+    0: 9,   // 子年在酉
+    1: 6,   // 丑年在午
+    2: 3,   // 寅年在卯
+    3: 0,   // 卯年在子
+    4: 9,   // 辰年在酉
+    5: 6,   // 巳年在午
+    6: 3,   // 午年在卯
+    7: 0,   // 未年在子
+    8: 9,   // 申年在酉
+    9: 6,   // 酉年在午
+    10: 3,  // 戌年在卯
+    11: 0   // 亥年在子
+  }
+  
+  const xianchiPos = xianchiTable[yearBranchIndex] || 0
+  positions.set('咸池', [xianchiPos])
+  
+  return positions
+}
+
+/**
+ * 计算小星位置
+ * Calculate minor star positions
+ * 
+ * @ai-context 小星不包含已分类的煞星、桃花星等
+ * 包含博士十二神、年干系、年支系、月系、日系等多组小星
+ * 
+ * @param month 农历月 (1-12)
+ * @param day 农历日 (1-30)
+ * @param timeZhiIndex 时辰索引 (0-11)
+ * @param yearStem 年干
+ * @param yearBranch 年支
+ * @param lifePalaceIndex 命宫索引 (0-11)
+ * @param bodyPalaceIndex 身宫索引 (0-11)
+ */
+export function calculateMinorStarPositions(
+  month: number,
+  day: number,
+  timeZhiIndex: number,
+  yearStem: string,
+  yearBranch: string,
+  lifePalaceIndex?: number,
+  bodyPalaceIndex?: number
+): Map<string, number[]> {
+  const positions = new Map<string, number[]>()
+  const yearBranchIndex = BRANCHES.indexOf(yearBranch as any)
+  const yearStemIndex = STEMS.indexOf(yearStem as any)
+  
+  // === 已有小星 ===
+  
+  // 三台 - 基于左辅位置和生日计算
+  const zuofuPosition = (4 + (month - 1)) % 12  // 左辅位置
+  const santaiPos = (zuofuPosition + (day - 1)) % 12  // 从左辅位置数日期
+  positions.set('三台', [santaiPos])
+  
+  // 八座 - 基于右弼位置和生日计算
+  const youbiPosition = (10 - (month - 1) + 12) % 12  // 右弼位置
+  const bazuoPos = (youbiPosition - (day - 1) + 12) % 12  // 从右弼位置逆数日期
+  positions.set('八座', [bazuoPos])
+  
+  // 恩光 - 基于文昌位置（年干查表）和生日
+  const wenchangByGanTable: Record<string, number> = {
+    '甲': 5,   // 巳
+    '乙': 6,   // 午
+    '丙': 8,   // 申
+    '丁': 9,   // 酉
+    '戊': 8,   // 申
+    '己': 9,   // 酉
+    '庚': 11,  // 亥
+    '辛': 0,   // 子
+    '壬': 2,   // 寅
+    '癸': 3    // 卯
+  }
+  const wenchangPosition = wenchangByGanTable[yearStem] ?? 0
+  const enguangPos = (wenchangPosition + (day - 1)) % 12  // 从文昌位置顺数生日数
+  positions.set('恩光', [enguangPos])
+  
+  // 天贵 - 基于文曲位置和生日
+  // 从文曲的下一个宫位开始，顺时针数生日-1格
+  const wenquPosition = (4 + timeZhiIndex) % 12  // 文曲位置
+  const tianguiSteps = Math.max(0, day - 1)  // 生日-1，至少为0
+  const tianguiPos = (wenquPosition + 1 + tianguiSteps) % 12  // 从文曲下一宫开始
+  positions.set('天贵', [tianguiPos])
+  
+  // 龙池凤阁 - 根据年支
+  positions.set('龙池', [(yearBranchIndex + 4) % 12])
+  positions.set('凤阁', [(10 - yearBranchIndex + 12) % 12])
+  
+  // 孤辰寡宿 - 根据年支（孤寡星）
+  const guchenTable = [2, 2, 5, 5, 5, 8, 8, 8, 11, 11, 11, 2]
+  const guasuTable = [10, 10, 10, 1, 1, 1, 4, 4, 4, 7, 7, 7]
+  positions.set('孤辰', [guchenTable[yearBranchIndex]])
+  positions.set('寡宿', [guasuTable[yearBranchIndex]])
+  
+  // 天哭天虚 - 根据年支
+  positions.set('天哭', [(6 - yearBranchIndex + 12) % 12])
+  positions.set('天虚', [(6 + yearBranchIndex) % 12])
+  
+  // 天官 - 根据年干
+  const tianguanTable: Record<string, number> = {
+    '甲': 7,   // 未
+    '乙': 4,   // 辰
+    '丙': 5,   // 巳
+    '丁': 2,   // 寅
+    '戊': 3,   // 卯
+    '己': 9,   // 酉
+    '庚': 11,  // 亥
+    '辛': 9,   // 酉
+    '壬': 10,  // 戌
+    '癸': 0    // 子
+  }
+  const tianguanPos = tianguanTable[yearStem] ?? 0
+  positions.set('天官', [tianguanPos])
+  
+  // 天福 - 根据年干
+  const tianfuTable: Record<string, number> = {
+    '甲': 9,   // 酉
+    '乙': 8,   // 申
+    '丙': 0,   // 子
+    '丁': 11,  // 亥
+    '戊': 3,   // 卯
+    '己': 2,   // 寅
+    '庚': 6,   // 午
+    '辛': 5,   // 巳
+    '壬': 6,   // 午
+    '癸': 5    // 巳
+  }
+  const tianfuPos = tianfuTable[yearStem] ?? 0
+  positions.set('天福', [tianfuPos])
+  
+  // 台辅 - 从午宫起子时，顺时针数至生时
+  const taifuPos = (6 + timeZhiIndex) % 12  // 午宫索引6 + 生时索引
+  positions.set('台辅', [taifuPos])
+  
+  // 封诰 - 从寅宫起子时，顺数至生时支
+  const fenggaoPos = (2 + timeZhiIndex) % 12  // 寅宫索引2，加时辰索引
+  positions.set('封诰', [fenggaoPos])
+  
+  // === 新增21颗小星 ===
+  
+  // 1. 天空 (博士十二神煞之一) - 根据年支
+  // 子年在丑，丑年在寅，依次类推
+  const tiankongPos = (yearBranchIndex + 1) % 12
+  positions.set('天空', [tiankongPos])
+  
+  // 2. 天厨 - 根据生年天干
+  const tianchuTable: Record<string, number> = {
+    '甲': 5,  // 巳
+    '乙': 6,  // 午
+    '丙': 0,  // 子
+    '丁': 11, // 亥
+    '戊': 8,  // 申
+    '己': 9,  // 酉
+    '庚': 2,  // 寅
+    '辛': 3,  // 卯
+    '壬': 6,  // 午
+    '癸': 5   // 巳
+  }
+  const tianchuPos = tianchuTable[yearStem] ?? 0
+  positions.set('天厨', [tianchuPos])
+  
+  // 3. 截空 (正空与傍空) - 根据生年天干，两个位置
+  const jiekongTable: Record<string, [number, number]> = {
+    '甲': [8, 9],   // 申、酉
+    '己': [8, 9],   // 申、酉
+    '乙': [6, 7],   // 午、未
+    '庚': [6, 7],   // 午、未
+    '丙': [4, 5],   // 辰、巳
+    '辛': [4, 5],   // 辰、巳
+    '丁': [2, 3],   // 寅、卯
+    '壬': [2, 3],   // 寅、卯
+    '戊': [0, 1],   // 子、丑
+    '癸': [0, 1]    // 子、丑
+  }
+  const [jiekong1, jiekong2] = jiekongTable[yearStem] ?? [0, 11]
+  positions.set('截空', [jiekong1, jiekong2])
+  
+  // 4. 旬空 - 根据年柱干支计算旬空和副旬空（正确六十甲子算法）
+  // 六旬旬空对照表
+  const xunkongTable: Record<string, [number, number]> = {
+    // 甲子旬 (甲子至癸酉) - 旬空戌亥
+    '甲子': [10, 11], '乙丑': [10, 11], '丙寅': [10, 11], '丁卯': [10, 11], '戊辰': [10, 11],
+    '己巳': [10, 11], '庚午': [10, 11], '辛未': [10, 11], '壬申': [10, 11], '癸酉': [10, 11],
+    // 甲戌旬 (甲戌至癸未) - 旬空申酉
+    '甲戌': [8, 9], '乙亥': [8, 9], '丙子': [8, 9], '丁丑': [8, 9], '戊寅': [8, 9],
+    '己卯': [8, 9], '庚辰': [8, 9], '辛巳': [8, 9], '壬午': [8, 9], '癸未': [8, 9],
+    // 甲申旬 (甲申至癸巳) - 旬空午未
+    '甲申': [6, 7], '乙酉': [6, 7], '丙戌': [6, 7], '丁亥': [6, 7], '戊子': [6, 7],
+    '己丑': [6, 7], '庚寅': [6, 7], '辛卯': [6, 7], '壬辰': [6, 7], '癸巳': [6, 7],
+    // 甲午旬 (甲午至癸卯) - 旬空辰巳
+    '甲午': [4, 5], '乙未': [4, 5], '丙申': [4, 5], '丁酉': [4, 5], '戊戌': [4, 5],
+    '己亥': [4, 5], '庚子': [4, 5], '辛丑': [4, 5], '壬寅': [4, 5], '癸卯': [4, 5],
+    // 甲辰旬 (甲辰至癸丑) - 旬空寅卯
+    '甲辰': [2, 3], '乙巳': [2, 3], '丙午': [2, 3], '丁未': [2, 3], '戊申': [2, 3],
+    '己酉': [2, 3], '庚戌': [2, 3], '辛亥': [2, 3], '壬子': [2, 3], '癸丑': [2, 3],
+    // 甲寅旬 (甲寅至癸亥) - 旬空子丑
+    '甲寅': [0, 1], '乙卯': [0, 1], '丙辰': [0, 1], '丁巳': [0, 1], '戊午': [0, 1],
+    '己未': [0, 1], '庚申': [0, 1], '辛酉': [0, 1], '壬戌': [0, 1], '癸亥': [0, 1]
+  }
+  
+  const yearGanZhi = yearStem + yearBranch
+  const [kong1, kong2] = xunkongTable[yearGanZhi] ?? [10, 11]
+  
+  // 判断年干阴阳属性确定正空和副空
+  const yangStem = ['甲', '丙', '戊', '庚', '壬'].includes(yearStem)
+  const yangBranches = [0, 2, 4, 6, 8, 10]  // 子寅辰午申戌为阳支
+  
+  let zhengkong, fukong
+  if ((yangBranches.includes(kong1) && yangStem) || (!yangBranches.includes(kong1) && !yangStem)) {
+    zhengkong = kong1
+    fukong = kong2
+  } else {
+    zhengkong = kong2
+    fukong = kong1
+  }
+  
+  positions.set('旬空', [zhengkong, fukong])
+  
+  // 5. 天巫 - 根据年支和月份计算
+  // 规则：四马之地起正月，顺数至生月
+  // 寅卯辰年从巳宫起，巳午未年从申宫起，申酉戌年从亥宫起，亥子丑年从寅宫起
+  let tianwuStartPos: number
+  if ([2, 3, 4].includes(yearBranchIndex)) {  // 寅卯辰年（春季）
+    tianwuStartPos = 5  // 从巳宫起
+  } else if ([5, 6, 7].includes(yearBranchIndex)) {  // 巳午未年（夏季）
+    tianwuStartPos = 8  // 从申宫起
+  } else if ([8, 9, 10].includes(yearBranchIndex)) {  // 申酉戌年（秋季）
+    tianwuStartPos = 11  // 从亥宫起
+  } else {  // 亥子丑年（冬季）
+    tianwuStartPos = 2  // 从寅宫起
+  }
+  const tianwuPos = (tianwuStartPos + (month - 1)) % 12  // 从起始宫顺数到生月
+  positions.set('天巫', [tianwuPos])
+  
+  // 6. 解神 - 从申宫起正月，顺时针数至生月
+  const jieshenPos = (8 + (month - 1)) % 12  // 申宫索引8
+  positions.set('解神', [jieshenPos])
+  
+  // 7. 破碎 - 根据年支
+  const posuiTable: Record<number, number> = {
+    0: 5,   // 子(子午卯酉)在巳
+    1: 1,   // 丑(辰戌丑未)在丑
+    2: 9,   // 寅(寅申巳亥)在酉
+    3: 5,   // 卯(子午卯酉)在巳
+    4: 1,   // 辰(辰戌丑未)在丑
+    5: 9,   // 巳(寅申巳亥)在酉
+    6: 5,   // 午(子午卯酉)在巳
+    7: 1,   // 未(辰戌丑未)在丑
+    8: 9,   // 申(寅申巳亥)在酉
+    9: 5,   // 酉(子午卯酉)在巳
+    10: 1,  // 戌(辰戌丑未)在丑
+    11: 9   // 亥(寅申巳亥)在酉
+  }
+  const posuiPos = posuiTable[yearBranchIndex] ?? 0
+  positions.set('破碎', [posuiPos])
+  
+  // 8. 华盖 - 根据年支（寅午戌在戌，亥卯未在未，申子辰在辰，巳酉丑在丑）
+  const huagaiTable: Record<number, number> = {
+    0: 4,   // 子(申子辰)在辰
+    1: 1,   // 丑(巳酉丑)在丑
+    2: 10,  // 寅(寅午戌)在戌
+    3: 7,   // 卯(亥卯未)在未
+    4: 4,   // 辰(申子辰)在辰
+    5: 1,   // 巳(巳酉丑)在丑
+    6: 10,  // 午(寅午戌)在戌
+    7: 7,   // 未(亥卯未)在未
+    8: 4,   // 申(申子辰)在辰
+    9: 1,   // 酉(巳酉丑)在丑
+    10: 10, // 戌(寅午戌)在戌
+    11: 7   // 亥(亥卯未)在未
+  }
+  const huagaiPos = huagaiTable[yearBranchIndex] ?? 0
+  positions.set('华盖', [huagaiPos])
+  
+  // 9. 天德 - 从酉宫起子年，顺时针数至生年地支
+  const tiandePos = (9 + yearBranchIndex) % 12
+  positions.set('天德', [tiandePos])
+  
+  // 10. 天才 - 从命宫起子年，顺时针数至生年地支
+  if (lifePalaceIndex !== undefined) {
+    const tiancaiPos = (lifePalaceIndex + yearBranchIndex) % 12
+    positions.set('天才', [tiancaiPos])
+  }
+  
+  // 11. 天寿 - 从身宫起子年，顺时针数至生年地支
+  if (bodyPalaceIndex !== undefined) {
+    const tianshouPos = (bodyPalaceIndex + yearBranchIndex) % 12
+    positions.set('天寿', [tianshouPos])
+  }
+  
+  // 12. 天使 - 固定在疾厄宫
+  // 疾厄宫是命宫逆时针第6宫
+  if (lifePalaceIndex !== undefined) {
+    const jiegongIndex = (lifePalaceIndex - 5 + 12) % 12  // 疾厄宫位置
+    positions.set('天使', [jiegongIndex])
+  }
+  
+  // 13. 天伤 - 固定在仆役宫（交友宫）
+  // 交友宫是命宫逆时针第8宫
+  if (lifePalaceIndex !== undefined) {
+    const jiaoyouGongIndex = (lifePalaceIndex - 7 + 12) % 12
+    positions.set('天伤', [jiaoyouGongIndex])
+  }
+  
+  // 14. 劫煞 - 根据年支（寅午戌在亥，亥卯未在申，申子辰在巳，巳酉丑在寅）
+  const jieshaTable: Record<number, number> = {
+    0: 5,   // 子(申子辰)在巳
+    1: 2,   // 丑(巳酉丑)在寅
+    2: 11,  // 寅(寅午戌)在亥
+    3: 8,   // 卯(亥卯未)在申
+    4: 5,   // 辰(申子辰)在巳
+    5: 2,   // 巳(巳酉丑)在寅
+    6: 11,  // 午(寅午戌)在亥
+    7: 8,   // 未(亥卯未)在申
+    8: 5,   // 申(申子辰)在巳
+    9: 2,   // 酉(巳酉丑)在寅
+    10: 11, // 戌(寅午戌)在亥
+    11: 8   // 亥(亥卯未)在申
+  }
+  const jieshaPos = jieshaTable[yearBranchIndex] ?? 0
+  positions.set('劫煞', [jieshaPos])
+  
+  // 16. 息神 - 基于将星位置顺时针数第4个宫位
+  // 先确定将星位置（根据年支三合局）
+  let jiangxingPos: number
+  if ([8, 0, 4].includes(yearBranchIndex)) {  // 申子辰水局
+    jiangxingPos = 0  // 将星在子
+  } else if ([2, 6, 10].includes(yearBranchIndex)) {  // 寅午戌火局
+    jiangxingPos = 6  // 将星在午
+  } else if ([11, 3, 7].includes(yearBranchIndex)) {  // 亥卯未木局
+    jiangxingPos = 3  // 将星在卯
+  } else {  // 巳酉丑金局
+    jiangxingPos = 9  // 将星在酉
+  }
+  // 息神在将星顺时针第4个宫位（将星->攀鞍->岁驿->息神）
+  const xishenPos = (jiangxingPos + 3) % 12
+  positions.set('息神', [xishenPos])
+  
+  // 17. 天煞 - 根据年支（寅午戌在丑，亥卯未在戌，申子辰在未，巳酉丑在辰）
+  const tianshaTable: Record<number, number> = {
+    0: 7,   // 子(申子辰)在未
+    1: 4,   // 丑(巳酉丑)在辰
+    2: 1,   // 寅(寅午戌)在丑
+    3: 10,  // 卯(亥卯未)在戌
+    4: 7,   // 辰(申子辰)在未
+    5: 4,   // 巳(巳酉丑)在辰
+    6: 1,   // 午(寅午戌)在丑
+    7: 10,  // 未(亥卯未)在戌
+    8: 7,   // 申(申子辰)在未
+    9: 4,   // 酉(巳酉丑)在辰
+    10: 1,  // 戌(寅午戌)在丑
+    11: 10  // 亥(亥卯未)在戌
+  }
+  const tianshaPos = tianshaTable[yearBranchIndex] ?? 0
+  positions.set('天煞', [tianshaPos])
+  
+  // 18. 天月 - 根据年支查表
+  const tianyueTable: Record<number, number> = {
+    0: 7,   // 子年在未
+    1: 2,   // 丑年在寅
+    2: 10,  // 寅年在戌
+    3: 5,   // 卯年在巳
+    4: 4,   // 辰年在辰
+    5: 11,  // 巳年在亥
+    6: 8,   // 午年在申
+    7: 3,   // 未年在卯
+    8: 6,   // 申年在午
+    9: 1,   // 酉年在丑
+    10: 9,  // 戌年在酉
+    11: 0   // 亥年在子
+  }
+  const tianyuePos = tianyueTable[yearBranchIndex] ?? 0
+  positions.set('天月', [tianyuePos])
+  
+  // 19. 阴煞 - 根据生月固定对应关系
+  const yinshaTable: Record<number, number> = {
+    1: 2,   // 正月在寅
+    2: 0,   // 二月在子
+    3: 10,  // 三月在戌
+    4: 8,   // 四月在申
+    5: 6,   // 五月在午
+    6: 4,   // 六月在辰
+    7: 2,   // 七月在寅
+    8: 0,   // 八月在子
+    9: 10,  // 九月在戌
+    10: 8,  // 十月在申
+    11: 6,  // 十一月在午
+    12: 4   // 十二月在辰
+  }
+  const yinshaPos = yinshaTable[month] ?? 0
+  positions.set('阴煞', [yinshaPos])
+  
+  // 20. 月德 - 从巳宫起正月，顺时针数至生月
+  const yuedePos = (5 + (month - 1)) % 12
+  positions.set('月德', [yuedePos])
+  
+  
+  return positions
+}
+
+/**
+ * 计算生年四化
+ * Calculate birth year Si Hua transformations
+ */
+export function calculateBirthYearSihua(yearStem: string): {
+  A: string // 禄
+  B: string // 权
+  C: string // 科
+  D: string // 忌
+} {
+  return BIRTH_YEAR_SIHUA[yearStem] || { A: '', B: '', C: '', D: '' }
+}
+
+/**
+ * 计算飞宫四化
+ * Calculate flying palace Si Hua transformations
+ */
+export function calculateFlyingPalaceSihua(
+  palaceStem: string,
+  targetPalaceIndex: number,
+  sourcePalaceIndex: number
+): Array<{ star: string; type: string }> {
+  const sihua = FLYING_PALACE_SIHUA[palaceStem]
+  if (!sihua) return []
+  
+  const transformations: Array<{ star: string; type: string }> = []
+  
+  // 判断是向心还是离心
+  const isInward = targetPalaceIndex === (sourcePalaceIndex + 6) % 12 // 对宫
+  const prefix = isInward ? 'i' : 'x'
+  
+  // 添加四化
+  if (sihua.A) transformations.push({ star: sihua.A, type: `${prefix}A` })
+  if (sihua.B) transformations.push({ star: sihua.B, type: `${prefix}B` })
+  if (sihua.C) transformations.push({ star: sihua.C, type: `${prefix}C` })
+  if (sihua.D) transformations.push({ star: sihua.D, type: `${prefix}D` })
+  
+  return transformations
+}
+
+/**
+ * 计算斗君位置 (先天斗君)
+ * Calculate DouJun (Star General) position
+ * 斗君算法：以子宫起正月，逆数生月，所落之宫再起子时，顺数生时
+ * 
+ * @param monthLunar 农历月份 (1-12)
+ * @param timeZhiIndex 生时地支索引 (0-11, 对应子丑寅...)
+ * @returns 斗君所在地支
+ */
+export function calculateDouJun(monthLunar: number, timeZhiIndex: number): string {
+  // 子宫起正月，逆数生月
+  // 子宫索引0，正月(1) -> 子(0), 二月(2) -> 亥(11), 三月(3) -> 戌(10), ...
+  // 逆数公式：(12 - (monthLunar - 1)) % 12 = (13 - monthLunar) % 12
+  const monthPosition = (13 - monthLunar) % 12
+  
+  // 从该宫起子时，顺数生时
+  // 子时(0)在月宫，丑时(1)在下一宫，以此类推
+  const douJunPosition = (monthPosition + timeZhiIndex) % 12
+  
+  return BRANCHES[douJunPosition]
+}
+
+/**
+ * 计算命主身主
+ * Calculate life and body masters
+ * 
+ * @param yearBranch 年支
+ * @returns 命主和身主星
+ */
+export function calculateMasters(yearBranch: string, lifePalaceBranch: string): {
+  lifeMaster: string
+  bodyMaster: string
+} {
+  const yearBranchIndex = BRANCHES.indexOf(yearBranch as any)
+  const lifePalaceBranchIndex = BRANCHES.indexOf(lifePalaceBranch as any)
+  return {
+    lifeMaster: LIFE_MASTER_STARS[lifePalaceBranchIndex], // 命主用命宫地支索引
+    bodyMaster: BODY_MASTER_STARS[yearBranchIndex]        // 身主用出生年支索引
+  }
+}
+
+/**
+ * 获取先天斗君宫位索引
+ * Get Innate Dou Jun palace index
+ * 
+ * @description
+ * 先天斗君是紫微斗数中用于确定流年宫位的重要概念
+ * 从正月起子宫，逆数到出生月份，再从该宫起子时，顺数到出生时辰
+ * 
+ * @param month 农历生月 (1-12)
+ * @param timeZhiIndex 生时地支索引 (0-11)
+ * @returns 宫位索引 (0-11，对应子丑寅卯辰巳午未申酉戌亥)
+ */
+export function getInnateDauPalaceIndex(month: number, timeZhiIndex: number): number {
+  // 正月在子宫（索引0），二月在亥宫（索引11），三月在戌宫（索引10）...
+  // 公式：(12 - (month - 1)) % 12 = (13 - month) % 12
+  const monthPalaceIndex = (13 - month) % 12
+  
+  // 从月宫起子时，顺数到出生时辰
+  return (monthPalaceIndex + timeZhiIndex) % 12
+}
+
+/**
+ * 计算紫微大运起运岁数
+ * Calculate ZiWei major period start age
+ * 
+ * 紫微大运起始年龄就是五行局的局数
+ * 如：水二局=2岁起运，火六局=6岁起运
+ */
+export function calculateMajorPeriodStartAge(
+  bureau: string,
+  yearStem: string,
+  gender: 'male' | 'female'
+): number {
+  // 从五行局代码提取局数 (如："fire_6" -> 6, "water_2" -> 2)
+  const match = bureau.match(/_(\d+)$/)
+  const bureauNumber = match ? parseInt(match[1]) : 6
+  
+  // 紫微大运起始年龄就是局数
+  return bureauNumber
+}
+
+/**
+ * 计算紫微大运信息
+ * Calculate ZiWei major period information
+ * 
+ * 紫微大运计算规则：
+ * 1. 第一个大运从命宫开始，起始年龄是局数，结束年龄是局数+9
+ * 2. 根据年干性别判断顺逆
+ * 3. 顺行：命宫→父母宫→福德宫→田宅宫...
+ * 4. 逆行：命宫→兄弟宫→夫妻宫→子女宫...
+ */
+export function calculateMajorPeriods(
+  startAge: number,
+  birthYear: number,
+  lifePalaceIndex: number,
+  isClockwise: boolean
+): Array<{
+  period: number
+  startAge: number
+  endAge: number
+  startYear: number
+  endYear: number
+  palaceIndex: number
+}> {
+  const periods = []
+  
+  // 生成12个大运，每个大运10年
+  for (let i = 0; i < 12; i++) {
+    // 第一个大运起始年龄是局数，后续每个大运+10年
+    const periodStartAge = startAge + i * 10
+    const periodEndAge = periodStartAge + 9
+    
+    // 计算大运宫位
+    let palaceIndex
+    if (isClockwise) {
+      // 顺行：命宫 → 父母宫(+1) → 福德宫(+2) → ...
+      palaceIndex = (lifePalaceIndex + i) % 12
+    } else {
+      // 逆行：命宫 → 兄弟宫(-1) → 夫妻宫(-2) → ...
+      palaceIndex = (lifePalaceIndex - i + 12) % 12
+    }
+    
+    periods.push({
+      period: i + 1,
+      startAge: periodStartAge,
+      endAge: periodEndAge,
+      startYear: birthYear + periodStartAge - 1,
+      endYear: birthYear + periodEndAge - 1,
+      palaceIndex
+    })
+  }
+  
+  return periods
+}
+
+/**
+ * 计算流年岁数
+ * Calculate fleeting year ages for a branch
+ */
+export function calculateFleetingYears(branchIndex: number): number[] {
+  const years = []
+  // 从该地支开始，每12年循环一次
+  for (let i = 0; i < 10; i++) {
+    years.push(branchIndex + 1 + i * 12)
+  }
+  return years
+}
+
+/**
+ * 计算来因宫
+ * Calculate Laiyin Palace (根据年干确定，使用五虎遁方法定位地支)
+ * 五虎遁：甲己年起丙寅，乙庚年起戊寅，丙辛年起庚寅，丁壬年起壬寅，戊癸年起甲寅
+ */
+/**
+ * 计算来因宫
+ * Calculate Laiyin Palace
+ * 
+ * @description
+ * 来因宫是十二宫中宫干与生年天干相同的宫位名称。
+ * The Laiyin Palace is the palace name whose stem matches the year stem.
+ * 
+ * @algorithm
+ * 使用五虎遁法确定各宫天干，找出与年干相同的宫位，返回其在命盘中的名称。
+ * Uses Wu Hu Dun method to determine palace stems, finds the one matching year stem, returns palace name.
+ * 
+ * @param yearStem 生年天干
+ * @param lifePalaceIndex 命宫位置 (0-11)
+ * @returns 来因宫名称 (命宫/兄弟/夫妻等)
+ * 
+ * @example
+ * // 甲年生人，命宫在寅
+ * calculateLaiyinPalace('甲', 2) // 返回 "夫妻" (甲年五虎遁，申宫天干为甲)
+ */
+export function calculateLaiyinPalace(yearStem: string, lifePalaceIndex: number): string {
+  // 五虎遁表：年干 -> 寅宫起始天干
+  const wuHuDunTable: Record<string, string> = {
+    '甲': '丙', '己': '丙',  // 甲己之年丙作首
+    '乙': '戊', '庚': '戊',  // 乙庚之岁戊为头  
+    '丙': '庚', '辛': '庚',  // 丙辛必定从庚起
+    '丁': '壬', '壬': '壬',  // 丁壬壬位顺流行
+    '戊': '甲', '癸': '甲'   // 戊癸之年甲寅宫
+  }
+  
+  const startStem = wuHuDunTable[yearStem]
+  if (!startStem) return PALACE_NAMES[0] // 默认返回命宫
+  
+  // 从寅宫(index=2)开始，按五虎遁推算各宫天干
+  const startStemIndex = STEMS.indexOf(startStem as any)
+  
+  // 遍历12宫，找到天干与年干相同的宫位
+  for (let i = 0; i < 12; i++) {
+    // 从寅宫开始，顺时针计算各宫的天干
+    // 寅宫=2, 卯宫=3, ..., 子宫=0, 丑宫=1
+    const palaceIndex = (i + 2) % 12
+    const palaceStemIndex = (startStemIndex + i) % 10
+    const palaceStem = STEMS[palaceStemIndex]
+    
+    // 找到与年干相同的宫位
+    if (palaceStem === yearStem) {
+      // 计算该宫位相对于命宫的位置，返回对应的宫名
+      const relativeIndex = (palaceIndex - lifePalaceIndex + 12) % 12
+      return PALACE_NAMES[relativeIndex]
+    }
+  }
+  
+  return PALACE_NAMES[0] // 默认返回命宫
+}
+
+/**
+ * 计算小限宫位索引
+ * Calculate minor limit palace index for specific age
+ * 
+ * @param age 年龄 (虚岁)
+ * @param lifePalaceIndex 命宫索引 (0-11)
+ * @param yearBranch 出生年支
+ * @param gender 性别
+ * @returns 小限宫位索引 (0-11)
+ */
+export function calculateMinorLimitPalace(
+  age: number,
+  lifePalaceIndex: number,
+  yearBranch: string,
+  gender: 'male' | 'female'
+): number {
+  // 确定起运宫位置（根据生年地支三合局土位的相冲位）
+  let startPalaceIndex: number
+  
+  switch (yearBranch) {
+    case '寅': case '午': case '戌':
+      // 寅午戌年支在辰位起运
+      startPalaceIndex = 4  // 辰宫索引
+      break
+    case '申': case '子': case '辰':
+      // 申子辰年支在戌位起运  
+      startPalaceIndex = 10 // 戌宫索引
+      break
+    case '巳': case '酉': case '丑':
+      // 巳酉丑年支在未位起运
+      startPalaceIndex = 7  // 未宫索引
+      break
+    case '亥': case '卯': case '未':
+      // 亥卯未年支在丑位起运
+      startPalaceIndex = 1  // 丑宫索引
+      break
+    default:
+      startPalaceIndex = 0  // 默认子宫
+  }
+  
+  // 计算小限位置
+  // 1岁在起运宫，2岁在下一宫，依此类推
+  const offset = (age - 1) % 12
+  
+  if (gender === 'male') {
+    // 男命一律顺行
+    return (startPalaceIndex + offset) % 12
+  } else {
+    // 女命一律逆行
+    return (startPalaceIndex - offset + 12) % 12
+  }
+}
+
+/**
+ * 计算120年完整小限分布
+ * Calculate complete 120-year minor limits distribution from birth year position
+ * @param yearBranch 出生年支
+ * @param gender 性别
+ * @param lifePalaceIndex 命宫索引（可选，用于兼容性）
+ * @returns 各地支位置对应的年龄数组
+ */
+export function calculate120YearMinorLimits(
+  yearBranch: string,
+  gender: 'male' | 'female',
+  lifePalaceIndex?: number
+): Record<number, number[]> {
+  const result: Record<number, number[]> = {}
+  
+  // 初始化各地支位置的年龄数组
+  for (let i = 0; i < 12; i++) {
+    result[i] = []
+  }
+  
+  // 确定起运宫位置（根据生年地支三合局土位的相冲位）
+  let startPalaceIndex: number
+  
+  switch (yearBranch) {
+    case '寅': case '午': case '戌':
+      // 寅午戌年支在辰位起运
+      startPalaceIndex = 4  // 辰宫索引
+      break
+    case '申': case '子': case '辰':
+      // 申子辰年支在戌位起运  
+      startPalaceIndex = 10 // 戌宫索引
+      break
+    case '巳': case '酉': case '丑':
+      // 巳酉丑年支在未位起运
+      startPalaceIndex = 7  // 未宫索引
+      break
+    case '亥': case '卯': case '未':
+      // 亥卯未年支在丑位起运
+      startPalaceIndex = 1  // 丑宫索引
+      break
+    default:
+      startPalaceIndex = 0  // 默认子宫
+  }
+  
+  // 计算120年的小限分布（10个12年轮回）
+  for (let age = 1; age <= 120; age++) {
+    let palaceIndex: number
+    const offset = (age - 1) % 12
+    
+    if (gender === 'male') {
+      // 男命一律顺行
+      palaceIndex = (startPalaceIndex + offset) % 12
+    } else {
+      // 女命一律逆行
+      palaceIndex = (startPalaceIndex - offset + 12) % 12
+    }
+    
+    result[palaceIndex].push(age)
+  }
+  
+  return result
+}
+
+/**
+ * 计算小限岁数分布（兼容旧版本）
+ * Calculate minor period ages distribution based on correct traditional rules
+ * @param yearBranch 年支
+ * @param gender 性别
+ * @param birthDate 出生日期
+ * @returns 各地支位置对应的年龄数组
+ */
+export function calculateMinorPeriod(
+  yearBranch: string,
+  gender: 'male' | 'female', 
+  birthDate: Date
+): Record<number, number[]> {
+  // 使用新的120年计算函数
+  return calculate120YearMinorLimits(yearBranch, gender)
+}
+
+
+/**
+ * 计算正确的自化系统
+ * Calculate correct self-transformation system
+ * @param palaceStem - 本宫天干
+ * @param starsInPalace - 本宫星曜列表  
+ * @param oppositePalaceStem - 对宫天干
+ * @returns 本宫星曜的自化标记
+ */
+export function calculateSelfTransformations(
+  palaceStem: string,
+  starsInPalace: string[],
+  oppositePalaceStem: string
+): Array<{
+  star: string
+  type: 'iA' | 'iB' | 'iC' | 'iD' | 'xA' | 'xB' | 'xC' | 'xD'
+  source: 'inward' | 'outward'
+}> {
+  const transformations: Array<{
+    star: string
+    type: 'iA' | 'iB' | 'iC' | 'iD' | 'xA' | 'xB' | 'xC' | 'xD'
+    source: 'inward' | 'outward'
+  }> = []
+  
+  // 获取本宫天干四化和对宫天干四化
+  const palaceSihua = BIRTH_YEAR_SIHUA[palaceStem]
+  const oppositeSihua = BIRTH_YEAR_SIHUA[oppositePalaceStem]
+  
+  starsInPalace.forEach(starName => {
+    // 1. 离心自化：本宫天干对本宫星曜的四化
+    if (palaceSihua) {
+      Object.entries(palaceSihua).forEach(([type, sihuaStarName]) => {
+        if (sihuaStarName === starName) {
+          transformations.push({
+            star: starName,
+            type: `x${type}` as 'xA' | 'xB' | 'xC' | 'xD',
+            source: 'outward'
+          })
+        }
+      })
+    }
+    
+    // 2. 向心自化：对宫天干对本宫星曜的四化
+    if (oppositeSihua) {
+      Object.entries(oppositeSihua).forEach(([type, sihuaStarName]) => {
+        if (sihuaStarName === starName) {
+          transformations.push({
+            star: starName,
+            type: `i${type}` as 'iA' | 'iB' | 'iC' | 'iD',
+            source: 'inward'
+          })
+        }
+      })
+    }
+  })
+  
+  return transformations
+}
+
+/**
+ * 计算五行局详细信息
+ * Calculate detailed Five Elements Bureau information
+ */
+export function calculateFiveElementsBureauDetail(
+  yearStem: string,
+  yearBranch: string,
+  month: number,
+  hour: number
+): {
+  name: string
+  局数: number
+  element: string
+  code: string
+} {
+  // 计算命宫位置
+  const lifePalaceIndex = calculateLifePalace(month, hour)
+  const lifePalaceBranch = BRANCHES[lifePalaceIndex]
+  
+  // 使用年天干 + 命宫地支查表
+  const ganZhi = yearStem + lifePalaceBranch
+  
+  if (!FIVE_ELEMENTS_BUREAU[ganZhi]) {
+    throw new Error(`Invalid GanZhi combination for Five Elements Bureau: ${ganZhi}`)
+  }
+  
+  const chineseBureau = FIVE_ELEMENTS_BUREAU[ganZhi]
+  
+  // 从中文五行局名称解析出英文代码 (如："火六局" -> "fire_6")
+  const bureauMapping: Record<string, string> = {
+    '水二局': 'water_2',
+    '木三局': 'wood_3', 
+    '金四局': 'metal_4',
+    '土五局': 'earth_5',
+    '火六局': 'fire_6'
+  }
+  
+  const bureauCode = bureauMapping[chineseBureau] || 'fire_6'
+  const [element, numberStr] = bureauCode.split('_')
+  const number = parseInt(numberStr) || 6
+  
+  // 转换为中文名称
+  const elementNames: Record<string, string> = {
+    'water': '水',
+    'wood': '木', 
+    'metal': '金',
+    'earth': '土',
+    'fire': '火'
+  }
+  
+  const elementName = elementNames[element] || '火'
+  const chineseNumbers = ['', '一', '二', '三', '四', '五', '六']
+  const chineseNumber = chineseNumbers[number] || '六'
+  
+  return {
+    name: `${elementName}${chineseNumber}局`,
+    局数: number,
+    element: elementName,  // 返回中文五行名称
+    code: bureauCode
+  }
+}
+
+/**
+ * 获取宫位名称
+ * Get palace name by index relative to life palace
+ */
+export function getPalaceName(index: number, lifePalaceIndex: number): string {
+  // 十二宫是逆时针排布的
+  const relativeIndex = (lifePalaceIndex - index + 12) % 12
+  return PALACE_NAMES[relativeIndex]
+}
+
+/**
+ * 获取星曜在指定宫位的亮度数值
+ * Get star brightness value at specified palace position
+ * @param starName 星曜名称 Star name
+ * @param palaceIndex 宫位索引 (0-11, 对应子丑寅卯辰巳午未申酉戌亥)
+ * @returns 亮度数值 (0-5: 陷平利得旺庙)
+ */
+export function getStarBrightness(starName: string, palaceIndex: number): StarBrightnessValue {
+  const brightnessArray = STAR_BRIGHTNESS_TABLE[starName]
+  if (!brightnessArray || palaceIndex < 0 || palaceIndex > 11) {
+    return STAR_BRIGHTNESS.PING // 默认返回平
+  }
+  
+  const brightnessLevel = brightnessArray[palaceIndex]
+  return BRIGHTNESS_LEVEL_MAP[brightnessLevel] || STAR_BRIGHTNESS.PING
+}
+
+// 导入完整命盘类型定义
+import type { 
+  ZiWeiCompleteChart, 
+  ZiWeiChartInput, 
+  BirthInfo, 
+  PalaceInfo, 
+  StarInfo,
+  MajorPeriodInfo
+} from './complete-chart-types'
+
+import { 
+  getCurrentMajorPeriod as getTimeMajorPeriod,
+  calculateAge as getTimeAge
+} from './time-calculations'
+
+/**
+ * 生成完整紫微斗数命盘数据 - 统一入口函数
+ * Generate Complete ZiWei Chart - Unified API Entry Point
+ * 
+ * 这是唯一的对外入口，一次性生成所有HOOK API需要的数据格式
+ * This is the single external entry point that generates all data needed for HOOK API
+ */
+export function generateCompleteZiWeiChart(input: ZiWeiChartInput): ZiWeiCompleteChart {
+  try {
+    // 1. 创建SolarDay对象和BaZi参数
+    const solarTime = SolarTime.fromYmdHms(input.year, input.month, input.day, input.hour, 0, 0)
+    const baziParams = createBaZiParams(solarTime, input.gender === 'male' ? 0 : 1)
+
+    // 2. 生成基础出生信息  
+    const birthInfo: BirthInfo = {
+      solar: {
+        year: input.year,
+        month: input.month,
+        day: input.day,
+        hour: input.hour,
+        gender: input.gender,
+        isLunar: input.isLunar || false
+      },
+      lunar: {
+        yearStem: baziParams.yearStem,
+        yearBranch: baziParams.yearBranch,
+        yearGanzhi: baziParams.yearStem + baziParams.yearBranch,
+        monthLunar: baziParams.lunarMonth,
+        dayLunar: baziParams.lunarDay,
+        hourBranch: baziParams.timeBranch,
+        isLunar: input.isLunar,
+        isLeapMonth: input.isLeapMonth
+      }
+    }
+
+    // 3. 计算核心宫位信息 (使用农历数据)
+    const lifePalaceIndex = calculateLifePalace(baziParams.lunarMonth, baziParams.timeZhiIndex)
+    const bodyPalaceIndex = calculateBodyPalace(baziParams.lunarMonth, baziParams.timeZhiIndex)
+    
+    // 4. 计算五行局 (使用农历数据)
+    const fiveElementsBureau = calculateFiveElementsBureauDetail(
+      baziParams.yearStem,
+      baziParams.yearBranch,
+      baziParams.lunarMonth,
+      baziParams.timeZhiIndex
+    )
+
+    // 5. 获取命主身主 (使用农历干支)
+    const lifePalaceBranch = BRANCHES[lifePalaceIndex]
+    const masters = calculateMasters(baziParams.yearBranch, lifePalaceBranch)
+    const lifeMaster = masters.lifeMaster
+    const bodyMaster = masters.bodyMaster
+
+    // 6. 计算各类星曜位置 (使用农历数据)
+    const ziweiPosition = calculateZiweiPosition(fiveElementsBureau.code, baziParams.lunarDay)
+    const tianfuPosition = (ziweiPosition + TIANFU_OFFSET_FROM_ZIWEI[ziweiPosition]) % 12
+    const mainStarPositions = calculateMainStarPositions(ziweiPosition, tianfuPosition)
+    const auxiliaryStarPositions = calculateAuxiliaryStarPositions(
+      baziParams.lunarMonth, 
+      baziParams.lunarDay, 
+      baziParams.timeZhiIndex,
+      baziParams.yearStem,
+      baziParams.yearBranch,
+      lifePalaceIndex
+    )
+    const maleficStarPositions = calculateMaleficStarPositions(
+      baziParams.lunarMonth,
+      baziParams.timeZhiIndex,
+      baziParams.yearStem,
+      baziParams.yearBranch
+    )
+    const minorStarPositions = calculateMinorStarPositions(
+      baziParams.lunarMonth, 
+      baziParams.lunarDay, 
+      baziParams.timeZhiIndex,
+      baziParams.yearStem,
+      baziParams.yearBranch,
+      lifePalaceIndex, 
+      bodyPalaceIndex
+    )
+    
+    // 7. 计算四化系统 (生年四化 + 飞宫四化 + 自化)
+    const birthSihua = calculateBirthYearSihua(baziParams.yearStem)
+    // TODO: 实现飞宫四化和自化系统
+    
+    // 8. 预处理所有宫位的星曜数据
+    const allPalacesStarsData = new Map<number, string[]>()
+    const allPalacesStemData = new Map<number, string>()
+    
+    // 先收集所有宫位的星曜和天干
+    for (let i = 0; i < 12; i++) {
+      const stem = calculateStemForBranch(i, baziParams.yearStem)
+      allPalacesStemData.set(i, stem)
+      
+      const starsInThisPalace: string[] = []
+      
+      // 收集主星
+      mainStarPositions.forEach((positions, starName) => {
+        if (positions.includes(i)) {
+          starsInThisPalace.push(starName)
+        }
+      })
+      
+      // 收集辅星
+      auxiliaryStarPositions.forEach((positions, starName) => {
+        if (positions.includes(i)) {
+          starsInThisPalace.push(starName)
+        }
+      })
+      
+      // 收集煞星
+      maleficStarPositions.forEach((positions, starName) => {
+        if (positions.includes(i)) {
+          starsInThisPalace.push(starName)
+        }
+      })
+      
+      // 杂耀不参加四化，不需要收集到starsInThisPalace
+      
+      allPalacesStarsData.set(i, starsInThisPalace)
+    }
+    
+    // 9. 预计算120年小限分布
+    const minorLimitsDistribution = calculate120YearMinorLimits(baziParams.yearBranch, input.gender, lifePalaceIndex)
+    
+    // 10. 预计算完整大运分布
+    const majorPeriodStartAge = calculateMajorPeriodStartAge(fiveElementsBureau.name, baziParams.yearStem, input.gender)
+    const isClockwise = (baziParams.yearStem === '甲' || baziParams.yearStem === '丙' || baziParams.yearStem === '戊' || baziParams.yearStem === '庚' || baziParams.yearStem === '壬') === (input.gender === 'male')
+    const allMajorPeriods = calculateMajorPeriods(majorPeriodStartAge, input.year, lifePalaceIndex, isClockwise)
+    
+    // 构建各宫位的大运年龄分布
+    const majorPeriodsDistribution: Record<number, number[]> = {}
+    for (let i = 0; i < 12; i++) {
+      majorPeriodsDistribution[i] = []
+    }
+    
+    allMajorPeriods.forEach(period => {
+      for (let age = period.startAge; age <= period.endAge; age++) {
+        majorPeriodsDistribution[period.palaceIndex].push(age)
+      }
+    })
+    
+    // 10. 生成十二宫完整数据
+    const palaces: { [branchName: string]: PalaceInfo } = {}
+    
+    for (let i = 0; i < 12; i++) {
+      const branch = BRANCHES[i]
+      const stem = calculateStemForBranch(i, baziParams.yearStem)
+      const palaceName = getPalaceName(i, lifePalaceIndex)
+      
+      // 收集该宫位的所有星曜
+      const mainStars: StarInfo[] = []
+      const auxiliaryStars: StarInfo[] = []
+      const minorStars: StarInfo[] = []
+      
+      // 添加主星
+      mainStarPositions.forEach((positions, starName) => {
+        if (positions.includes(i)) {
+          const brightness = getStarBrightness(starName, i)
+          
+          // 生年四化标记
+          let sihuaMark = undefined
+          if (birthSihua.A === starName) {
+            sihuaMark = 'A'  // 禄
+          } else if (birthSihua.B === starName) {
+            sihuaMark = 'B'  // 权
+          } else if (birthSihua.C === starName) {
+            sihuaMark = 'C'  // 科
+          } else if (birthSihua.D === starName) {
+            sihuaMark = 'D'  // 忌
+          }
+          
+          mainStars.push({
+            name: starName,
+            bright: getBrightnessName(brightness),
+            sihua: sihuaMark
+          })
+        }
+      })
+      
+      // 添加辅星
+      auxiliaryStarPositions.forEach((positions, starName) => {
+        if (positions.includes(i)) {
+          const brightness = getStarBrightness(starName, i)
+          
+          // 检查辅星的生年四化
+          let sihuaMark = undefined
+          if (birthSihua.A === starName) {
+            sihuaMark = 'A'
+          } else if (birthSihua.B === starName) {
+            sihuaMark = 'B'
+          } else if (birthSihua.C === starName) {
+            sihuaMark = 'C'
+          } else if (birthSihua.D === starName) {
+            sihuaMark = 'D'
+          }
+          
+          auxiliaryStars.push({
+            name: starName,
+            bright: getBrightnessName(brightness),
+            sihua: sihuaMark
+          })
+        }
+      })
+      
+      // 添加煞星 (归类到辅星中)
+      maleficStarPositions.forEach((positions, starName) => {
+        if (positions.includes(i)) {
+          const brightness = getStarBrightness(starName, i)
+          
+          // 检查煞星的生年四化
+          let sihuaMark = undefined
+          if (birthSihua.A === starName) {
+            sihuaMark = 'A'
+          } else if (birthSihua.B === starName) {
+            sihuaMark = 'B'
+          } else if (birthSihua.C === starName) {
+            sihuaMark = 'C'
+          } else if (birthSihua.D === starName) {
+            sihuaMark = 'D'
+          }
+          
+          auxiliaryStars.push({
+            name: starName,
+            bright: getBrightnessName(brightness),
+            sihua: sihuaMark
+          })
+        }
+      })
+      
+      // 添加杂耀
+      minorStarPositions.forEach((positions, starName) => {
+        if (positions.includes(i)) {
+          minorStars.push({
+            name: starName,
+            bright: '平' // 杂耀一般不分亮度
+          })
+        }
+      })
+      
+      // 计算完整的自化系统（包括向心和离心）
+      // 注意：杂耀不参加四化
+      const allStarsInPalace = [
+        ...mainStars.map(s => s.name),
+        ...auxiliaryStars.map(s => s.name)
+      ]
+      
+      // 计算对宫索引和天干
+      const oppositePalaceIndex = (i + 6) % 12
+      const oppositePalaceStem = calculateStemForBranch(oppositePalaceIndex, baziParams.yearStem)
+      
+      // 计算本宫所有星曜的自化（向心+离心）
+      const allStarsInThisPalace = [...mainStars.map(s => s.name), ...auxiliaryStars.map(s => s.name)]
+      const selfTransformations = calculateSelfTransformations(
+        stem,
+        allStarsInThisPalace,
+        oppositePalaceStem
+      )
+      
+      // 应用自化标记（只对主星和辅星）
+      const updateStarWithSelfSihua = (stars: StarInfo[]) => {
+        stars.forEach(star => {
+          const starTransformations = selfTransformations.filter(t => t.star === star.name)
+          if (starTransformations.length > 0) {
+            star.self_sihua = starTransformations.map(t => t.type).join(',')
+          }
+        })
+      }
+      
+      // 只更新主星和辅星，杂耀不参加四化
+      updateStarWithSelfSihua(mainStars)
+      updateStarWithSelfSihua(auxiliaryStars)
+      
+      // 计算该宫位的大运信息
+      const majorPeriodsInThisPalace = allMajorPeriods.filter(period => period.palaceIndex === i)
+      const majorPeriod: MajorPeriodInfo = majorPeriodsInThisPalace.length > 0 ? {
+        period: majorPeriodsInThisPalace[0].period,
+        startAge: majorPeriodsInThisPalace[0].startAge,
+        endAge: majorPeriodsInThisPalace[0].endAge,
+        startYear: majorPeriodsInThisPalace[0].startYear,
+        endYear: majorPeriodsInThisPalace[0].endYear
+      } : {
+        period: 0,
+        startAge: 0,
+        endAge: 0,
+        startYear: input.year,
+        endYear: input.year
+      }
+      
+      // 计算该宫位的流年周期 (按干支纪年法)
+      const fleetingYears: number[] = []
+      for (let age = 1; age <= 120; age++) {
+        // 从出生年干支开始，按甲子60年循环推算
+        const currentYearBranchIndex = (BRANCHES.indexOf(baziParams.yearBranch as any) + age - 1) % 12
+        if (currentYearBranchIndex === i) {
+          fleetingYears.push(age)
+        }
+      }
+      
+      // 使用优化的120年小限分布计算
+      const minorPeriod = minorLimitsDistribution[i] || []
+      
+      palaces[branch] = {
+        branch,
+        branchIndex: i,
+        stem,
+        palaceName,
+        mainStars,
+        auxiliaryStars, 
+        minorStars,
+        fleetingYears,
+        majorPeriod,
+        minorPeriod,
+        palaceStatus: {
+          isEmpty: mainStars.length === 0,
+          isBorrowingStars: false, // TODO: 实现借星逻辑
+          strength: mainStars.length > 0 ? 'normal' : 'weak',
+          conflictLevel: 0 // TODO: 实现冲突计算
+        }
+      }
+    }
+    
+    // 9. 组装完整数据结构
+    const completeChart: ZiWeiCompleteChart = {
+      birthInfo,
+      bazi: baziParams.yearStem + baziParams.yearBranch + baziParams.monthStem + baziParams.monthBranch + baziParams.dayStem + baziParams.dayBranch + baziParams.timeStem + baziParams.timeBranch,
+      baziQiyun: `${baziParams.qiyunDetail.years}年${baziParams.qiyunDetail.months}个月`, // 八字起运详细时间
+      baziDayun: baziParams.majorPeriods.map(period => 
+        `${period.startAge}-${period.endAge}岁: ${period.stem}${period.branch}`
+      ).join(', '),
+      lifePalace: getPalaceName(lifePalaceIndex, lifePalaceIndex),
+      bodyPalace: getPalaceName(bodyPalaceIndex, lifePalaceIndex), 
+      laiyinPalace: PALACE_NAMES[(lifePalaceIndex + 6) % 12], // 来因宫在迁移宫位置
+      lifeMaster,
+      bodyMaster,
+      doujun: calculateDouJun(baziParams.lunarMonth, baziParams.timeZhiIndex), // 使用农历月份和时辰索引
+      fiveElementsBureau: {
+        name: fiveElementsBureau.name,
+        number: fiveElementsBureau.局数.toString()
+      },
+      palaces,
+      sihuaAnalysis: {
+        birthYearSihua: {
+          stem: baziParams.yearStem,
+          transformations: {
+            lu: birthSihua.A || '',
+            quan: birthSihua.B || '',
+            ke: birthSihua.C || '',
+            ji: birthSihua.D || ''
+          }
+        }
+      },
+      generatedAt: new Date().toISOString(),
+      version: '1.0.0'
+    }
+    
+    return completeChart
+    
+  } catch (error) {
+    throw new Error(`ZiWei Chart generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+  }
+}
+
+// 辅助函数 - 获取亮度名称 (标准七等级制)
+function getBrightnessName(brightness: StarBrightnessValue): string {
+  const names = ['陷', '不', '平', '利', '得', '旺', '庙']
+  return names[brightness] || '平'
+}
+
+
+// 辅助函数 - 计算干支配宫 
+function calculateStemForBranch(branchIndex: number, yearStem: string): string {
+  // 紫微斗数宫干用年干起寅宫的五虎遁法
+  // 五虎遁表：年干 -> 寅宫起始天干
+  const wuHuDunTable: Record<string, string> = {
+    '甲': '丙', '己': '丙',  // 甲己之年丙作首
+    '乙': '戊', '庚': '戊',  // 乙庚之岁戊为头  
+    '丙': '庚', '辛': '庚',  // 丙辛必定从庚起
+    '丁': '壬', '壬': '壬',  // 丁壬壬位顺流行
+    '戊': '甲', '癸': '甲'   // 戊癸之年甲寅宫
+  }
+  
+  const yinStem = wuHuDunTable[yearStem]
+  if (!yinStem) return '甲' // 默认值
+  
+  const yinStemIndex = STEMS.indexOf(yinStem as any)
+  
+  // 计算从寅宫(索引2)到目标宫的偏移量
+  const offsetFromYin = (branchIndex - 2 + 12) % 12
+  
+  // 应用五虎遁：从寅宫天干开始，按十天干循环
+  const stemIndex = (yinStemIndex + offsetFromYin) % 10
+  return STEMS[stemIndex]
+}
+

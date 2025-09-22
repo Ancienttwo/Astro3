@@ -187,6 +187,7 @@
     "jest-environment-node": "^29.7.0",
     "jest-html-reporters": "^3.1.5",
     "magicui-mcp": "^1.0.1",
+    "oxlint": "^1.16.0",
     "playwright": "^1.53.2",
     "postcss": "^8.4.33",
     "solidity-coverage": "^0.8.1",
