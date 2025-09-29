@@ -9,14 +9,14 @@ const config: Config = {
     "*.{js,ts,jsx,tsx,mdx}"
   ],
   theme: {
-  	extend: {
-  		fontFamily: {
-  			rajdhani: [
-  				'var(--font-rajdhani)',
-  				'sans-serif'
-  			]
-  		},
-  		colors: {
+	extend: {
+		fontFamily: {
+			rajdhani: [
+				'var(--font-rajdhani)',
+				'sans-serif'
+			]
+		},
+		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {
@@ -68,11 +68,24 @@ const config: Config = {
   				ring: 'hsl(var(--sidebar-ring))'
   			}
   		},
-  		borderRadius: {
-  			lg: 'var(--radius)',
-  			md: 'calc(var(--radius) - 2px)',
-  			sm: 'calc(var(--radius) - 4px)'
-  		},
+		borderRadius: {
+			lg: 'var(--radius)',
+			md: 'calc(var(--radius) - 2px)',
+			sm: 'calc(var(--radius) - 4px)',
+			section: 'var(--radius-section)'
+		},
+		maxWidth: {
+			page: 'var(--page-max-width)'
+		},
+		boxShadow: {
+			soft: 'var(--shadow-soft)',
+			medium: 'var(--shadow-medium)'
+		},
+		spacing: {
+			'page-inline': 'var(--space-page-inline)',
+			'section-stack': 'var(--space-section-stack)',
+			'card-padding': 'var(--space-card-padding)'
+		},
   		keyframes: {
   			'accordion-down': {
   				from: {

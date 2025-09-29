@@ -26,9 +26,9 @@ export default function CookiesPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="mx-auto w-full max-w-page px-page-inline py-section-stack">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
+        <div className="mb-section-stack flex items-center gap-4">
           <Link href="/en">
             <Button variant="outline" size="sm" className="border-amber-400/50 text-amber-400 hover:bg-amber-400/10">
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -47,10 +47,10 @@ export default function CookiesPage() {
         </div>
 
         {/* Cookie Settings */}
-        <div className="space-y-6">
+        <div className="space-y-section-stack">
           {/* Essential Cookies */}
-          <Card className="bg-black/20 border-amber-400/30 backdrop-blur-md">
-            <CardHeader>
+          <Card className="border border-amber-400/30 bg-black/20 p-card-padding shadow-soft backdrop-blur-md">
+            <CardHeader className="p-0 pb-4">
               <div className="flex items-center gap-3">
                 <Shield className="w-6 h-6 text-green-400" />
                 <div>
@@ -61,7 +61,7 @@ export default function CookiesPage() {
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-0">
               <div className="flex items-center justify-between">
                 <div className="flex-1">
                   <h4 className="font-semibold text-white mb-2">Always Active</h4>
@@ -75,8 +75,8 @@ export default function CookiesPage() {
           </Card>
 
           {/* Functional Cookies */}
-          <Card className="bg-black/20 border-amber-400/30 backdrop-blur-md">
-            <CardHeader>
+          <Card className="border border-amber-400/30 bg-black/20 p-card-padding shadow-soft backdrop-blur-md">
+            <CardHeader className="p-0 pb-4">
               <div className="flex items-center gap-3">
                 <Settings className="w-6 h-6 text-blue-400" />
                 <div>
@@ -87,7 +87,7 @@ export default function CookiesPage() {
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-0">
               <div className="flex items-center justify-between">
                 <div className="flex-1">
                   <h4 className="font-semibold text-white mb-2">Enhanced Functionality</h4>
@@ -109,8 +109,8 @@ export default function CookiesPage() {
           </Card>
 
           {/* Analytics Cookies */}
-          <Card className="bg-black/20 border-amber-400/30 backdrop-blur-md">
-            <CardHeader>
+          <Card className="border border-amber-400/30 bg-black/20 p-card-padding shadow-soft backdrop-blur-md">
+            <CardHeader className="p-0 pb-4">
               <div className="flex items-center gap-3">
                 <BarChart3 className="w-6 h-6 text-purple-400" />
                 <div>
@@ -121,7 +121,7 @@ export default function CookiesPage() {
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-0">
               <div className="flex items-center justify-between">
                 <div className="flex-1">
                   <h4 className="font-semibold text-white mb-2">Usage Analytics</h4>
@@ -144,8 +144,8 @@ export default function CookiesPage() {
           </Card>
 
           {/* Marketing Cookies */}
-          <Card className="bg-black/20 border-amber-400/30 backdrop-blur-md">
-            <CardHeader>
+          <Card className="border border-amber-400/30 bg-black/20 p-card-padding shadow-soft backdrop-blur-md">
+            <CardHeader className="p-0 pb-4">
               <div className="flex items-center gap-3">
                 <Target className="w-6 h-6 text-orange-400" />
                 <div>

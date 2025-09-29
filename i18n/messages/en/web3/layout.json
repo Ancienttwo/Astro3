@@ -1,0 +1,99 @@
+{
+  "hero": {
+    "title": "Fortune Hunter Dashboard",
+    "subtitle": "Your cosmic journey to Web3 mastery"
+  },
+  "status": {
+    "eliteBadge": "Elite Fortune Hunter",
+    "rankLabel": "Rank #{rank}",
+    "streak": "🔥 {streak} Day Streak"
+  },
+  "actions": {
+    "startQuest": "Start Quest",
+    "comingSoon": "Coming Soon"
+  },
+  "themeToggle": "Toggle theme",
+  "secondaryNav": {
+    "collapse": "Collapse",
+    "expand": "Expand navigation"
+  },
+  "navigationHeading": "Navigation",
+  "navItems": {
+    "home": {
+      "label": "Home",
+      "subItems": {
+        "dashboard": "Dashboard",
+        "dailyTasks": "Daily tasks",
+        "privileges": "Web3 privileges",
+        "quickActions": "Quick actions",
+        "docs": "Docs"
+      }
+    },
+    "analysis": {
+      "label": "Analysis",
+      "subItems": {
+        "bazi": "BaZi analysis",
+        "ziwei": "Zi Wei Dou Shu",
+        "fortune": "Guan Di oracle",
+        "createChart": "Create chart",
+        "myCharts": "My charts"
+      }
+    },
+    "wiki": {
+      "label": "Knowledge base",
+      "subItems": {
+        "wikiHome": "Knowledge overview",
+        "baziGuide": "BaZi guide",
+        "ziweiGuide": "Zi Wei guide",
+        "glossary": "Glossary"
+      }
+    },
+    "aiAssistant": {
+      "label": "AI assistant",
+      "subItems": {
+        "chat": "Chat with AI",
+        "baziMaster": "BaZi master",
+        "ziweiMaster": "Zi Wei master",
+        "general": "General guidance"
+      }
+    },
+    "web3Features": {
+      "label": "Web3 features",
+      "subItems": {
+        "tasks": "Task center",
+        "leaderboard": "Leaderboard",
+        "rewards": "Rewards center",
+        "credits": "Credits manager",
+        "nfts": "NFT collection",
+        "staking": "Staking pool"
+      }
+    },
+    "profile": {
+      "label": "Profile",
+      "subItems": {
+        "web3Profile": "Web3 profile",
+        "birthInfo": "Birth info",
+        "membership": "Membership",
+        "subscription": "Subscription"
+      }
+    },
+    "settings": {
+      "label": "Settings",
+      "subItems": {
+        "web3Settings": "Web3 settings",
+        "preferences": "Preferences",
+        "privacy": "Privacy & security",
+        "helpCenter": "Help center",
+        "disconnect": "Disconnect wallet"
+      }
+    }
+  },
+  "wallet": {
+    "connected": "Connected wallet",
+    "copy": "Copy address",
+    "disconnectTitle": "Disconnect wallet",
+    "disconnectMessage": "Are you sure you want to disconnect your wallet? You'll need to reconnect to access Web3 features.",
+    "disconnectConfirm": "Disconnect",
+    "disconnectCancel": "Cancel"
+  }
+}

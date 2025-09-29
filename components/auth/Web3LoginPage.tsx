@@ -1,17 +1,8 @@
 "use client"
 
-import dynamic from 'next/dynamic'
 import { CheckCircle2, Globe2, ShieldCheck } from 'lucide-react'
 import { cn } from '@/lib/utils'
-
-const WalletConnectAuth = dynamic(() => import('@/components/WalletConnectAuth'), {
-  ssr: false,
-  loading: () => (
-    <div className="flex min-h-[420px] items-center justify-center rounded-2xl border border-dashed border-purple-200 bg-white/40 p-10 text-sm text-muted-foreground shadow-sm dark:border-purple-500/40 dark:bg-gray-900/40">
-      Loading Web3 login...
-    </div>
-  )
-})
+import WalletConnectAuth from '@/components/WalletConnectAuth'
 
 const loginContent = {
   zh: {

@@ -140,6 +140,39 @@ const styles = `
   }
 `;
 
+const yongShenOptions = [
+  {
+    element: 'Wood',
+    chinese: '木',
+    emoji: '🌳',
+    className: 'border-emerald-200 dark:border-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400'
+  },
+  {
+    element: 'Fire',
+    chinese: '火',
+    emoji: '🔥',
+    className: 'border-rose-200 dark:border-rose-700 hover:bg-rose-50 dark:hover:bg-rose-900/20 text-rose-600 dark:text-rose-400'
+  },
+  {
+    element: 'Earth',
+    chinese: '土',
+    emoji: '🏔️',
+    className: 'border-amber-200 dark:border-amber-700 hover:bg-amber-50 dark:hover:bg-amber-900/20 text-amber-600 dark:text-amber-400'
+  },
+  {
+    element: 'Metal',
+    chinese: '金',
+    emoji: '⚒️',
+    className: 'border-yellow-200 dark:border-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 text-yellow-600 dark:text-yellow-400'
+  },
+  {
+    element: 'Water',
+    chinese: '水',
+    emoji: '💧',
+    className: 'border-sky-200 dark:border-sky-700 hover:bg-sky-50 dark:hover:bg-sky-900/20 text-sky-600 dark:text-sky-400'
+  }
+] as const;
+
 export default function BaziAnalysisPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -643,12 +676,18 @@ export default function BaziAnalysisPage() {
 
         
         {/* 主要内容 */}
-        <div className="pb-0 md:pb-4 px-1 md:px-4 w-full">
+        <div className="mx-auto flex w-full max-w-page flex-col gap-section-stack px-page-inline pb-0 md:pb-4">
         {/* 输入表单 - 只在没有八字结果且没有chartId时显示 */}
         {!hasBaziResult && !chartId && (
-          <div className="bg-gradient-to-br from-white to-blue-50 dark:from-slate-800 dark:to-slate-900 rounded-xl p-4 sm:p-6 shadow-xl mt-6 border border-slate-200 dark:border-slate-700">
-            <h3 className="text-lg font-semibold mb-4">Birth Information</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Card className="mt-6 rounded-section border border-slate-200 bg-gradient-to-br from-white to-blue-50 p-card-padding shadow-soft dark:border-slate-700 dark:from-slate-800 dark:to-slate-900">
+            <CardHeader className="p-0 pb-4">
+              <CardTitle className="text-lg font-semibold text-slate-900 dark:text-slate-100">Birth Information</CardTitle>
+              <CardDescription className="text-sm text-slate-600 dark:text-slate-300">
+                Provide birth details to calculate your BaZi chart.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div>
                 <Label htmlFor="username" className="text-sm font-semibold text-slate-700 dark:text-slate-300">Full Name</Label>
                 <Input
@@ -708,7 +747,7 @@ export default function BaziAnalysisPage() {
               </div>
             </div>
             
-            <div className="mt-6">
+              <div className="mt-6">
               <Button
                 onClick={() => {
                   enableSaving(); // 🔥 新增：启用保存功能，用于手动排盘
@@ -720,14 +759,18 @@ export default function BaziAnalysisPage() {
                 {isCalculating ? 'Calculating...' : 'Calculate BaZi'}
               </Button>
             </div>
-          </div>
+            </CardContent>
+          </Card>
         )}
 
         {/* 结果展示 */}
         {hasBaziResult && (
           <div className="mt-4">
             {/* 八字四柱展示 */}
-            <div id="bazi-chart" className="bg-gradient-to-br from-white via-slate-50 to-blue-50 dark:from-slate-800 dark:via-slate-800 dark:to-slate-900 rounded-xl p-6 shadow-xl mb-6 relative border border-slate-200 dark:border-slate-700">
+            <Card
+              id="bazi-chart"
+              className="relative mb-6 border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-blue-50 p-card-padding shadow-soft dark:border-slate-700 dark:from-slate-800 dark:via-slate-800 dark:to-slate-900"
+            >
               {/* 命盘卡片的干支关系按钮 */}
               {baziRelations && (
                 <button
@@ -748,21 +791,23 @@ export default function BaziAnalysisPage() {
                 <Lightbulb className="w-4 h-4" />
               </button>
               
-              <h3 className="text-xl font-bold mb-6 text-center bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">{birthData.username ? `${birthData.username}'s` : 'Your'} BaZi Chart</h3>
+              <h3 className="mb-6 text-center text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                {birthData.username ? `${birthData.username}'s` : 'Your'} BaZi Chart
+              </h3>
               
               {/* 八字四柱 */}
                 <div className="w-full max-w-6xl mx-auto overflow-x-auto px-2 sm:px-0">
                 {/* Mobile: Display four pillars in responsive grid */}
-                <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:hidden mb-4 min-w-[300px]">
+                <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2 sm:hidden mb-4">
                   {renderPillar("Year Pillar", baziResult.year)}
                   {renderPillar("Month Pillar", baziResult.month)}
                 </div>
-                <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:hidden mb-4 min-w-[300px]">
+                <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2 sm:hidden mb-4">
                   {renderPillar("Day Master", baziResult.day)}
                   {renderPillar("Hour Pillar", baziResult.hour)}
                 </div>
                 {/* Desktop: Display four pillars in single row */}
-                <div className="hidden sm:grid sm:grid-cols-4 sm:gap-4 md:gap-6 mb-4 min-w-[320px]">
+                <div className="hidden sm:grid sm:grid-cols-4 sm:gap-4 md:gap-6 mb-4">
                   {renderPillar("Year Pillar", baziResult.year)}
                   {renderPillar("Month Pillar", baziResult.month)}
                   {renderPillar("Day Master", baziResult.day)}
@@ -773,7 +818,7 @@ export default function BaziAnalysisPage() {
               {/* 大运滑动展示 - 取消外边框ring */}
               {luckCycles && luckCycles.length > 0 && (
                 <div className="mt-1.5">
-                  <h4 className="text-sm font-semibold mb-1.5 text-gray-900 dark:text-slate-100 flex items-center justify-between">
+                  <h4 className="text-sm font-semibold mb-1.5 text-gray-900 dark:text-slate-100 flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <span>🔄</span> Luck Cycles
                       <span className="text-xs text-gray-600 dark:text-gray-400">
@@ -799,17 +844,12 @@ export default function BaziAnalysisPage() {
                       {luckCycles.map((cycle, index) => (
                         <div
                           key={index}
-                          className={`flex-shrink-0 cursor-pointer transition-all duration-200 ${
+                          className={`relative flex-shrink-0 cursor-pointer transition-all duration-200 origin-center ${
                             selectedLuckCycle?.ganZhi === cycle.ganZhi
                               ? 'transform scale-105 z-50 origin-center'
                               : 'hover:transform hover:scale-102 z-20'
                           }`}
                           onClick={() => handleSelectLuckCycle(cycle)}
-                          style={{
-                            position: 'relative',
-                            transformOrigin: 'center',
-                            zIndex: selectedLuckCycle?.ganZhi === cycle.ganZhi ? 50 : 20
-                          }}
                         >
                           <div className={`w-16 sm:w-18 p-2 sm:p-3 rounded-lg text-center relative text-xs transition-all duration-300 hover:shadow-lg transform hover:scale-105 cycle-card ${
                             selectedLuckCycle?.ganZhi === cycle.ganZhi
@@ -849,7 +889,7 @@ export default function BaziAnalysisPage() {
               {/* 流年滑动展示 */}
                 {fleetingYears && selectedLuckCycle && (
                 <div className="mt-1.5">
-                  <h4 className="text-sm font-semibold mb-1.5 text-gray-900 dark:text-slate-100 flex items-center justify-between">
+                  <h4 className="text-sm font-semibold mb-1.5 text-gray-900 dark:text-slate-100 flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <span>📅</span> Fleeting Years
                     </div>
@@ -912,7 +952,7 @@ export default function BaziAnalysisPage() {
               {/* 流月滑动展示 */}
               {selectedFleetingYear && calculateFleetingMonths.length > 0 && (
                 <div className="mt-1.5">
-                  <h4 className="text-sm font-semibold mb-1.5 text-gray-900 dark:text-slate-100 flex items-center justify-between">
+                  <h4 className="text-sm font-semibold mb-1.5 text-gray-900 dark:text-slate-100 flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <span>📅</span> Fleeting Months
                     </div>
@@ -959,7 +999,7 @@ export default function BaziAnalysisPage() {
                   </div>
                 </div>
               )}
-            </div>
+            </Card>
           </div>
         )}
 
@@ -1032,12 +1072,14 @@ export default function BaziAnalysisPage() {
         {/* 用神推理大师 */}
         {hasBaziResult && (
           <div id="yongshen-master" className="mt-4">
-            <div className="bg-gradient-to-br from-white to-purple-50 dark:from-slate-800 dark:to-purple-900/20 rounded-xl p-4 sm:p-6 shadow-xl border border-slate-200 dark:border-slate-700">
-              <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                <Sparkles className="w-6 h-6 text-purple-500" />
-                Focal Element Master
-              </h3>
-              
+            <Card className="rounded-section border border-slate-200 bg-gradient-to-br from-white to-purple-50 p-card-padding shadow-soft dark:border-slate-700 dark:from-slate-800 dark:to-purple-900/20">
+              <CardHeader className="flex flex-row items-center gap-2 p-0 pb-3">
+                <Sparkles className="h-6 w-6 text-purple-500" />
+                <CardTitle className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+                  Focal Element Master
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4 p-0">
               {/* 已存储的用神信息显示 */}
               {isLoadingYongShen ? (
                 <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
@@ -1047,96 +1089,77 @@ export default function BaziAnalysisPage() {
                           </div>
                           </div>
               ) : storedYongShen ? (
-                <div className="mb-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
-                      <h4 className="font-semibold text-green-800 dark:text-green-300">Analyzed Focal Element Information</h4>
-                          </div>
-                    
-                    {/* 提取用神按钮 */}
+                <Card className="mb-4 border border-green-200 bg-green-50 p-card-padding shadow-soft dark:border-green-800 dark:bg-green-900/20">
+                  <CardHeader className="gap-3 p-0 pb-3 sm:flex-row sm:items-center sm:justify-between">
+                    <CardTitle className="flex items-center gap-2 text-base font-semibold text-green-800 dark:text-green-300">
+                      <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+                      Analyzed Focal Element Information
+                    </CardTitle>
                     {chartId && (
                       <Button
                         onClick={handleExtractYongShen}
                         disabled={isExtractingYongShen}
                         size="sm"
                         variant="outline"
-                        className="border-green-300 dark:border-green-600 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-800"
+                        className="border-green-300 text-green-700 hover:bg-green-100 dark:border-green-600 dark:text-green-300 dark:hover:bg-green-800"
                       >
                         {isExtractingYongShen ? (
                           <>
-                            <Clock className="w-3 h-3 mr-1 animate-spin" />
+                            <Clock className="mr-1 h-3 w-3 animate-spin" />
                             Extracting
                           </>
                         ) : (
                           <>
-                            <Download className="w-3 h-3 mr-1" />
+                            <Download className="mr-1 h-3 w-3" />
                             Re-extract
                           </>
                         )}
                       </Button>
                     )}
-                          </div>
-                  
-                  {/* 用神忌神 2x1 布局 - 两个独立格子 */}
-                  <div className="grid grid-cols-2 gap-4 mb-3">
-                    {/* 用神格子 */}
-                    <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-md border-2 border-green-300 dark:border-green-700 text-center">
-                      <div className="text-gray-600 dark:text-gray-400 font-medium mb-2">Beneficial</div>
-                      <div className={`font-bold text-xl ${getElementColor(storedYongShen.primaryYongShen as any)}`}>
-                        {storedYongShen.primaryYongShen}
+                  </CardHeader>
+                  <CardContent className="space-y-3 p-0">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <div className="rounded-md border-2 border-green-300 bg-green-50 p-card-padding text-center dark:border-green-700 dark:bg-green-900/20">
+                        <div className="mb-2 text-gray-600 dark:text-gray-400 font-medium">Beneficial</div>
+                        <div className={`text-xl font-bold ${getElementColor(storedYongShen.primaryYongShen as any)}`}>
+                          {storedYongShen.primaryYongShen}
                         </div>
                       </div>
-
-                    {/* 忌神格子 */}
-                    <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-md border-2 border-red-300 dark:border-red-700 text-center">
-                      <div className="text-gray-600 dark:text-gray-400 font-medium mb-2">Harmful</div>
-                      <div className={`font-bold text-xl ${storedYongShen.jiShen && storedYongShen.jiShen.length > 0 
-                        ? getElementColor(storedYongShen.jiShen[0] as any)
-                        : 'text-gray-500'
-                      }`}>
-                        {storedYongShen.jiShen && storedYongShen.jiShen.length > 0 
-                          ? storedYongShen.jiShen.join('、') 
-                          : '无'
-                        }
-                        </div>
+                      <div className="rounded-md border-2 border-red-300 bg-red-50 p-card-padding text-center dark:border-red-700 dark:bg-red-900/20">
+                        <div className="mb-2 text-gray-600 dark:text-gray-400 font-medium">Harmful</div>
+                        <div className={`text-xl font-bold ${storedYongShen.jiShen && storedYongShen.jiShen.length > 0 ? getElementColor(storedYongShen.jiShen[0] as any) : 'text-gray-500'}`}>
+                          {storedYongShen.jiShen && storedYongShen.jiShen.length > 0 ? storedYongShen.jiShen.join('、') : '无'}
                         </div>
                       </div>
-
-                  {/* 其他信息 */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                    {storedYongShen.secondaryYongShen && (
-                      <div className="bg-white dark:bg-slate-800 p-3 rounded-md border border-green-300 dark:border-green-700">
-                        <span className="text-gray-600 dark:text-gray-400">Secondary:</span>
-                        <span className="font-semibold text-green-700 dark:text-green-300 ml-1">
-                          {storedYongShen.secondaryYongShen}
-                        </span>
-                          </div>
-                    )}
-                    
-                    {storedYongShen.geLu && (
-                      <div className="bg-white dark:bg-slate-800 p-3 rounded-md border border-green-300 dark:border-green-700">
-                        <span className="text-gray-600 dark:text-gray-400">格局：</span>
-                        <span className="font-semibold text-purple-600 dark:text-purple-400 ml-1">
-                          {storedYongShen.geLu}
-                        </span>
                     </div>
-                    )}
-                      </div>
-
-
-                  
-                  <div className="mt-3 text-xs text-gray-500 dark:text-gray-400">
-                    分析时间：{new Date(storedYongShen.analysisDate).toLocaleString()}
-                    {storedYongShen.confidence && (
-                      <span className="ml-3">
-                        置信度：{Math.round(storedYongShen.confidence * 100)}%
-                      </span>
-                    )}
+                    <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
+                      {storedYongShen.secondaryYongShen && (
+                        <div className="rounded-md border border-green-300 bg-white p-3 dark:border-green-700 dark:bg-slate-800">
+                          <span className="text-gray-600 dark:text-gray-400">Secondary:</span>
+                          <span className="ml-1 font-semibold text-green-700 dark:text-green-300">
+                            {storedYongShen.secondaryYongShen}
+                          </span>
+                        </div>
+                      )}
+                      {storedYongShen.geLu && (
+                        <div className="rounded-md border border-green-300 bg-white p-3 dark:border-green-700 dark:bg-slate-800">
+                          <span className="text-gray-600 dark:text-gray-400">格局：</span>
+                          <span className="ml-1 font-semibold text-purple-600 dark:text-purple-400">
+                            {storedYongShen.geLu}
+                          </span>
+                        </div>
+                      )}
                     </div>
-                </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                      分析时间：{new Date(storedYongShen.analysisDate).toLocaleString()}
+                      {storedYongShen.confidence && (
+                        <span className="ml-3">置信度：{Math.round(storedYongShen.confidence * 100)}%</span>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
               ) : hasValidBirthData && (
-                <div className="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                <Card className="mb-4 border border-yellow-200 bg-yellow-50 p-card-padding shadow-soft dark:border-yellow-800 dark:bg-yellow-900/20">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-yellow-600 dark:text-yellow-400">⚠️</span>
                     <h4 className="font-semibold text-yellow-800 dark:text-yellow-300">No Focal Element Information Found</h4>
@@ -1144,7 +1167,7 @@ export default function BaziAnalysisPage() {
                   <p className="text-yellow-700 dark:text-yellow-300 text-sm">
                     You have not analyzed focal element information yet. Please click "Start Analysis" below to begin focal element analysis.
                   </p>
-                </div>
+                </Card>
               )}
 
               <MobileAsyncAnalysis
@@ -1173,8 +1196,8 @@ export default function BaziAnalysisPage() {
                 
                 {/* 用神手动选择界面 */}
                 {chartId && !storedYongShen && (
-                  <div className="mt-4 p-4 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
-                    <div className="flex items-center gap-2 mb-3">
+                  <Card className="mt-4 border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 p-card-padding shadow-soft dark:border-amber-800 dark:from-amber-900/20 dark:to-orange-900/20">
+                    <div className="flex flex-wrap items-center gap-2 mb-3">
                       <span className="text-amber-600 dark:text-amber-400">🎯</span>
                       <h4 className="font-medium text-amber-800 dark:text-amber-300">
                         Select Your Focal Element (Yong Shen)
@@ -1185,23 +1208,13 @@ export default function BaziAnalysisPage() {
                     </p>
                     
                     {/* 五行选择按钮 */}
-                    <div className="grid grid-cols-5 gap-2 mb-4">
-                      {[
-                        { element: 'Wood', chinese: '木', color: 'emerald', emoji: '🌳' },
-                        { element: 'Fire', chinese: '火', color: 'rose', emoji: '🔥' },
-                        { element: 'Earth', chinese: '土', color: 'amber', emoji: '🏔️' },
-                        { element: 'Metal', chinese: '金', color: 'yellow', emoji: '⚒️' },
-                        { element: 'Water', chinese: '水', color: 'sky', emoji: '💧' }
-                      ].map((item) => (
+                    <div className="grid grid-cols-2 min-[480px]:grid-cols-3 lg:grid-cols-5 gap-2 mb-4">
+                      {yongShenOptions.map((item) => (
                         <button
                           key={item.element}
                           onClick={() => handleManualYongShenSelect(item.chinese)}
                           disabled={isExtractingYongShen}
-                          className={`p-3 rounded-lg border transition-all hover:scale-105 active:scale-95 
-                            bg-white dark:bg-slate-800 border-${item.color}-200 dark:border-${item.color}-700 
-                            hover:bg-${item.color}-50 dark:hover:bg-${item.color}-900/20
-                            text-${item.color}-600 dark:text-${item.color}-400
-                            disabled:opacity-50 disabled:cursor-not-allowed`}
+                          className={`p-3 rounded-lg border transition-all hover:scale-105 active:scale-95 bg-white dark:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 ${item.className}`}
                         >
                           <div className="text-xl mb-1">{item.emoji}</div>
                           <div className="text-xs font-medium">{item.element}</div>
@@ -1210,13 +1223,14 @@ export default function BaziAnalysisPage() {
                       ))}
                     </div>
                     
-                    <div className="text-xs text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30 p-2 rounded">
+                    <div className="rounded bg-amber-100 p-2 text-xs text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
                       💡 <strong>Tip:</strong> The focal element is usually what you need most based on your chart's balance and life goals.
                     </div>
-                  </div>
+                  </Card>
                 )}
-                    </div>
-                  </div>
+              </CardContent>
+            </Card>
+          </div>
         )}
       </div>
 
@@ -1224,7 +1238,7 @@ export default function BaziAnalysisPage() {
       {showScienceModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-slate-800 rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
               <h3 className="text-lg font-semibold flex items-center gap-2">
                 <Lightbulb className="w-5 h-5 text-orange-500" />
                 BaZi Knowledge
@@ -1332,7 +1346,7 @@ export default function BaziAnalysisPage() {
       {showTimeEditModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-slate-800 rounded-lg p-6 max-w-md w-full">
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
               <h3 className="text-lg font-semibold flex items-center gap-2">
                 <Settings className="w-5 h-5 text-blue-500" />
                 修改时辰
@@ -1394,7 +1408,7 @@ export default function BaziAnalysisPage() {
       {showRelationModal && baziRelations && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-slate-800 rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
               <h3 className="text-lg font-semibold flex items-center gap-2">
                 <span className="text-orange-500 font-bold">干支关系</span>
                 提示：

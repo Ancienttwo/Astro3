@@ -1,0 +1,43 @@
+# Task ID: 4
+# Title: Web3 multilingual unification
+# Status: pending
+# Dependencies: None
+# Priority: high
+# Description: Execute the multi-phase Web3-first multilingual consolidation defined in intl.md.
+# Details:
+Follow intl.md: discovery, translation architecture, Web3 layout internationalization, page migrations, QA rollout.
+
+# Test Strategy:
+
+
+# Subtasks:
+## 1. Phase 1 – Discovery & scope lock [pending]
+### Dependencies: None
+### Description: Audit Web3 routes and confirm locale/routing scope per intl.md Phase 1.
+### Details:
+Catalog current Web3 pages/components, align target locales, define canonical routing + legacy deprecation list, deliver signed-off architecture brief.
+
+## 2. Phase 2 – Translation architecture refactor [pending]
+### Dependencies: None
+### Description: Modularize dictionaries and establish translation workflow per intl.md Phase 2.
+### Details:
+Split dictionaries by feature, define typed message APIs, add extraction tooling, document translator workflow.
+
+## 3. Phase 3 – Web3 layout internationalization [pending]
+### Dependencies: None
+### Description: Localize Web3 shell components and navigation per intl.md Phase 3.
+### Details:
+Refactor components/Web3Layout.tsx to use locale-aware config, translate shared Web3 UI strings, ensure routing helpers generate locale-prefixed links.
+
+## 4. Phase 4 – Web3 page migrations [pending]
+### Dependencies: None
+### Description: Convert Web3 pages to locale-aware implementations per intl.md Phase 4.
+### Details:
+Refactor priority pages (web3 dashboard, rewards, tasks, leaderboard, profile, fortune) to shared translation hooks, update APIs/metadata, retire duplicated /en routes.
+
+## 5. Phase 5 – QA and rollout [pending]
+### Dependencies: None
+### Description: Harden multi-locale QA, monitoring, and release workflows per intl.md Phase 5.
+### Details:
+Add locale smoke tests, visual regression coverage, deployment checklist, telemetry validation, and communication plan.
+

@@ -55,15 +55,6 @@ export default function WalletGuideePage() {
       recommended: false,
       downloadUrl: 'https://trustwallet.com/',
       features: ['Mobile-optimized', 'Built-in browser', 'Multi-chain', 'Staking support']
-    },
-    {
-      name: 'Coinbase Wallet',
-      icon: '💙',
-      description: 'User-friendly wallet from Coinbase exchange',
-      platforms: ['Mobile App', 'Browser Extension'],
-      recommended: false,
-      downloadUrl: 'https://wallet.coinbase.com/',
-      features: ['Beginner-friendly', 'Exchange integration', 'Secure backup', 'DeFi access']
     }
   ]
 
@@ -180,8 +171,8 @@ export default function WalletGuideePage() {
     <EnglishLayout>
       <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
         {/* Page Header */}
-        <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="border-b border-gray-200 bg-white px-page-inline py-section-stack dark:border-slate-700 dark:bg-slate-800">
+          <div className="mx-auto w-full max-w-page">
             <div className="text-center">
               <div className="flex justify-center mb-4">
                 <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center shadow-xl">
@@ -199,17 +190,17 @@ export default function WalletGuideePage() {
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mx-auto w-full max-w-page space-y-section-stack px-page-inline py-section-stack">
           {/* Why Web3 Section */}
-          <Card className="mb-12 dark:bg-slate-800 dark:border-slate-700">
-            <CardHeader>
-              <CardTitle className="text-center text-2xl text-gray-900 dark:text-white flex items-center justify-center">
+          <Card className="border border-slate-200 bg-white p-card-padding shadow-soft dark:border-slate-700 dark:bg-slate-800">
+            <CardHeader className="p-0 pb-4">
+              <CardTitle className="flex items-center justify-center text-center text-2xl text-gray-900 dark:text-white">
                 <Gift className="w-6 h-6 mr-2 text-purple-500" />
                 Why Choose Web3 for AstroZi?
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <CardContent className="p-0">
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {benefits.map((benefit, index) => (
                   <div key={index} className="flex items-start space-x-3">
                     <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/40 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -264,31 +255,34 @@ export default function WalletGuideePage() {
           </div>
 
           {/* Step Content */}
-          <div className="grid lg:grid-cols-3 gap-8">
+          <div className="grid gap-section-stack lg:grid-cols-3">
             {/* Main Content */}
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-2 space-y-section-stack">
               {/* Step 1: Choose Wallet */}
               {activeStep === 1 && (
-                <Card className="dark:bg-slate-800 dark:border-slate-700">
-                  <CardHeader>
+                <Card className="border border-slate-200 bg-white p-card-padding shadow-soft dark:border-slate-700 dark:bg-slate-800">
+                  <CardHeader className="p-0 pb-4">
                     <CardTitle className="flex items-center text-gray-900 dark:text-white">
                       <Download className="w-6 h-6 mr-2 text-purple-500" />
                       Step 1: Choose & Download Wallet
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-6">
+                  <CardContent className="space-y-6 p-0">
                     <p className="text-gray-600 dark:text-gray-300">
                       Select a Web3 wallet that supports Binance Smart Chain. We recommend MetaMask for beginners.
                     </p>
                     
                     <div className="space-y-4">
                       {walletOptions.map((wallet, index) => (
-                        <Card key={index} className={`border-2 ${
-                          wallet.recommended 
-                            ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' 
-                            : 'border-gray-200 dark:border-slate-600'
-                        }`}>
-                          <CardContent className="p-4">
+                        <Card
+                          key={index}
+                          className={`border ${
+                            wallet.recommended
+                              ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+                              : 'border-gray-200 dark:border-slate-600 dark:bg-slate-800'
+                          }`}
+                        >
+                          <CardContent className="space-y-3 p-card-padding">
                             <div className="flex items-start justify-between">
                               <div className="flex items-start space-x-3">
                                 <div className="text-2xl">{wallet.icon}</div>
@@ -359,14 +353,14 @@ export default function WalletGuideePage() {
 
               {/* Step 2: Create Wallet */}
               {activeStep === 2 && (
-                <Card className="dark:bg-slate-800 dark:border-slate-700">
-                  <CardHeader>
+                <Card className="border border-slate-200 bg-white p-card-padding shadow-soft dark:border-slate-700 dark:bg-slate-800">
+                  <CardHeader className="p-0 pb-4">
                     <CardTitle className="flex items-center text-gray-900 dark:text-white">
                       <Shield className="w-6 h-6 mr-2 text-purple-500" />
                       Step 2: Create New Wallet
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-6">
+                  <CardContent className="space-y-6 p-0">
                     <p className="text-gray-600 dark:text-gray-300">
                       Follow these steps to create a secure wallet. This process is similar across all wallet providers.
                     </p>
@@ -428,8 +422,8 @@ export default function WalletGuideePage() {
                       </div>
                     </div>
 
-                    <Card className="bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
-                      <CardContent className="p-4">
+                    <Card className="border border-yellow-200 bg-yellow-50 p-card-padding shadow-soft dark:border-yellow-800 dark:bg-yellow-900/20">
+                      <CardContent className="space-y-2 p-0">
                         <h4 className="font-semibold text-yellow-800 dark:text-yellow-200 mb-2">
                           🔐 Security Best Practices
                         </h4>
@@ -465,14 +459,14 @@ export default function WalletGuideePage() {
 
               {/* Step 3: Add BSC Network */}
               {activeStep === 3 && (
-                <Card className="dark:bg-slate-800 dark:border-slate-700">
-                  <CardHeader>
+                <Card className="border border-slate-200 bg-white p-card-padding shadow-soft dark:border-slate-700 dark:bg-slate-800">
+                  <CardHeader className="p-0 pb-4">
                     <CardTitle className="flex items-center text-gray-900 dark:text-white">
                       <LinkIcon className="w-6 h-6 mr-2 text-purple-500" />
                       Step 3: Add BSC Network
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-6">
+                  <CardContent className="space-y-6 p-0">
                     <p className="text-gray-600 dark:text-gray-300">
                       Configure Binance Smart Chain (BSC) network to use AstroZi's Web3 features.
                     </p>
@@ -488,8 +482,8 @@ export default function WalletGuideePage() {
                         Add BSC network manually using these settings:
                       </p>
 
-                      <Card className="bg-gray-50 dark:bg-slate-700">
-                        <CardContent className="p-4">
+                      <Card className="border border-gray-200 bg-gray-50 p-card-padding dark:border-slate-600 dark:bg-slate-700">
+                        <CardContent className="space-y-3 p-0">
                           <div className="space-y-3">
                             <div className="flex justify-between items-center">
                               <span className="font-medium text-gray-900 dark:text-white">Network Name:</span>
@@ -603,20 +597,20 @@ export default function WalletGuideePage() {
 
               {/* Step 4: Get BNB */}
               {activeStep === 4 && (
-                <Card className="dark:bg-slate-800 dark:border-slate-700">
-                  <CardHeader>
+                <Card className="border border-slate-200 bg-white p-card-padding shadow-soft dark:border-slate-700 dark:bg-slate-800">
+                  <CardHeader className="p-0 pb-4">
                     <CardTitle className="flex items-center text-gray-900 dark:text-white">
                       <Coins className="w-6 h-6 mr-2 text-purple-500" />
                       Step 4: Get BNB for Transaction Fees
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-6">
+                  <CardContent className="space-y-6 p-0">
                     <p className="text-gray-600 dark:text-gray-300">
                       You need a small amount of BNB to pay for transaction fees on Binance Smart Chain.
                     </p>
 
-                    <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
-                      <CardContent className="p-4">
+                    <Card className="border border-blue-200 bg-blue-50 p-card-padding shadow-soft dark:border-blue-800 dark:bg-blue-900/20">
+                      <CardContent className="space-y-4 p-0">
                         <h4 className="font-semibold text-blue-800 dark:text-blue-200 mb-2 flex items-center">
                           <DollarSign className="w-4 h-4 mr-2" />
                           How Much BNB Do I Need?
@@ -634,8 +628,8 @@ export default function WalletGuideePage() {
                       <h4 className="font-semibold text-gray-900 dark:text-white">Ways to Get BNB:</h4>
                       
                       <div className="grid md:grid-cols-2 gap-4">
-                        <Card className="border-l-4 border-l-yellow-500">
-                          <CardContent className="p-4">
+                        <Card className="border border-yellow-200 border-l-4 border-l-yellow-500 bg-white p-card-padding shadow-soft dark:border-yellow-700 dark:bg-slate-800">
+                          <CardContent className="space-y-2 p-0">
                             <h5 className="font-semibold text-gray-900 dark:text-white mb-2">
                               Option 1: Buy Directly (Easiest)
                             </h5>
@@ -648,8 +642,8 @@ export default function WalletGuideePage() {
                           </CardContent>
                         </Card>
 
-                        <Card className="border-l-4 border-l-blue-500">
-                          <CardContent className="p-4">
+                        <Card className="border border-blue-200 border-l-4 border-l-blue-500 bg-white p-card-padding shadow-soft dark:border-blue-700 dark:bg-slate-800">
+                          <CardContent className="space-y-2 p-0">
                             <h5 className="font-semibold text-gray-900 dark:text-white mb-2">
                               Option 2: Exchange Transfer
                             </h5>
@@ -671,8 +665,8 @@ export default function WalletGuideePage() {
                         </AlertDescription>
                       </Alert>
 
-                      <Card className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
-                        <CardContent className="p-4">
+                      <Card className="border border-green-200 bg-green-50 p-card-padding shadow-soft dark:border-green-800 dark:bg-green-900/20">
+                        <CardContent className="space-y-2 p-0">
                           <h5 className="font-semibold text-green-800 dark:text-green-200 mb-2">
                             ✅ How to Verify You Have BNB
                           </h5>
@@ -708,14 +702,14 @@ export default function WalletGuideePage() {
 
               {/* Step 5: Connect to AstroZi */}
               {activeStep === 5 && (
-                <Card className="dark:bg-slate-800 dark:border-slate-700">
-                  <CardHeader>
+                <Card className="border border-slate-200 bg-white p-card-padding shadow-soft dark:border-slate-700 dark:bg-slate-800">
+                  <CardHeader className="p-0 pb-4">
                     <CardTitle className="flex items-center text-gray-900 dark:text-white">
                       <Zap className="w-6 h-6 mr-2 text-purple-500" />
                       Step 5: Connect to AstroZi
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-6">
+                  <CardContent className="space-y-6 p-0">
                     <p className="text-gray-600 dark:text-gray-300">
                       Final step! Connect your wallet to AstroZi and start your Web3 astrology journey.
                     </p>
@@ -770,8 +764,8 @@ export default function WalletGuideePage() {
                       </div>
                     </div>
 
-                    <Card className="bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800">
-                      <CardContent className="p-4">
+                    <Card className="border border-purple-200 bg-purple-50 p-card-padding shadow-soft dark:border-purple-800 dark:bg-purple-900/20">
+                      <CardContent className="space-y-2 p-0">
                         <h4 className="font-semibold text-purple-800 dark:text-purple-200 mb-2 flex items-center">
                           <Gift className="w-4 h-4 mr-2" />
                           What Happens After Connection?
@@ -811,15 +805,15 @@ export default function WalletGuideePage() {
             </div>
 
             {/* Sidebar */}
-            <div className="space-y-6">
+            <div className="space-y-section-stack">
               {/* Current Step Info */}
-              <Card className="dark:bg-slate-800 dark:border-slate-700">
-                <CardHeader>
+              <Card className="border border-slate-200 bg-white p-card-padding shadow-soft dark:border-slate-700 dark:bg-slate-800">
+                <CardHeader className="p-0 pb-3">
                   <CardTitle className="text-lg text-gray-900 dark:text-white">
                     Current Step
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-0">
                   <div className="space-y-3">
                     <div className="flex items-center space-x-3">
                       {React.createElement(setupSteps[activeStep - 1].icon, { className: "w-5 h-5 text-purple-500" })}
@@ -839,13 +833,13 @@ export default function WalletGuideePage() {
               </Card>
 
               {/* Step Navigation */}
-              <Card className="dark:bg-slate-800 dark:border-slate-700">
-                <CardHeader>
+              <Card className="border border-slate-200 bg-white p-card-padding shadow-soft dark:border-slate-700 dark:bg-slate-800">
+                <CardHeader className="p-0 pb-3">
                   <CardTitle className="text-lg text-gray-900 dark:text-white">
                     All Steps
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-0">
                   <div className="space-y-2">
                     {setupSteps.map((step) => (
                       <Button
@@ -875,14 +869,14 @@ export default function WalletGuideePage() {
               </Card>
 
               {/* Troubleshooting */}
-              <Card className="dark:bg-slate-800 dark:border-slate-700">
-                <CardHeader>
+              <Card className="border border-slate-200 bg-white p-card-padding shadow-soft dark:border-slate-700 dark:bg-slate-800">
+                <CardHeader className="p-0 pb-3">
                   <CardTitle className="text-lg text-gray-900 dark:text-white flex items-center">
                     <HelpCircle className="w-5 h-5 mr-2" />
                     Need Help?
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-0">
                   <div className="space-y-3">
                     <Button variant="outline" className="w-full justify-start" size="sm">
                       <MessageCircle className="w-4 h-4 mr-2" />
@@ -907,16 +901,16 @@ export default function WalletGuideePage() {
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
               Common Issues & Solutions
             </h2>
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid gap-6 md:grid-cols-3">
               {commonIssues.map((issue, index) => (
-                <Card key={index} className="dark:bg-slate-800 dark:border-slate-700">
-                  <CardHeader>
+                <Card key={index} className="border border-slate-200 bg-white p-card-padding shadow-soft dark:border-slate-700 dark:bg-slate-800">
+                  <CardHeader className="p-0 pb-3">
                     <CardTitle className="text-lg text-gray-900 dark:text-white flex items-center">
                       <AlertTriangle className="w-5 h-5 mr-2 text-orange-500" />
                       {issue.problem}
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="p-0">
                     <ul className="space-y-2">
                       {issue.solutions.map((solution, idx) => (
                         <li key={idx} className="text-sm text-gray-600 dark:text-gray-300 flex items-start">

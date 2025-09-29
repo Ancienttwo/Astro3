@@ -19,11 +19,10 @@ import {
 } from "lucide-react";
 import { useAccount, useReadContract, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { formatEther } from "viem";
+import { useNamespaceTranslations } from '@/lib/i18n/useI18n';
 
-// 合约配置
 const CONTRACT_ADDRESS = "0x3b016F5A7C462Fe51B691Ef18559DE720D9B452F";
 
-// 合约ABI - 只包含我们需要的函数
 const CONTRACT_ABI = [
   "function checkinCost() view returns (uint256)",
   "function canCheckin(address user) view returns (bool)",
@@ -63,8 +62,17 @@ interface ContractInfo {
 
 export default function Web3SmartContractInteraction({ walletAddress }: { walletAddress: string }) {
   const { isConnected } = useAccount();
-  const [lastTransactionHash, setLastTransactionHash] = useState<string | null>(null);
   const { toast } = useToast();
+  const t = useNamespaceTranslations('web3/auth');
+  const ti = (path: string, values?: Record<string, unknown>) => t(`integration.${path}`, values);
+  const tc = (path: string, values?: Record<string, unknown>) => ti(`checkinCard.${path}`, values);
+  const ts = (path: string, values?: Record<string, unknown>) => ti(`stats.${path}`, values);
+  const ta = (path: string, values?: Record<string, unknown>) => ti(`actions.${path}`, values);
+  const terr = (path: string, values?: Record<string, unknown>) => ti(`errors.${path}`, values);
+  const toastMessage = (path: string, values?: Record<string, unknown>) => ti(`toast.${path}`, values);
+  const tm = (path: string, values?: Record<string, unknown>) => ti(`milestone.${path}`, values);
+  const tContract = (path: string, values?: Record<string, unknown>) => ti(`contract.${path}`, values);
+  const streakLabel = (key: 'starter' | 'beginner' | 'advanced' | 'expert' | 'elite' | 'legendary') => ti(`streakLabels.${key}`);
 
   const { data: userStatsData, refetch: refetchUserStats, isFetching: f1 } = useReadContract({
     address: CONTRACT_ADDRESS as `0x${string}`,
@@ -129,12 +137,13 @@ export default function Web3SmartContractInteraction({ walletAddress }: { wallet
   const { writeContract, isPending } = useWriteContract();
   const [txHash, setTxHash] = useState<`0x${string}` | undefined>(undefined);
   const { isLoading: isWaiting } = useWaitForTransactionReceipt({ hash: txHash, query: { enabled: !!txHash } });
+  const [lastTransactionHash, setLastTransactionHash] = useState<string | null>(null);
 
   const isLoading = f1 || f2 || f3 || f4;
 
   const performCheckin = async () => {
     if (!isConnected || !canCheckin || !contractInfo) {
-      toast({ title: "无法签到", description: "请连接钱包或今天已签到", variant: "destructive" });
+      toast({ title: terr('requiresWallet'), variant: "destructive" });
       return;
     }
     try {
@@ -146,35 +155,39 @@ export default function Web3SmartContractInteraction({ walletAddress }: { wallet
       });
       setTxHash(hash as `0x${string}`);
       setLastTransactionHash(hash as string);
-      toast({ title: "签到中...", description: `交易已提交: ${(hash as string).slice(0, 10)}...` });
+      toast({
+        title: toastMessage('transactionSubmitted'),
+        description: `${(hash as string).slice(0, 10)}...`,
+      });
       setTimeout(() => {
         refetchUserStats();
         refetchCan();
         refetchPreview();
         refetchContractInfo();
+        toast({ title: toastMessage('checkinSuccess') });
       }, 1500);
     } catch (error: any) {
       console.error("Error performing checkin:", error);
-      let errorMessage = "签到失败，请重试";
-      if (error?.code === "INSUFFICIENT_FUNDS") errorMessage = "BNB余额不足，请充值后重试";
-      else if (error?.message?.includes("User denied")) errorMessage = "用户取消了交易";
-      else if (error?.message?.includes("gas")) errorMessage = "Gas费用不足，请检查网络设置";
-      toast({ title: "签到失败", description: errorMessage, variant: "destructive" });
+      let description = terr('checkinFailed', { error: '' });
+      if (error?.code === "INSUFFICIENT_FUNDS") description = terr('insufficientFunds');
+      else if (error?.message?.includes("User denied")) description = terr('userRejected');
+      else if (error?.message?.includes("gas")) description = terr('gasIssue');
+      else if (error?.message) description = error.message;
+      toast({
+        title: toastMessage('checkinFailed', { error: description }),
+        variant: "destructive",
+      });
     }
   };
 
-  const formatBNB = (wei: bigint) => {
-    return parseFloat(formatEther(wei)).toFixed(4);
-  };
+  const formatBNB = (wei: bigint) => parseFloat(formatEther(wei)).toFixed(4);
 
   const formatNumber = (num: bigint) => {
     const n = Number(num);
-    if (n >= 1000000) {
-      return (n / 1000000).toFixed(1) + 'M';
-    } else if (n >= 1000) {
-      return (n / 1000).toFixed(1) + 'K';
-    }
-    return n.toString();
+    if (Number.isNaN(n)) return '0';
+    if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+    if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
+    return n.toLocaleString();
   };
 
   const getConsecutiveDaysColor = (days: number) => {
@@ -187,12 +200,12 @@ export default function Web3SmartContractInteraction({ walletAddress }: { wallet
   };
 
   const getConsecutiveDaysLabel = (days: number) => {
-    if (days >= 100) return 'LEGENDARY';
-    if (days >= 60) return 'ELITE';
-    if (days >= 30) return 'EXPERT';
-    if (days >= 15) return 'ADVANCED';
-    if (days >= 7) return 'BEGINNER';
-    return 'STARTER';
+    if (days >= 100) return streakLabel('legendary');
+    if (days >= 60) return streakLabel('elite');
+    if (days >= 30) return streakLabel('expert');
+    if (days >= 15) return streakLabel('advanced');
+    if (days >= 7) return streakLabel('beginner');
+    return streakLabel('starter');
   };
 
   const getNextMilestone = (days: number) => {
@@ -223,10 +236,18 @@ export default function Web3SmartContractInteraction({ walletAddress }: { wallet
     return (
       <Card>
         <CardContent className="p-6 text-center">
-          <p className="text-gray-500">无法加载智能合约数据</p>
-          <Button onClick={() => { refetchUserStats(); refetchContractInfo(); refetchCan(); refetchPreview(); }} className="mt-2">
+          <p className="text-gray-500">{terr('loadFailed')}</p>
+          <Button
+            onClick={() => {
+              refetchUserStats();
+              refetchContractInfo();
+              refetchCan();
+              refetchPreview();
+            }}
+            className="mt-2"
+          >
             <RefreshCw className="w-4 h-4 mr-2" />
-            重试
+            {terr('retry')}
           </Button>
         </CardContent>
       </Card>
@@ -238,42 +259,41 @@ export default function Web3SmartContractInteraction({ walletAddress }: { wallet
 
   return (
     <div className="space-y-6">
-      {/* 签到操作卡片 */}
       <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50">
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <span className="flex items-center gap-2">
               <Calendar className="w-5 h-5 text-blue-600" />
-              Web3 Daily Check-in
+              {tc('title')}
             </span>
             {canCheckin ? (
               <Badge className="bg-green-500 text-white">
                 <Clock className="w-3 h-3 mr-1" />
-                可签到
+                {tc('badgeAvailable')}
               </Badge>
             ) : (
               <Badge variant="secondary">
                 <CheckCircle2 className="w-3 h-3 mr-1" />
-                已签到
+                {tc('badgeDone')}
               </Badge>
             )}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {canCheckin && checkinRewards && (
-            <div className="p-4 bg白 rounded-lg border">
-              <h4 className="font-semibold mb-2">今日签到奖励预览:</h4>
+            <div className="p-4 bg-white rounded-lg border">
+              <h4 className="font-semibold mb-2">{tc('previewHeading')}</h4>
               <div className="grid grid-cols-3 gap-4 text-sm">
                 <div className="text-center">
-                  <p className="text-gray-600">积分</p>
+                  <p className="text-gray-600">{tc('preview.points')}</p>
                   <p className="text-lg font-bold text-blue-600">+{formatNumber(checkinRewards.pointsEarned)}</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-gray-600">空投权重</p>
+                  <p className="text-gray-600">{tc('preview.airdrop')}</p>
                   <p className="text-lg font-bold text-purple-600">+{(Number(checkinRewards.airdropWeightEarned) / 1000).toFixed(1)}</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-gray-600">连续天数</p>
+                  <p className="text-gray-600">{tc('preview.streak')}</p>
                   <p className="text-lg font-bold text-green-600">{formatNumber(checkinRewards.consecutiveDays)}</p>
                 </div>
               </div>
@@ -282,20 +302,24 @@ export default function Web3SmartContractInteraction({ walletAddress }: { wallet
 
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">签到费用</p>
-              <p className="text-lg font-semibold">{formatBNB(contractInfo.checkinCost)} BNB</p>
+              <p className="text-sm text-gray-600">{tc('costLabel')}</p>
+              <p className="text-lg font-semibold">{formatBNB(contractInfo.checkinCost)} {ts('bnb')}</p>
             </div>
 
             <Button onClick={performCheckin} disabled={!canCheckin || isPending || isWaiting} className="min-w-[120px]" size="lg">
               {isPending || isWaiting ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <Gift className="w-4 h-4 mr-2" />}
-              {isPending || isWaiting ? '签到中...' : canCheckin ? '立即签到' : '今日已签到'}
+              {isPending || isWaiting
+                ? tc('button.pending')
+                : canCheckin
+                  ? tc('button.ready')
+                  : tc('button.done')}
             </Button>
           </div>
 
           {lastTransactionHash && (
             <div className="p-2 bg-green-50 rounded border border-green-200">
               <p className="text-sm text-green-700">
-                最近交易:
+                {tc('recentTx')}:
                 <Button
                   variant="link"
                   className="h-auto p-0 ml-1 text-green-700"
@@ -310,13 +334,12 @@ export default function Web3SmartContractInteraction({ walletAddress }: { wallet
         </CardContent>
       </Card>
 
-      {/* 用户统计 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-blue-600">总积分</p>
+                <p className="text-sm font-medium text-blue-600">{ts('points')}</p>
                 <p className="text-2xl font-bold text-blue-900">{formatNumber(userStats.totalPoints)}</p>
               </div>
               <Coins className="h-8 w-8 text-blue-500" />
@@ -328,7 +351,7 @@ export default function Web3SmartContractInteraction({ walletAddress }: { wallet
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-purple-600">空投权重</p>
+                <p className="text-sm font-medium text-purple-600">{ts('airdrop')}</p>
                 <p className="text-2xl font-bold text-purple-900">{(Number(userStats.airdropWeight) / 1000).toFixed(1)}</p>
               </div>
               <Gift className="h-8 w-8 text-purple-500" />
@@ -340,12 +363,14 @@ export default function Web3SmartContractInteraction({ walletAddress }: { wallet
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-green-600">连续签到</p>
-                <p className="text-2xl font-bold text-green-900">{consecutiveDays}天</p>
+                <p className="text-sm font-medium text-green-600">{ts('streak')}</p>
+                <p className="text-2xl font-bold text-green-900">{consecutiveDays}{ts('days')}</p>
               </div>
               <Calendar className="h-8 w-8 text-green-500" />
             </div>
-            <Badge className={`bg-gradient-to-r ${getConsecutiveDaysColor(consecutiveDays)} text-white text-xs mt-1`}>{getConsecutiveDaysLabel(consecutiveDays)}</Badge>
+            <Badge className={`bg-gradient-to-r ${getConsecutiveDaysColor(consecutiveDays)} text-white text-xs mt-1`}>
+              {getConsecutiveDaysLabel(consecutiveDays)}
+            </Badge>
           </CardContent>
         </Card>
 
@@ -353,69 +378,66 @@ export default function Web3SmartContractInteraction({ walletAddress }: { wallet
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-orange-600">总投入</p>
+                <p className="text-sm font-medium text-orange-600">{ts('spend')}</p>
                 <p className="text-2xl font-bold text-orange-900">{formatBNB(userStats.totalBNBSpent)}</p>
               </div>
               <TrendingUp className="h-8 w-8 text-orange-500" />
             </div>
-            <p className="text-xs text-orange-500 mt-1">BNB</p>
+            <p className="text-xs text-orange-500 mt-1">{ts('bnb')}</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* 进度条 */}
       {nextMilestone && (
         <Card>
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <Star className="w-5 h-5" />
-              下一个里程碑
+              {tm('title')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex justify-between text-sm">
-              <span>连续签到进度</span>
+              <span>{tm('progressLabel')}</span>
               <span>
-                {consecutiveDays}/{nextMilestone.target}天
+                {consecutiveDays}/{nextMilestone.target}{ts('days')}
               </span>
             </div>
             <Progress value={(consecutiveDays / nextMilestone.target) * 100} className="h-2" />
             <p className="text-sm text-gray-600">
-              还需签到 {nextMilestone.target - consecutiveDays} 天解锁
-              <span className="font-semibold text-blue-600"> {nextMilestone.reward} 奖励倍数</span>
+              {tm('remaining', { days: nextMilestone.target - consecutiveDays })}
+              <span className="font-semibold text-blue-600"> {tm('reward', { reward: nextMilestone.reward })}</span>
             </p>
           </CardContent>
         </Card>
       )}
 
-      {/* 合约统计 */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">合约统计</CardTitle>
+          <CardTitle className="text-lg">{tContract('title')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div className="text-center">
-              <p className="text-gray-600">总用户数</p>
+              <p className="text-gray-600">{tContract('users')}</p>
               <p className="text-lg font-bold text-blue-600">{formatNumber(contractInfo.totalUsers)}</p>
             </div>
             <div className="text-center">
-              <p className="text-gray-600">总签到次数</p>
+              <p className="text-gray-600">{tContract('checkins')}</p>
               <p className="text-lg font-bold text-green-600">{formatNumber(contractInfo.totalCheckins)}</p>
             </div>
             <div className="text-center">
-              <p className="text-gray-600">总收入</p>
-              <p className="text-lg font-bold text-purple-600">{formatBNB(contractInfo.totalRevenue)} BNB</p>
+              <p className="text-gray-600">{tContract('revenue')}</p>
+              <p className="text-lg font-bold text-purple-600">{formatBNB(contractInfo.totalRevenue)} {ts('bnb')}</p>
             </div>
             <div className="text-center">
-              <p className="text-gray-600">合约余额</p>
-              <p className="text-lg font-bold text-orange-600">{formatBNB(contractInfo.contractBalance)} BNB</p>
+              <p className="text-gray-600">{tContract('balance')}</p>
+              <p className="text-lg font-bold text-orange-600">{formatBNB(contractInfo.contractBalance)} {ts('bnb')}</p>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* 操作按钮 */}
       <div className="flex gap-4">
         <Button
           variant="outline"
@@ -428,7 +450,7 @@ export default function Web3SmartContractInteraction({ walletAddress }: { wallet
           className="flex-1"
         >
           <RefreshCw className="w-4 h-4 mr-2" />
-          刷新数据
+          {ta('refresh')}
         </Button>
         <Button
           variant="outline"
@@ -436,10 +458,9 @@ export default function Web3SmartContractInteraction({ walletAddress }: { wallet
           className="flex-1"
         >
           <ExternalLink className="w-4 h-4 mr-2" />
-          查看合约
+          {ta('viewContract')}
         </Button>
       </div>
     </div>
   );
 }
-

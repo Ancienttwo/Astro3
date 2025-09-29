@@ -2,10 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { walletSignatureVerifier } from '@/lib/services/wallet-signature-verifier'
 import { createClient } from '@supabase/supabase-js'
 import crypto from 'crypto'
-import jwt from 'jsonwebtoken'
-
-const JWT_SECRET = process.env.JWT_SECRET
-
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -249,25 +245,6 @@ export async function POST(request: NextRequest) {
 
       console.log('✅ 标准JWT session创建成功')
 
-      if (!JWT_SECRET || JWT_SECRET.length < 32) {
-        throw new Error('JWT_SECRET not configured or too short')
-      }
-
-      const customJwtPayload = {
-        userId: supabaseUser.id,
-        walletAddress: normalizedAddress,
-        authType: 'walletconnect',
-        email: virtualEmail,
-        iss: 'astrozi',
-        aud: 'astrozi-users',
-        iat: Math.floor(Date.now() / 1000)
-      }
-
-      const customJWT = jwt.sign(customJwtPayload, JWT_SECRET, {
-        algorithm: 'HS256',
-        expiresIn: '7d'
-      })
-
       // Step 4: 返回用户数据和真正的JWT session
       const userData = {
         id: supabaseUser.id,
@@ -284,23 +261,11 @@ export async function POST(request: NextRequest) {
         success: true,
         data: {
           user: userData,
-          session: standardSession,
-          customJWT
+          session: standardSession
         }
       })
 
-    } catch (jwtError) {
-      console.error('❌ JWT生成失败，回退到简化session:', jwtError)
-      
-      // 如果JWT生成失败，返回用户数据但不包含session
-      // 客户端可以决定是否需要重新尝试认证
-      return NextResponse.json({
-        success: false,
-        error: `JWT token生成失败: ${jwtError instanceof Error ? jwtError.message : '未知错误'}`,
-        details: 'Web3认证成功但JWT生成失败，请重试'
-      }, { status: 500 })
     }
-
 
   } catch (error) {
     console.error('❌ 服务端Web3认证失败:', error)

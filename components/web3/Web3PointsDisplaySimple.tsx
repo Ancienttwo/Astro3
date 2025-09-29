@@ -7,8 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Coins, Calendar, TrendingUp, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useChainId, useReadContract } from 'wagmi';
+import { useNamespaceTranslations } from '@/lib/i18n/useI18n';
 
-// Contract configuration
 const CONTRACT_ADDRESS = '0x3b016F5A7C462Fe51B691Ef18559DE720D9B452F';
 const CONTRACT_ABI = [
   "function getUserStats(address user) view returns (uint256, uint256, uint256, uint256, uint256, uint256, bool)",
@@ -22,12 +22,12 @@ interface Web3PointsDisplaySimpleProps {
   onPointsUpdate?: () => void;
 }
 
-export default function Web3PointsDisplaySimple({ 
-  walletAddress, 
-  onPointsUpdate 
-}: Web3PointsDisplaySimpleProps) {
+export default function Web3PointsDisplaySimple({ walletAddress, onPointsUpdate }: Web3PointsDisplaySimpleProps) {
   const chainId = useChainId();
   const { toast } = useToast();
+  const t = useNamespaceTranslations('web3/auth');
+  const tp = (path: string, values?: Record<string, unknown>) => t(`points.${path}`, values);
+
   const { data: userStatsData, refetch: refetchStats, isFetching: f1 } = useReadContract({
     address: CONTRACT_ADDRESS as `0x${string}`,
     abi: CONTRACT_ABI as any,
@@ -45,21 +45,18 @@ export default function Web3PointsDisplaySimple({
 
   const formatNumber = (num: bigint) => {
     const n = Number(num);
-    if (n >= 1000000) {
-      return (n / 1000000).toFixed(1) + 'M';
-    } else if (n >= 1000) {
-      return (n / 1000).toFixed(1) + 'K';
-    }
-    return n.toString();
+    if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+    if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
+    return n.toLocaleString();
   };
 
-  const getConsecutiveDaysLabel = (days: number) => {
-    if (days >= 100) return 'LEGENDARY';
-    if (days >= 60) return 'ELITE';
-    if (days >= 30) return 'EXPERT';
-    if (days >= 15) return 'ADVANCED';
-    if (days >= 7) return 'BEGINNER';
-    return 'STARTER';
+  const getConsecutiveDaysLabelKey = (days: number) => {
+    if (days >= 100) return 'legendary';
+    if (days >= 60) return 'elite';
+    if (days >= 30) return 'expert';
+    if (days >= 15) return 'advanced';
+    if (days >= 7) return 'beginner';
+    return 'starter';
   };
 
   const getConsecutiveDaysColor = (days: number) => {
@@ -76,7 +73,7 @@ export default function Web3PointsDisplaySimple({
     return (
       <Card>
         <CardContent className="p-6 text-center">
-          <p className="text-gray-500">Please switch to BSC Mainnet to view your Web3 stats</p>
+          <p className="text-gray-500">{tp('networkMismatch')}</p>
         </CardContent>
       </Card>
     );
@@ -104,9 +101,7 @@ export default function Web3PointsDisplaySimple({
     return {
       totalPoints: d[0] as bigint,
       consecutiveDays: d[1] as bigint,
-      lastCheckinDate: d[2] as bigint,
       airdropWeight: d[3] as bigint,
-      totalBNBSpent: d[4] as bigint,
       totalCheckins: d[5] as bigint,
       isActive: d[6] as boolean,
     };
@@ -118,14 +113,17 @@ export default function Web3PointsDisplaySimple({
     return (
       <Card>
         <CardContent className="p-6 text-center">
-          <p className="text-gray-500">No Web3 data available</p>
-          <Button 
-            variant="outline" 
-            onClick={() => { refetchStats(); refetchCan(); }}
+          <p className="text-gray-500">{tp('noData')}</p>
+          <Button
+            variant="outline"
+            onClick={() => {
+              refetchStats();
+              refetchCan();
+            }}
             className="mt-2"
           >
             <RefreshCw className="w-4 h-4 mr-2" />
-            Retry
+            {tp('retry')}
           </Button>
         </CardContent>
       </Card>
@@ -137,52 +135,40 @@ export default function Web3PointsDisplaySimple({
 
   return (
     <div className="space-y-6">
-      {/* Main Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Total Points */}
         <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-blue-600">Total Points</p>
-                <p className="text-2xl font-bold text-blue-900">
-                  {formatNumber(userStats.totalPoints)}
-                </p>
+                <p className="text-sm font-medium text-blue-600">{tp('pointsBalance')}</p>
+                <p className="text-2xl font-bold text-blue-900">{formatNumber(userStats.totalPoints)}</p>
               </div>
               <Coins className="h-8 w-8 text-blue-500" />
             </div>
           </CardContent>
         </Card>
 
-        {/* Consecutive Days */}
         <Card className="border-green-200 bg-gradient-to-br from-green-50 to-green-100">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-green-600">Consecutive Days</p>
-                <p className="text-2xl font-bold text-green-900">
-                  {consecutiveDays}
-                </p>
+                <p className="text-sm font-medium text-green-600">{tp('consecutiveLabel')}</p>
+                <p className="text-2xl font-bold text-green-900">{consecutiveDays}</p>
               </div>
               <Calendar className="h-8 w-8 text-green-500" />
             </div>
-            <Badge 
-              className={`${getConsecutiveDaysColor(consecutiveDays)} text-white text-xs mt-1`}
-            >
-              {getConsecutiveDaysLabel(consecutiveDays)}
+            <Badge className={`${getConsecutiveDaysColor(consecutiveDays)} text-white text-xs mt-1`}>
+              {tp(`streakLabels.${getConsecutiveDaysLabelKey(consecutiveDays)}`)}
             </Badge>
           </CardContent>
         </Card>
 
-        {/* Total Check-ins */}
         <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-purple-100">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-purple-600">Total Check-ins</p>
-                <p className="text-2xl font-bold text-purple-900">
-                  {totalCheckins}
-                </p>
+                <p className="text-2xl font-bold text-purple-900">{totalCheckins.toLocaleString()}</p>
               </div>
               <TrendingUp className="h-8 w-8 text-purple-500" />
             </div>
@@ -190,43 +176,41 @@ export default function Web3PointsDisplaySimple({
         </Card>
       </div>
 
-      {/* Action Buttons */}
       <div className="flex gap-4">
-        <Button 
-          variant="outline" 
-          onClick={() => { refetchStats(); refetchCan(); }}
+        <Button
+          variant="outline"
+          onClick={() => {
+            refetchStats();
+            refetchCan();
+          }}
           className="flex-1"
         >
           <RefreshCw className="w-4 h-4 mr-2" />
-          Refresh Data
+          {tp('refreshButton')}
         </Button>
         {canCheckin && (
-          <Button 
+          <Button
             onClick={() => {
-              if (onPointsUpdate) onPointsUpdate();
+              toast({ title: tp('checkinCta') });
+              onPointsUpdate?.();
             }}
             className="flex-1"
           >
-            Check In Available
+            {tp('checkinCta')}
           </Button>
         )}
       </div>
 
-      {/* Status Info */}
       <Card className="bg-gray-50">
         <CardContent className="p-4">
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <span className="text-gray-600">Status:</span>
-              <span className="ml-2 font-medium">
-                {userStats.isActive ? 'Active' : 'Inactive'}
-              </span>
+              <span className="text-gray-600">{tp('statusTitle')}:</span>
+              <span className="ml-2 font-medium">{userStats.isActive ? tp('statusActive') : tp('statusInactive')}</span>
             </div>
             <div>
-              <span className="text-gray-600">Can Check-in:</span>
-              <span className="ml-2 font-medium">
-                {canCheckin ? 'Yes' : 'No'}
-              </span>
+              <span className="text-gray-600">{tp('statusCanCheckin')}:</span>
+              <span className="ml-2 font-medium">{canCheckin ? tp('statusYes') : tp('statusNo')}</span>
             </div>
           </div>
         </CardContent>

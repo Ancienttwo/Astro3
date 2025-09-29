@@ -20,7 +20,6 @@ export interface UnifiedWeb3User {
 // Web3认证结果
 export interface Web3AuthResult {
   user: UnifiedWeb3User
-  customJWT: string
   supabaseJWT: string
   expiresAt: number
   success: boolean
@@ -28,7 +27,6 @@ export interface Web3AuthResult {
 
 // 双JWT tokens结构
 export interface DualJWTTokens {
-  customJWT: string      // 用于API认证和自定义逻辑
   supabaseJWT: string    // 用于Supabase RLS和数据库访问
   expiresAt: number
   issuedAt: number
@@ -64,24 +62,14 @@ export interface StoredAuthData {
     wallet_address: string
     auth_method: 'walletconnect'
     expires_at: number
+    refresh_token?: string
+    supabase_access_token?: string
   }
   wallet_session: {
     address: string
     timestamp: number
     auth_method: 'walletconnect'
   }
-}
-
-// JWT Payload接口
-export interface CustomJWTPayload {
-  userId: string
-  walletAddress: string
-  authType: 'walletconnect'
-  email: string
-  iss: string
-  aud: string
-  iat: number
-  exp: number
 }
 
 export interface SupabaseJWTPayload {
@@ -134,7 +122,6 @@ export interface WalletIntegrationConfig {
   supabaseUrl: string
   supabaseAnonKey: string
   supabaseServiceKey: string
-  jwtSecret: string
   supabaseJwtSecret: string
   tokenExpiryHours: number
 }

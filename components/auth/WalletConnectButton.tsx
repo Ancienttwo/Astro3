@@ -6,7 +6,7 @@
  * 面向Web3原生用户的纯钱包登录入口
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Loader2, Wallet, LogOut, ChevronDown } from 'lucide-react';
 import {
@@ -20,7 +20,11 @@ import {
 import { useAccount, useConnect, useDisconnect, useSignMessage } from 'wagmi';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { useLocale } from 'next-intl';
 import { supabaseSessionManager } from '@/lib/services/supabase-session-manager';
+import { buildLocaleHref } from '@/lib/i18n/routing';
+import { useNamespaceTranslations } from '@/lib/i18n/useI18n';
+import { assertLocale, type Locale } from '@/i18n/messages';
 function formatWalletAddress(addr?: string | null) {
   if (!addr) return '';
   return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
@@ -34,6 +38,8 @@ interface WalletConnectButtonProps {
   className?: string;
   variant?: 'default' | 'outline' | 'ghost';
   size?: 'default' | 'sm' | 'lg';
+  locale?: Locale;
+  dashboardPath?: string;
   onSuccess?: (walletAddress: string) => void;
 }
 
@@ -41,6 +47,8 @@ export function WalletConnectButton({
   className,
   variant = 'outline',
   size = 'default',
+  locale,
+  dashboardPath,
   onSuccess
 }: WalletConnectButtonProps) {
   const router = useRouter();
@@ -49,13 +57,17 @@ export function WalletConnectButton({
   const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
   const { signMessageAsync } = useSignMessage();
+  const intlLocale = useLocale();
+  const resolvedLocale = assertLocale(locale ?? intlLocale);
+  const successRedirect = buildLocaleHref(resolvedLocale, dashboardPath ?? '/web3', undefined, { localize: false });
+  const tAuth = useNamespaceTranslations('web3/auth');
 
   const handleConnect = async () => {
     try {
       setIsConnecting(true);
       
-      // 1. Connect wallet via wagmi (prefer injected, fallback to walletConnect/coinbase)
-      const preferred = ['injected', 'walletConnect', 'coinbaseWallet'];
+      // 1. Connect wallet via wagmi (prefer injected, fallback to walletConnect)
+      const preferred = ['injected', 'walletConnect'];
       const list = connectors.sort((a, b) => preferred.indexOf(a.id) - preferred.indexOf(b.id));
       const connector = list[0] || connectors[0];
       if (!connector) throw new Error('No wallet connector available');
@@ -108,13 +120,16 @@ export function WalletConnectButton({
         throw new Error('Authentication failed');
       }
       
-      const data = await authResponse.json();
-      const { jwt, user, session } = data;
+      const responseBody = await authResponse.json();
+      const payload = responseBody?.data;
+      const { user, session } = payload || {};
 
-      // Prefer the custom JWT for our API auth while still retaining Supabase tokens
-      const authToken = jwt;
-      const supabaseAccessToken = session?.access_token || null;
-      const supabaseRefreshToken = session?.refresh_token || null;
+      if (!session?.access_token) {
+        throw new Error('Missing Supabase session token');
+      }
+
+      const supabaseAccessToken = session.access_token;
+      const supabaseRefreshToken = session.refresh_token || null;
 
       // 5. Store unified local state for API client
       // current_user for unified header builder
@@ -128,16 +143,13 @@ export function WalletConnectButton({
       // walletconnect_auth for Web3 header builder compatibility
       const expSec = Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60;
       localStorage.setItem('walletconnect_auth', JSON.stringify({
-        auth_token: supabaseAccessToken || authToken,
-        refresh_token: supabaseRefreshToken || supabaseAccessToken || authToken,
-        api_token: authToken,
-        supabase_access_token: supabaseAccessToken || null,
+        auth_token: supabaseAccessToken,
+        refresh_token: supabaseRefreshToken || supabaseAccessToken,
+        supabase_access_token: supabaseAccessToken,
         wallet_address: resolvedAddr,
         auth_method: 'walletconnect',
         expires_at: session?.expires_at || expSec,
       }));
-      // Keep legacy keys for backward compatibility
-      localStorage.setItem('wallet_jwt', authToken);
       localStorage.setItem('wallet_session', JSON.stringify({
         walletAddress: resolvedAddr,
         userId: user.id,
@@ -156,15 +168,15 @@ export function WalletConnectButton({
         }
       }
 
-      toast.success('钱包连接成功 / Wallet connected');
+      toast.success(tAuth('button.toast.connected'));
       onSuccess?.(resolvedAddr);
       
       // Redirect to dashboard
-      router.push('/dashboard');
+      router.push(successRedirect);
       
     } catch (error: any) {
       console.error('Wallet connection failed:', error);
-      toast.error(error.message || '连接失败 / Connection failed');
+      toast.error(error?.message || tAuth('button.toast.error'));
     } finally {
       setIsConnecting(false);
     }
@@ -174,26 +186,27 @@ export function WalletConnectButton({
     try {
       disconnect();
       // Clear local storage
-      localStorage.removeItem('wallet_jwt');
       localStorage.removeItem('wallet_session');
+      localStorage.removeItem('walletconnect_auth');
+      localStorage.removeItem('current_user');
+      localStorage.removeItem('supabase_jwt');
       
       // Call logout API
       await fetch('/api/auth/walletconnect', {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('wallet_jwt') || localStorage.getItem('supabase_jwt') || ''}`
+          'Authorization': `Bearer ${localStorage.getItem('supabase_jwt') || ''}`
         }
       });
       
-      setSession(null);
-      setWalletAddress(null);
-      
-      toast.success('钱包已断开 / Wallet disconnected');
-      router.push('/');
+      await supabaseSessionManager.clearWeb3Session();
+
+      toast.success(tAuth('button.toast.disconnected'));
+      router.push(buildLocaleHref(resolvedLocale, '/', undefined, { localize: resolvedLocale !== 'zh' }));
       
     } catch (error) {
       console.error('Disconnect failed:', error);
-      toast.error('断开连接失败 / Failed to disconnect');
+      toast.error(tAuth('button.toast.error'));
     }
   };
 
@@ -217,7 +230,7 @@ export function WalletConnectButton({
         <DropdownMenuContent align="end" className="w-56">
           <DropdownMenuLabel>
             <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium">Web3 Wallet</p>
+              <p className="text-sm font-medium">{tAuth('button.menuTitle')}</p>
               <p className="text-xs text-muted-foreground font-mono">
                 {address}
               </p>
@@ -227,18 +240,18 @@ export function WalletConnectButton({
           
           <DropdownMenuItem onClick={handleSwitchWallet}>
             <Wallet className="mr-2 h-4 w-4" />
-            Switch Wallet
+            {tAuth('button.menuSwitch')}
           </DropdownMenuItem>
           
-          <DropdownMenuItem onClick={() => router.push('/dashboard')}>
-            Dashboard
+          <DropdownMenuItem onClick={() => router.push(successRedirect)}>
+            {tAuth('button.menuDashboard')}
           </DropdownMenuItem>
           
           <DropdownMenuSeparator />
           
           <DropdownMenuItem onClick={handleDisconnect} className="text-red-600">
             <LogOut className="mr-2 h-4 w-4" />
-            Disconnect
+            {tAuth('button.menuDisconnect')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -257,12 +270,12 @@ export function WalletConnectButton({
       {isConnecting ? (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Connecting...
+          {tAuth('button.connecting')}
         </>
       ) : (
         <>
           <Wallet className="mr-2 h-4 w-4" />
-          Connect Wallet
+          {tAuth('button.connect')}
         </>
       )}
     </Button>

@@ -1,0 +1,103 @@
+{
+  "loading": "タスクを読み込み中...",
+  "alerts": {
+    "loginRequired": "まずログインしてください",
+    "claimSuccess": "おめでとうございます！{points} ポイントを獲得しました！",
+    "claimFailure": "報酬の受け取りに失敗しました。しばらくしてからもう一度お試しください",
+    "progressCompleted": "タスク完了！今すぐ報酬を受け取りましょう！"
+  },
+  "errors": {
+    "fetchFailed": "タスクの読み込みに失敗しました",
+    "loginRequired": "ログインしてタスクを表示してください",
+    "retry": "再試行"
+  },
+  "auth": {
+    "title": "ログインしてタスクを見る",
+    "description": "ログインするとタスクを確認して達成できます",
+    "cta": "ログインページへ"
+  },
+  "hero": {
+    "title": "タスクセンター",
+    "subtitle": "タスクをこなして Web3 リワードを獲得しよう"
+  },
+  "stats": {
+    "completed": {
+      "title": "完了済み",
+      "subtitle": "完了したタスク数"
+    },
+    "pointsEarned": {
+      "title": "獲得ポイント",
+      "subtitle": "累計ポイント"
+    },
+    "available": {
+      "title": "受け取り可能",
+      "subtitle": "受け取れるポイント"
+    },
+    "units": {
+      "points": "pt"
+    }
+  },
+  "categories": {
+    "title": "タスクカテゴリー",
+    "newbie": {
+      "title": "ビギナータスク",
+      "description": "はじめてのユーザーが Web3 機能に慣れるための簡単なタスク"
+    },
+    "advanced": {
+      "title": "アドバンスタスク",
+      "description": "時間と労力が必要ですが、その分リワードが豊富です"
+    }
+  },
+  "dailySection": {
+    "title": "フォーチュンハンターミッション",
+    "subtitle": "デイリークエストとエピックチャレンジでコズミックポイントを稼ごう",
+    "cards": {
+      "daily": {
+        "title": "デイリークエスト",
+        "subtitle": "🔥 連続 {streak} 日チェックイン • 今日の獲得 +25 ポイント",
+        "badge": "{progress}"
+      },
+      "leaderboard": {
+        "title": "ランキング",
+        "subtitle": "現在の順位：第 {rank} 位 • ↗ 今週 +5",
+        "badge": "上位 5%"
+      }
+    }
+  },
+  "fortune": {
+    "title": "おみくじ日課",
+    "subtitle": "関帝の神託にアクセスし、毎日の抽籤でコズミックポイントと古代の智慧を手に入れましょう。",
+    "highlights": {
+      "daily": "デイリークエスト解放中",
+      "rewards": "ポイントリワード",
+      "community": "コミュニティ共有"
+    },
+    "cta": "デイリーおみくじを完了"
+  },
+  "status": {
+    "claimed": "受け取り済み",
+    "claimable": "受け取り可能",
+    "inProgress": "進行中"
+  },
+  "taskTypes": {
+    "daily": "デイリータスク",
+    "onetime": "一度きりのタスク",
+    "recurring": "繰り返しタスク"
+  },
+  "actions": {
+    "completed": "完了済み",
+    "claimReward": "報酬を受け取る",
+    "claiming": "受け取り中...",
+    "startTask": "タスク開始",
+    "viewRewards": "報酬を確認"
+  },
+  "progress": {
+    "title": "全体の進捗",
+    "subtitle": "Web3 マスターへの道をトラッキング",
+    "completed": "{count} 件のタスクを完了",
+    "remaining": "残り {count} 件のタスク"
+  },
+  "task": {
+    "points": "{points} ポイント"
+  }
+}

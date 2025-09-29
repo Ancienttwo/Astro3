@@ -52,6 +52,22 @@ export class SupabaseSessionManager {
     }
   }
 
+  private persistSupabaseJwt(token: string | null) {
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    try {
+      if (token) {
+        localStorage.setItem('supabase_jwt', token)
+      } else {
+        localStorage.removeItem('supabase_jwt')
+      }
+    } catch (error) {
+      console.warn('⚠️ 无法持久化Supabase JWT:', (error as Error)?.message || error)
+    }
+  }
+
   /**
    * 获取Supabase客户端实例（用于前端直接使用）
    */
@@ -112,6 +128,8 @@ export class SupabaseSessionManager {
         expiresAt: data.session.expires_at
       })
 
+      this.persistSupabaseJwt(data.session.access_token || session.access_token)
+
       // 验证session是否正常工作
       await this.validateSessionAccess()
 
@@ -159,6 +177,7 @@ export class SupabaseSessionManager {
       const { session, error } = await tryOnce()
       if (session && !error) {
         console.log('✅ 使用凭据登录成功，session已创建')
+        this.persistSupabaseJwt(session.access_token || null)
         // 额外验证访问
         await this.validateSessionAccess().catch(() => {})
         return session
@@ -192,6 +211,7 @@ export class SupabaseSessionManager {
         const { data: { session }, error } = await this.supabase!.auth.getSession()
         if (!error && session?.user) {
           const user = session.user as any
+          this.persistSupabaseJwt(session.access_token || null)
           const email: string | undefined = user?.email
           const meta = user?.user_metadata || {}
           const wallet = (meta.wallet_address || '').toLowerCase()
@@ -313,6 +333,8 @@ export class SupabaseSessionManager {
         return null
       }
 
+      this.persistSupabaseJwt(standardSession.access_token || null)
+
       // 构造用户对象
       const web3User: UnifiedWeb3User = {
         id: current_user.id,
@@ -351,6 +373,7 @@ export class SupabaseSessionManager {
 
       if (session) {
         console.log('✅ 找到当前session:', session.user.id)
+        this.persistSupabaseJwt(session.access_token || null)
       } else {
         console.log('📭 未找到当前session')
       }
@@ -507,10 +530,9 @@ export class SupabaseSessionManager {
         authData.auth_token = tokens.supabaseJWT
         authData.refresh_token = tokens.supabaseJWT
         authData.supabase_access_token = tokens.supabaseJWT
-        authData.api_token = tokens.customJWT
         authData.expires_at = tokens.expiresAt
         localStorage.setItem('walletconnect_auth', JSON.stringify(authData))
-        
+        this.persistSupabaseJwt(tokens.supabaseJWT)
         console.log('✅ localStorage中的tokens已更新')
       }
 
@@ -537,6 +559,7 @@ export class SupabaseSessionManager {
       localStorage.removeItem(key)
     })
 
+    this.persistSupabaseJwt(null)
     console.log('✅ 存储的认证数据已清理')
   }
 

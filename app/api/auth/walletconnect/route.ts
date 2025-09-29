@@ -7,7 +7,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { verifyMessage } from 'viem';
-import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 
 // Initialize Supabase admin client
@@ -22,9 +21,10 @@ const supabaseAdmin = createClient(
   }
 );
 
-// JWT configuration
-const JWT_SECRET = process.env.JWT_SECRET!;
-const JWT_EXPIRY = '7d';
+const supabaseClient = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 // Nonce storage (in production, use Redis)
 const nonceStore = new Map<string, { nonce: string; expiresAt: number }>();
@@ -182,31 +182,15 @@ export async function POST(request: NextRequest) {
       .eq('user_id', existingUser.id)
       .single();
     
-    // Generate JWT (custom for legacy clients)
-    const jwtPayload = {
-      userId: existingUser.id,
-      walletAddress: normalizedAddress,
-      authType: 'walletconnect',
-      email: virtualEmail,
-      role: 'authenticated',
-      iss: 'astrozi',
-      aud: 'astrozi-users'
-    };
-    
-    const token = jwt.sign(jwtPayload, JWT_SECRET, {
-      expiresIn: JWT_EXPIRY,
-      algorithm: 'HS256'
-    });
-    
     // Create session record
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7);
-    
+
     await supabaseAdmin
       .from('user_sessions')
       .insert({
         user_id: existingUser.id,
-        supabase_jwt: token,
+        supabase_jwt: accessToken,
         device_info: {
           wallet: 'walletconnect',
           address: normalizedAddress
@@ -252,7 +236,15 @@ export async function POST(request: NextRequest) {
 
     const now = new Date()
     const sessionExpiresAt = Math.floor((now.getTime() + 24 * 60 * 60 * 1000) / 1000)
-    const session = accessToken ? {
+
+    if (!accessToken) {
+      return NextResponse.json(
+        { error: 'Failed to generate Supabase session' },
+        { status: 500 }
+      );
+    }
+
+    const session = {
       access_token: accessToken,
       refresh_token: refreshToken || accessToken,
       expires_in: 86400,
@@ -277,20 +269,21 @@ export async function POST(request: NextRequest) {
         created_at: now.toISOString(),
         updated_at: now.toISOString(),
       },
-    } : null
+    }
 
     return NextResponse.json({
       success: true,
-      jwt: token,
-      session,
-      user: {
-        id: existingUser.id,
-        walletAddress: normalizedAddress,
-        username: existingUser.username,
-        email: existingUser.email
-      },
-      credits: credits?.free_credits || 0,
-      isPremium: credits?.subscription_tier !== 'free'
+      data: {
+        session,
+        user: {
+          id: existingUser.id,
+          walletAddress: normalizedAddress,
+          username: existingUser.username,
+          email: existingUser.email
+        },
+        credits: credits?.free_credits || 0,
+        isPremium: credits?.subscription_tier !== 'free'
+      }
     });
     
   } catch (error) {
@@ -318,31 +311,23 @@ export async function GET(request: NextRequest) {
     }
     
     const token = authHeader.substring(7);
-    
-    // Verify JWT
-    let decoded: any;
-    try {
-      decoded = jwt.verify(token, JWT_SECRET);
-    } catch (error) {
+
+    const { data: authUser, error: authError } = await supabaseClient.auth.getUser(token);
+
+    if (authError || !authUser?.user) {
       return NextResponse.json(
         { error: 'Invalid or expired token' },
         { status: 401 }
       );
     }
-    
-    // Check if this is a WalletConnect user
-    if (decoded.authType !== 'walletconnect') {
-      return NextResponse.json(
-        { error: 'Not a WalletConnect session' },
-        { status: 403 }
-      );
-    }
-    
+
+    const userId = authUser.user.id;
+
     // Get user from database
     const { data: user, error } = await supabaseAdmin
       .from('users')
       .select('*')
-      .eq('id', decoded.userId)
+      .eq('id', userId)
       .single();
     
     if (error || !user) {
@@ -384,29 +369,29 @@ export async function DELETE(request: NextRequest) {
     }
     
     const token = authHeader.substring(7);
-    
-    // Verify JWT to get user ID
-    let decoded: any;
-    try {
-      decoded = jwt.verify(token, JWT_SECRET);
-    } catch (error) {
+
+    const { data: authUser } = await supabaseClient.auth.getUser(token);
+    const userId = authUser?.user?.id;
+    const walletAddress = authUser?.user?.user_metadata?.wallet_address;
+
+    if (!userId) {
       return NextResponse.json({ success: true });
     }
-    
+
     // Delete sessions
     await supabaseAdmin
       .from('user_sessions')
       .delete()
-      .eq('user_id', decoded.userId);
+      .eq('user_id', userId);
     
     // Log logout event
     await supabaseAdmin
       .from('auth_logs')
       .insert({
-        user_id: decoded.userId,
+        user_id: userId,
         event_type: 'logout',
         provider: 'walletconnect',
-        wallet_address: decoded.walletAddress,
+        wallet_address: walletAddress,
         success: true,
         created_at: new Date().toISOString()
       });

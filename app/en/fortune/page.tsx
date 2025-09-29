@@ -162,26 +162,26 @@ export default function FortunePageEN() {
   const FortuneContent = () => (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#3D0B5B] to-[#420868] text-white py-12">
-        <div className="container mx-auto px-4">
-          <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold text-[#FBCB0A] mb-4">
+      <div className="bg-gradient-to-r from-[#3D0B5B] to-[#420868] py-12 text-white">
+        <div className="mx-auto w-full max-w-page px-page-inline text-center">
+          <div className="space-y-4">
+            <h1 className="text-4xl font-bold text-[#FBCB0A] md:text-5xl">
               Fortune Divination · Temple Oracle
             </h1>
-            <p className="text-xl text-gray-200 max-w-2xl mx-auto">
+            <p className="mx-auto max-w-2xl text-xl text-gray-200">
               Connect with Hong Kong's three most sacred temples for authentic fortune readings and spiritual guidance
             </p>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid gap-8 lg:grid-cols-3">
+      <div className="mx-auto w-full max-w-page px-page-inline py-section-stack">
+        <div className="grid gap-section-stack lg:grid-cols-3">
           {/* Left Panel - Controls */}
-          <div className="lg:col-span-1 space-y-6">
+          <div className="lg:col-span-1 space-y-section-stack">
             {/* Temple Selection */}
-            <Card className="border-2 border-gray-200 shadow-lg">
-              <CardHeader className="bg-gradient-to-r from-[#3D0B5B]/5 to-[#FBCB0A]/5">
+            <Card className="border border-slate-200 shadow-soft">
+              <CardHeader className="bg-gradient-to-r from-[#3D0B5B]/5 to-[#FBCB0A]/5 p-card-padding">
                 <CardTitle className="flex items-center text-[#3D0B5B]">
                   <Building2 className="w-5 h-5 mr-2 text-[#FBCB0A]" />
                   Choose Temple
@@ -190,7 +190,7 @@ export default function FortunePageEN() {
                   Select the temple system for your fortune reading
                 </CardDescription>
               </CardHeader>
-              <CardContent className="pt-6">
+              <CardContent className="space-y-4 p-card-padding">
                 <TempleSystemSelector
                   selectedTempleCode={selectedTemple?.temple_code}
                   onTempleSelect={setSelectedTemple}
@@ -222,8 +222,8 @@ export default function FortunePageEN() {
             </Card>
 
             {/* Slip Number Input */}
-            <Card className="border-2 border-gray-200 shadow-lg">
-              <CardHeader className="bg-gradient-to-r from-[#3D0B5B]/5 to-[#FBCB0A]/5">
+            <Card className="border border-slate-200 shadow-soft">
+              <CardHeader className="bg-gradient-to-r from-[#3D0B5B]/5 to-[#FBCB0A]/5 p-card-padding">
                 <CardTitle className="flex items-center text-[#3D0B5B]">
                   <Search className="w-5 h-5 mr-2 text-[#FBCB0A]" />
                   Divination Method
@@ -232,7 +232,7 @@ export default function FortunePageEN() {
                   Enter slip number manually or draw randomly
                 </CardDescription>
               </CardHeader>
-              <CardContent className="pt-6 space-y-4">
+              <CardContent className="space-y-4 p-card-padding">
                 <div>
                   <label className="block text-sm font-medium text-[#3D0B5B] mb-2">
                     Slip Number {selectedTemple && `(1-${selectedTemple.total_slips})`}
@@ -278,8 +278,8 @@ export default function FortunePageEN() {
             </Card>
 
             {error && (
-              <Card className="border-2 border-red-200 bg-red-50">
-                <CardContent className="pt-6">
+              <Card className="border border-red-200 bg-red-50 shadow-soft">
+                <CardContent className="p-card-padding">
                   <p className="text-red-700 text-center">{error}</p>
                 </CardContent>
               </Card>
@@ -287,13 +287,13 @@ export default function FortunePageEN() {
           </div>
 
           {/* Right Panel - Fortune Display */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-section-stack">
             {fortuneSlip ? (
               <>
                 {/* Fortune Slip Display */}
-                <Card className="border-2 shadow-xl" style={{ borderColor: fortuneSlip.temple_primary_color }}>
+                <Card className="border-2 shadow-medium" style={{ borderColor: fortuneSlip.temple_primary_color }}>
                   <CardHeader 
-                    className="text-white"
+                    className="p-card-padding text-white"
                     style={{ 
                       background: `linear-gradient(135deg, ${fortuneSlip.temple_primary_color}, ${fortuneSlip.temple_secondary_color})` 
                     }}
@@ -316,7 +316,7 @@ export default function FortunePageEN() {
                     </div>
                   </CardHeader>
                   
-                  <CardContent className="pt-6 space-y-6">
+                  <CardContent className="space-y-6 p-card-padding">
                     {/* Categories */}
                     {fortuneSlip.categories.length > 0 && (
                       <div>
@@ -347,19 +347,19 @@ export default function FortunePageEN() {
                     )}
 
                     {/* Basic Interpretation */}
-                    <div>
-                      <h4 className="font-semibold text-[#3D0B5B] mb-2">Basic Interpretation:</h4>
-                      <div className="bg-gradient-to-r from-[#3D0B5B]/5 to-[#FBCB0A]/5 p-4 rounded-lg">
-                        <p className="text-gray-700 leading-relaxed">
-                          {fortuneSlip.display_basic_interpretation}
-                        </p>
+                      <div>
+                        <h4 className="mb-2 font-semibold text-[#3D0B5B]">Basic Interpretation:</h4>
+                        <Card className="border border-[#FBCB0A]/40 bg-gradient-to-r from-[#3D0B5B]/5 to-[#FBCB0A]/5 p-card-padding shadow-soft">
+                          <p className="leading-relaxed text-gray-700">
+                            {fortuneSlip.display_basic_interpretation}
+                          </p>
+                        </Card>
                       </div>
-                    </div>
 
                     {/* Auth Prompt for Detailed Analysis */}
                     {fortuneSlip.requires_auth_for_details && (
-                      <Card className="border-2 border-[#FBCB0A] bg-gradient-to-r from-[#FBCB0A]/10 to-[#3D0B5B]/5">
-                        <CardContent className="pt-6">
+                      <Card className="border border-[#FBCB0A] bg-gradient-to-r from-[#FBCB0A]/10 to-[#3D0B5B]/5 shadow-soft">
+                        <CardContent className="p-card-padding">
                           <div className="text-center">
                             <Sparkles className="w-8 h-8 mx-auto text-[#FBCB0A] mb-2" />
                             <h4 className="font-bold text-[#3D0B5B] mb-2">Unlock Detailed AI Analysis</h4>
@@ -389,8 +389,8 @@ export default function FortunePageEN() {
                 </Card>
               </>
             ) : (
-              <Card className="border-2 border-gray-200 shadow-lg">
-                <CardContent className="pt-6">
+              <Card className="border border-slate-200 shadow-soft">
+                <CardContent className="p-card-padding">
                   <div className="text-center py-12">
                     <Building2 className="w-16 h-16 mx-auto text-gray-400 mb-4" />
                     <h3 className="text-xl font-semibold text-gray-600 mb-2">

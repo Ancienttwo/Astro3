@@ -1,5 +1,5 @@
-import Web3LoginPage from '@/components/auth/Web3LoginPage'
+import CredentialsLoginPage from '@/components/auth/CredentialsLoginPage'
 
 export default function LoginPage() {
-  return <Web3LoginPage locale="en" />
+  return <CredentialsLoginPage locale="en" />
 }

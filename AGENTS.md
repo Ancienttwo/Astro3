@@ -1,3 +1,12 @@
+**Workflow Rules**
+- Before completing a round, update `docs/PROGRESS.md` with the next step and archive older notes so the file stays concise.
+- Ensure `docs/PROGRESS.md` reflects the latest progress before handing results back。
+- 若仓库限制导致无法提交，请在总结中说明，无需强制执行 `git commit`。
+- When the user says `continue`, pick up with the next planned step immediately.
+
+**Reference**
+- Detailed progress, open tasks, and upcoming actions live in `docs/PROGRESS.md`.
+
 # Task Master AI - Agent Integration Guide
 
 ## Essential Commands

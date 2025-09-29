@@ -5,8 +5,6 @@ import { QueryClient, QueryClientProvider, useQueryClient as useRQClient } from 
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { syncManager } from '@/lib/services/syncManager';
-import { useMutualAidStore } from '@/lib/stores/mutualAidStore';
 
 // Query Client Configuration
 const createQueryClient = () => {
@@ -66,49 +64,10 @@ export default function QueryProvider({ children }: QueryProviderProps) {
     }
   }, []);
 
-  // Initialize sync manager when provider mounts
-  React.useEffect(() => {
-    syncManager.init(queryClient);
-
-    return () => {
-      syncManager.destroy();
-    };
-  }, [queryClient]);
-
   // Global error handler
   React.useEffect(() => {
     const handleError = (error: Error, query?: any) => {
       console.error('Query error:', error, query);
-      
-      // Add notification for user-facing errors
-      const addNotification = useMutualAidStore.getState().addNotification;
-      
-      // Only show user notifications for certain error types
-      if (error.message.includes('Network') || error.message.includes('fetch')) {
-        addNotification({
-          type: 'error',
-          title: '网络连接错误',
-          message: '请检查网络连接后重试'
-        });
-      } else if (error.message.includes('401') || error.message.includes('Unauthorized')) {
-        addNotification({
-          type: 'warning',
-          title: '需要重新连接钱包',
-          message: '请重新连接您的钱包'
-        });
-      } else if (error.message.includes('403') || error.message.includes('Forbidden')) {
-        addNotification({
-          type: 'error',
-          title: '权限不足',
-          message: '您没有执行此操作的权限'
-        });
-      } else if (error.message.includes('500')) {
-        addNotification({
-          type: 'error',
-          title: '服务器错误',
-          message: '系统暂时不可用，请稍后重试'
-        });
-      }
     };
 
     queryClient.getQueryCache().subscribe((event) => {
@@ -243,46 +202,3 @@ export function useQueryClient() {
 }
 
 // Prefetch helper hook
-export function usePrefetch() {
-  const queryClient = useQueryClient();
-
-  const prefetchUserData = React.useCallback(async (walletAddress: string) => {
-    const queries = [
-      { queryKey: ['user', 'profile'], fn: () => import('@/lib/api/client').then(m => m.api.getUserStats()) },
-      { queryKey: ['user', 'stats'], fn: () => import('@/lib/api/client').then(m => m.api.getUserStats()) },
-      { queryKey: ['nfts', 'collection'], fn: () => import('@/lib/api/client').then(m => m.api.getNFTCollection()) },
-    ];
-
-    await Promise.all(
-      queries.map(({ queryKey, fn }) =>
-        queryClient.prefetchQuery({
-          queryKey,
-          queryFn: fn,
-          staleTime: 5 * 60 * 1000
-        })
-      )
-    );
-  }, [queryClient]);
-
-  const prefetchSystemData = React.useCallback(async () => {
-    const queries = [
-      { queryKey: ['stats', 'system'], fn: () => import('@/lib/api/client').then(m => m.api.getSystemStats()) },
-      { queryKey: ['leaderboard', 'reputation'], fn: () => import('@/lib/api/client').then(m => m.api.getLeaderboard('reputation', 1, 10)) },
-    ];
-
-    await Promise.all(
-      queries.map(({ queryKey, fn }) =>
-        queryClient.prefetchQuery({
-          queryKey,
-          queryFn: fn,
-          staleTime: 2 * 60 * 1000
-        })
-      )
-    );
-  }, [queryClient]);
-
-  return {
-    prefetchUserData,
-    prefetchSystemData
-  };
-}

@@ -1,30 +1,26 @@
 /**
- * 双JWT生成器服务
+ * Supabase JWT 生成器服务
  * 
  * 核心功能：
- * 1. 生成自定义JWT (用于API认证和业务逻辑)
- * 2. 生成Supabase兼容JWT (用于RLS和数据库访问)
- * 3. 确保两个token的一致性和有效性
+ * 1. 生成Supabase兼容JWT (用于RLS和数据库访问)
+ * 2. 确保token有效性并提供工具函数
  */
 
 import jwt from 'jsonwebtoken'
 import { 
   UnifiedWeb3User, 
   DualJWTTokens, 
-  CustomJWTPayload, 
   SupabaseJWTPayload,
   WalletIntegrationError 
 } from '../types/wallet-integration'
 
 export class DualJWTGenerator {
-  private jwtSecret: string | null = null
   private supabaseJwtSecret: string | null = null
   private defaultExpiryHours: number = 24
   private initialized: boolean = false
 
   private ensureInitialized() {
     if (!this.initialized) {
-      this.jwtSecret = process.env.JWT_SECRET!
       this.supabaseJwtSecret = process.env.SUPABASE_JWT_SECRET!
       this.validateEnvironment()
       this.initialized = true
@@ -33,11 +29,11 @@ export class DualJWTGenerator {
   }
 
   /**
-   * 生成双重JWT tokens
+   * 生成 Supabase JWT
    * 
    * @param web3User Web3用户信息
    * @param expiryHours token过期时间（小时）
-   * @returns 双重JWT tokens
+   * @returns 含 Supabase JWT 的结构
    */
   async generateTokens(
     web3User: UnifiedWeb3User, 
@@ -45,7 +41,7 @@ export class DualJWTGenerator {
   ): Promise<DualJWTTokens> {
     this.ensureInitialized()
     
-    console.log('🔑 开始生成双重JWT tokens:', {
+    console.log('🔑 开始生成Supabase JWT:', {
       userId: web3User.id,
       walletAddress: web3User.wallet_address,
       email: web3User.email,
@@ -56,23 +52,17 @@ export class DualJWTGenerator {
       const now = Math.floor(Date.now() / 1000)
       const expiresAt = now + (expiryHours * 60 * 60)
 
-      // 生成自定义JWT
-      const customJWT = await this.generateCustomJWT(web3User, now, expiresAt)
-      console.log('✅ 自定义JWT生成成功')
-
       // 生成Supabase兼容JWT
       const supabaseJWT = await this.generateSupabaseJWT(web3User, now, expiresAt)
       console.log('✅ Supabase兼容JWT生成成功')
 
       const tokens: DualJWTTokens = {
-        customJWT,
         supabaseJWT,
         expiresAt,
         issuedAt: now
       }
 
-      console.log('🔑 双重JWT tokens生成完成:', {
-        customJWTPreview: customJWT.substring(0, 50) + '...',
+      console.log('🔑 Supabase JWT生成完成:', {
         supabaseJWTPreview: supabaseJWT.substring(0, 50) + '...',
         expiresAt: new Date(expiresAt * 1000).toISOString()
       })
@@ -90,56 +80,6 @@ export class DualJWTGenerator {
         'Failed to generate JWT tokens',
         'JWT_GENERATION_FAILED',
         { originalError: error, userId: web3User.id }
-      )
-    }
-  }
-
-  /**
-   * 生成自定义JWT (用于API认证和业务逻辑)
-   */
-  private async generateCustomJWT(
-    web3User: UnifiedWeb3User,
-    issuedAt: number,
-    expiresAt: number
-  ): Promise<string> {
-    const payload: CustomJWTPayload = {
-      userId: web3User.id,
-      walletAddress: web3User.wallet_address,
-      authType: 'walletconnect',
-      email: web3User.email,
-      iss: 'astrozi',
-      aud: 'astrozi-users',
-      iat: issuedAt,
-      exp: expiresAt
-    }
-
-    console.log('🔐 生成自定义JWT payload:', {
-      userId: payload.userId,
-      walletAddress: payload.walletAddress,
-      authType: payload.authType,
-      email: payload.email
-    })
-
-    try {
-      const token = jwt.sign(payload, this.jwtSecret!, { 
-        algorithm: 'HS256',
-        noTimestamp: true // 使用我们自己的iat
-      })
-
-      // 验证生成的token
-      const decoded = jwt.verify(token, this.jwtSecret!) as CustomJWTPayload
-      if (decoded.userId !== web3User.id) {
-        throw new Error('JWT verification failed: userId mismatch')
-      }
-
-      return token
-
-    } catch (error) {
-      console.error('❌ 生成自定义JWT失败:', error)
-      throw new WalletIntegrationError(
-        'Failed to generate custom JWT',
-        'JWT_GENERATION_FAILED',
-        { error: error instanceof Error ? error.message : error }
       )
     }
   }
@@ -205,30 +145,6 @@ export class DualJWTGenerator {
   }
 
   /**
-   * 验证自定义JWT
-   */
-  async verifyCustomJWT(token: string): Promise<CustomJWTPayload | null> {
-    this.ensureInitialized()
-    try {
-      const decoded = jwt.verify(token, this.jwtSecret!) as CustomJWTPayload
-      
-      // 检查是否过期
-      const currentTime = Math.floor(Date.now() / 1000)
-      if (decoded.exp && currentTime > decoded.exp) {
-        console.log('⚠️ 自定义JWT已过期')
-        return null
-      }
-
-      console.log('✅ 自定义JWT验证成功:', decoded.userId)
-      return decoded
-
-    } catch (error) {
-      console.warn('⚠️ 自定义JWT验证失败:', error instanceof Error ? error.message : error)
-      return null
-    }
-  }
-
-  /**
    * 验证Supabase JWT
    */
   async verifySupabaseJWT(token: string): Promise<SupabaseJWTPayload | null> {
@@ -253,74 +169,10 @@ export class DualJWTGenerator {
   }
 
   /**
-   * 刷新JWT tokens
-   */
-  async refreshTokens(oldCustomJWT: string): Promise<DualJWTTokens | null> {
-    console.log('🔄 开始刷新JWT tokens')
-
-    try {
-      // 验证旧token
-      const payload = await this.verifyCustomJWT(oldCustomJWT)
-      if (!payload) {
-        console.log('⚠️ 旧token无效，无法刷新')
-        return null
-      }
-
-      // 从数据库重新获取用户信息
-      const { createClient } = await import('@supabase/supabase-js')
-      const supabaseAdmin = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!,
-        {
-          auth: {
-            autoRefreshToken: false,
-            persistSession: false
-          }
-        }
-      )
-
-      const { data: user, error } = await supabaseAdmin
-        .from('users')
-        .select('*')
-        .eq('id', payload.userId)
-        .eq('auth_type', 'web3')
-        .single()
-
-      if (error || !user) {
-        console.error('❌ 获取用户信息失败，无法刷新tokens:', error)
-        return null
-      }
-
-      // 生成新的tokens
-      const web3User: UnifiedWeb3User = {
-        id: user.id,
-        email: user.email,
-        username: user.username,
-        wallet_address: user.wallet_address,
-        auth_type: 'web3',
-        auth_provider: 'walletconnect',
-        display_name: user.username || `Web3User${user.wallet_address?.slice(-6) || ''}`,
-        created_at: user.created_at,
-        updated_at: user.updated_at
-      }
-
-      const newTokens = await this.generateTokens(web3User)
-      console.log('✅ JWT tokens刷新成功')
-      
-      return newTokens
-
-    } catch (error) {
-      console.error('❌ 刷新JWT tokens失败:', error)
-      return null
-    }
-  }
-
-  /**
    * 验证环境配置
    */
   private validateEnvironment(): void {
     const requiredEnvVars = [
-      'JWT_SECRET',
       'SUPABASE_JWT_SECRET',
       'NEXT_PUBLIC_SUPABASE_URL'
     ]
@@ -374,19 +226,11 @@ export const dualJWTGenerator = {
   async generateTokens(web3User: UnifiedWeb3User, expiryHours?: number): Promise<DualJWTTokens> {
     return this.instance.generateTokens(web3User, expiryHours)
   },
-  
-  async verifyCustomJWT(token: string): Promise<CustomJWTPayload | null> {
-    return this.instance.verifyCustomJWT(token)
-  },
-  
+
   async verifySupabaseJWT(token: string): Promise<SupabaseJWTPayload | null> {
     return this.instance.verifySupabaseJWT(token)
   },
-  
-  async refreshTokens(oldCustomJWT: string): Promise<DualJWTTokens | null> {
-    return this.instance.refreshTokens(oldCustomJWT)
-  },
-  
+
   getTokenRemainingTime(token: string): number {
     return this.instance.getTokenRemainingTime(token)
   }

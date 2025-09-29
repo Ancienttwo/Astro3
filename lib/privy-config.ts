@@ -72,7 +72,6 @@ export const privyConfig = {
       wallets: [
         'metamask',
         'walletconnect',
-        'coinbase_wallet',
         'trust_wallet',
         'okx_wallet',
         'rainbow',
@@ -161,7 +160,6 @@ export const getWalletDisplayName = (walletType: string): string => {
   const walletNames: Record<string, string> = {
     metamask: 'MetaMask',
     walletconnect: 'WalletConnect',
-    coinbase_wallet: 'Coinbase Wallet',
     trust_wallet: 'Trust Wallet',
     okx_wallet: 'OKX Wallet',
     rainbow: 'Rainbow',

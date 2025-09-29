@@ -1,0 +1,36 @@
+{
+  "title": "关帝灵签",
+  "subtitle": "摇签抽取指引，获取个性化解读",
+  "temple": {
+    "selectTemple": "选择庙宇体系",
+    "noTemples": "暂无可用庙宇",
+    "loading": "正在加载庙宇体系...",
+    "name": "庙宇",
+    "location": "地点",
+    "deity": "主神",
+    "specialization": "灵签擅长"
+  },
+  "slip": {
+    "inputLabel": "签号",
+    "inputPlaceholder": "输入签号",
+    "drawButton": "抽签",
+    "randomButton": "随机抽签",
+    "level": "签运等级",
+    "content": "签文内容",
+    "interpretation": "基础解读",
+    "categories": "适用领域"
+  },
+  "fortuneLevel": {
+    "excellent": "上上签",
+    "good": "上签",
+    "average": "中签",
+    "caution": "下签",
+    "warning": "凶签"
+  },
+  "ai": {
+    "cta": "获取 AI 解读",
+    "loginRequired": "登录后可查看完整 AI 解读",
+    "generating": "AI 正在分析，请稍候...",
+    "retry": "重新分析"
+  }
+}

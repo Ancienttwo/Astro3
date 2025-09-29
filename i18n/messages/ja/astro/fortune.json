@@ -1,0 +1,36 @@
+{
+  "title": "関帝おみくじ",
+  "subtitle": "御籤を引いてパーソナライズされたガイダンスを受け取りましょう",
+  "temple": {
+    "selectTemple": "寺院システムを選択",
+    "noTemples": "利用可能な寺院がありません",
+    "loading": "寺院システムを読み込み中...",
+    "name": "寺院",
+    "location": "所在地",
+    "deity": "主神",
+    "specialization": "専門分野"
+  },
+  "slip": {
+    "inputLabel": "籤番号",
+    "inputPlaceholder": "籤番号を入力",
+    "drawButton": "籤を引く",
+    "randomButton": "ランダムで引く",
+    "level": "運勢レベル",
+    "content": "籤文",
+    "interpretation": "基本解説",
+    "categories": "該当分野"
+  },
+  "fortuneLevel": {
+    "excellent": "大吉",
+    "good": "吉",
+    "average": "中吉",
+    "caution": "小吉",
+    "warning": "凶"
+  },
+  "ai": {
+    "cta": "AI解説を依頼する",
+    "loginRequired": "ログインすると完全な AI 解説が閲覧できます",
+    "generating": "AI が解説を生成しています...",
+    "retry": "再解析"
+  }
+}

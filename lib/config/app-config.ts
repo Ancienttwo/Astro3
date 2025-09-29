@@ -18,7 +18,7 @@ interface AppConfig {
     };
     web3: {
       enabled: boolean;
-      providers: ('metamask' | 'walletconnect' | 'coinbase')[];
+      providers: ('metamask' | 'walletconnect')[];
     };
   };
   

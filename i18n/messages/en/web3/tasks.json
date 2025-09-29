@@ -1,0 +1,103 @@
+{
+  "loading": "Loading tasks...",
+  "alerts": {
+    "loginRequired": "Please login first",
+    "claimSuccess": "Congratulations! You earned {points} points!",
+    "claimFailure": "Failed to claim reward, please try again",
+    "progressCompleted": "Task completed! You can claim your reward now!"
+  },
+  "errors": {
+    "fetchFailed": "Failed to load tasks",
+    "loginRequired": "Please login to view tasks",
+    "retry": "Retry"
+  },
+  "auth": {
+    "title": "Login to View Tasks",
+    "description": "Please login to view and complete tasks",
+    "cta": "Go to Login"
+  },
+  "hero": {
+    "title": "Task Center",
+    "subtitle": "Complete tasks and earn rewards in your Web3 journey"
+  },
+  "stats": {
+    "completed": {
+      "title": "Completed",
+      "subtitle": "Tasks Completed"
+    },
+    "pointsEarned": {
+      "title": "Points Earned",
+      "subtitle": "Points earned"
+    },
+    "available": {
+      "title": "Available",
+      "subtitle": "Points available"
+    },
+    "units": {
+      "points": "pts"
+    }
+  },
+  "categories": {
+    "title": "Task Categories",
+    "newbie": {
+      "title": "Beginner Tasks",
+      "description": "Simple tasks for first-time users to quickly get started with Web3 features"
+    },
+    "advanced": {
+      "title": "Advanced Tasks",
+      "description": "Advanced tasks that require more time and effort, offering generous rewards"
+    }
+  },
+  "dailySection": {
+    "title": "Fortune Hunter Missions",
+    "subtitle": "Complete daily quests and epic challenges to earn Cosmic Points",
+    "cards": {
+      "daily": {
+        "title": "Daily Quests",
+        "subtitle": "🔥 Streak: {streak} days • +25 points today",
+        "badge": "{progress}"
+      },
+      "leaderboard": {
+        "title": "Leaderboard",
+        "subtitle": "Your rank: #{rank} • ↗ Rising +5",
+        "badge": "Top 5%"
+      }
+    }
+  },
+  "fortune": {
+    "title": "Oracle Daily Quest",
+    "subtitle": "Connect with the divine wisdom of Guan Yu. Complete your daily Fortune Draw to earn Cosmic Points and unlock ancient wisdom.",
+    "highlights": {
+      "daily": "Daily quest available",
+      "rewards": "Cosmic Points rewards",
+      "community": "Community sharing"
+    },
+    "cta": "Complete Daily Fortune Quest"
+  },
+  "status": {
+    "claimed": "Claimed",
+    "claimable": "Claimable",
+    "inProgress": "In Progress"
+  },
+  "taskTypes": {
+    "daily": "Daily Task",
+    "onetime": "One-time Task",
+    "recurring": "Recurring Task"
+  },
+  "actions": {
+    "completed": "Completed",
+    "claimReward": "Claim Reward",
+    "claiming": "Claiming...",
+    "startTask": "Start Task",
+    "viewRewards": "View rewards"
+  },
+  "progress": {
+    "title": "Overall Progress",
+    "subtitle": "Track your journey to Web3 mastery",
+    "completed": "Completed {count} tasks",
+    "remaining": "{count} tasks remaining"
+  },
+  "task": {
+    "points": "{points} Points"
+  }
+}

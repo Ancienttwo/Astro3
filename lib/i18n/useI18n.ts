@@ -1,6 +1,7 @@
 "use client";
-import {useLocale, useMessages} from 'next-intl';
+import {useLocale, useMessages, useTranslations as useNextIntlTranslations} from 'next-intl';
 import type {Dictionary} from './dictionaries';
+import type {Namespace, Translator} from '@/i18n/messages';
 
 export function useI18n() {
   // 从 next-intl Provider 获取
@@ -45,4 +46,11 @@ export function getCurrentLanguage(pathname: string, searchParams?: URLSearchPar
  */
 export function isEnglishVersion(pathname: string, searchParams?: URLSearchParams): boolean {
   return getCurrentLanguage(pathname, searchParams) === 'en';
-} 
+}
+
+/**
+ * 命名空间翻译辅助，结合 Phase 2 新的消息架构
+ */
+export function useNamespaceTranslations(namespace: Namespace): Translator {
+  return useNextIntlTranslations(namespace) as unknown as Translator;
+}

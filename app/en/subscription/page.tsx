@@ -199,9 +199,9 @@ export default function EnglishSubscriptionPage() {
   return (
     <AuthGuard>
       <EnglishLayout>
-        <div className="container mx-auto px-3 md:px-4 py-4 md:py-8 max-w-7xl">
+        <div className="mx-auto w-full max-w-page px-page-inline py-section-stack">
           {/* Page Title */}
-          <div className="text-center mb-8 md:mb-12">
+          <div className="text-center">
             <div className="flex items-center justify-center gap-2 md:gap-3 mb-3 md:mb-4">
               <Crown className="w-6 h-6 md:w-8 md:h-8 text-purple-600 dark:text-amber-400 flex-shrink-0" />
               <h1 className="text-2xl md:text-3xl font-bold text-purple-600 dark:text-amber-400 leading-none flex items-center">
@@ -265,11 +265,11 @@ export default function EnglishSubscriptionPage() {
               </div>
 
           {/* Membership Plans */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-12 md:mb-16">
+          <div className="mb-section-stack grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 md:gap-6">
             {pricingPlans.map((plan) => (
               <Card 
                 key={plan.id} 
-                className={`relative transition-all duration-300 hover:shadow-lg ${
+                className={`relative border border-slate-200 bg-white p-card-padding shadow-soft transition-all duration-300 hover:shadow-medium dark:border-slate-700 dark:bg-slate-800 ${
                   plan.popular 
                     ? 'border-purple-500 shadow-lg shadow-purple-100 dark:shadow-purple-900/20 scale-105' 
                     : 'hover:border-purple-300'
@@ -284,7 +284,7 @@ export default function EnglishSubscriptionPage() {
                   </div>
                 )}
 
-                <CardHeader className="text-center pb-3 md:pb-4 pt-6 md:pt-8">
+                <CardHeader className="pt-6 md:pt-8 pb-3 text-center">
                   <CardTitle className="text-lg md:text-xl font-bold text-gray-800 dark:text-white">
                     {plan.name}
                   </CardTitle>
@@ -331,7 +331,7 @@ export default function EnglishSubscriptionPage() {
           </div>
 
           {/* Credit Purchase Section */}
-          <div className="mb-12 md:mb-16">
+          <div className="mb-section-stack">
             <div className="text-center mb-6 md:mb-8">
               <h2 className="text-xl md:text-2xl font-bold text-gray-800 dark:text-white mb-2">
                 {t.subscription.purchaseCredits}
@@ -341,9 +341,9 @@ export default function EnglishSubscriptionPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 md:gap-6">
               {creditPlans.map((credit) => (
-                <Card key={credit.id} className={`transition-all duration-300 hover:shadow-lg ${
+                <Card key={credit.id} className={`relative border border-slate-200 bg-white p-card-padding shadow-soft transition-all duration-300 hover:shadow-medium dark:border-slate-700 dark:bg-slate-800 ${
                   credit.popular ? 'border-purple-500 scale-105' : 'hover:border-purple-300'
                 }`}>
                   {credit.popular && (
@@ -354,8 +354,8 @@ export default function EnglishSubscriptionPage() {
                     </div>
                   )}
 
-                  <CardHeader className="text-center pb-3 md:pb-4">
-                    <div className={`w-12 h-12 md:w-16 md:h-16 bg-gradient-to-r ${credit.gradient} rounded-full flex items-center justify-center mx-auto mb-2`}>
+                  <CardHeader className="pb-3 text-center">
+                    <div className={`mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-r ${credit.gradient} md:h-16 md:w-16`}>
                       <credit.icon className="w-6 h-6 md:w-8 md:h-8 text-white" />
                     </div>
                     <CardTitle className="text-lg md:text-xl font-bold text-gray-800 dark:text-white">

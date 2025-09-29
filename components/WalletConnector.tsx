@@ -8,7 +8,9 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Loader2, Wallet, Shield, AlertTriangle, CheckCircle, ExternalLink } from 'lucide-react'
 import { toast } from 'sonner'
-import { useAccount, useConnect, useSignMessage, useDisconnect } from 'wagmi'
+import { useAccount, useConnect, useSignMessage } from 'wagmi'
+import { bsc } from 'wagmi/chains'
+import { useNamespaceTranslations } from '@/lib/i18n/useI18n'
 
 export interface WalletConnectRequest {
   walletAddress: string
@@ -33,10 +35,10 @@ export default function WalletConnector({ onConnect, isLoading = false, mode = '
   }>({ hasMetaMask: false, hasBinanceWallet: false, isMobile: false })
   const [isConnecting, setIsConnecting] = useState(false)
   const [error, setError] = useState<string>('')
-  const { address, isConnected } = useAccount()
+  const { address } = useAccount()
   const { connect, connectors } = useConnect()
-  const { disconnect } = useDisconnect()
   const { signMessageAsync } = useSignMessage()
+  const tAuth = useNamespaceTranslations('web3/auth')
 
   useEffect(() => {
     const env = {
@@ -56,7 +58,7 @@ export default function WalletConnector({ onConnect, isLoading = false, mode = '
       setStep('connect')
       
       // 连接钱包并获取地址（wagmi）
-      const preferred = ['injected', 'walletConnect', 'coinbaseWallet']
+      const preferred = ['injected', 'walletConnect']
       const list = connectors.sort((a, b) => preferred.indexOf(a.id) - preferred.indexOf(b.id))
       const connector = list[0] || connectors[0]
       if (!connector) throw new Error('No wallet connector available')
@@ -65,17 +67,17 @@ export default function WalletConnector({ onConnect, isLoading = false, mode = '
       const resolvedAddress = addr || address
       if (!resolvedAddress) throw new Error('Failed to get wallet address')
       setWalletAddress(resolvedAddress)
-      toast.success('Wallet connected successfully!')
-      
+      toast.success(tAuth('connector.toast.connected'))
+
       setStep('sign')
-      
+
       // 生成签名消息（内联生成 nonce/SIWE 简版消息）
       const nonce = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2)
       const message = `${window.location.host} wants you to sign in with your Ethereum account:\n${resolvedAddress}\n\nSign in to AstroZi.\n\nURI: https://${window.location.host}\nVersion: 1\nChain ID: 56\nNonce: ${nonce}\nIssued At: ${new Date().toISOString()}`
       
       // 请求用户签名（wagmi）
       const signature = await signMessageAsync({ message })
-      toast.success('Signature successful!')
+      toast.success(tAuth('connector.toast.signed'))
       
       setStep('confirm')
       
@@ -99,31 +101,31 @@ export default function WalletConnector({ onConnect, isLoading = false, mode = '
       
     } catch (error: any) {
       console.error('钱包连接失败:', error)
-      setError(error.message || 'Connection failed')
-      toast.error(error.message || 'Connection failed')
+      const fallbackMessage = tAuth('connector.errors.generic')
+      setError(error?.message || fallbackMessage)
+      toast.error(tAuth('connector.errors.toast'))
       setStep('detect')
     } finally {
       setIsConnecting(false)
     }
   }
 
+  const isLoginMode = mode === 'login'
+  const cardTitle = isLoginMode ? tAuth('connector.card.title.login') : tAuth('connector.card.title.bind')
+  const cardSubtitle = isLoginMode ? tAuth('connector.card.subtitle.login') : tAuth('connector.card.subtitle.bind')
+  const chainName = bsc.name
+  const chainId = bsc.id
+
   const renderDetectStep = () => (
     <div className="space-y-4">
       <div className="text-center">
-        <h3 className="text-lg font-semibold mb-2">
-          {mode === 'login' ? '钱包登录' : '绑定钱包'}
-        </h3>
-        <p className="text-sm text-muted-foreground">
-          {mode === 'login' 
-            ? '使用您的Web3钱包快速登录' 
-            : '将钱包绑定到您的账户以启用Web3功能'
-          }
-        </p>
+        <h3 className="text-lg font-semibold mb-2">{cardTitle}</h3>
+        <p className="text-sm text-muted-foreground">{cardSubtitle}</p>
       </div>
 
       {/* 钱包环境检测 */}
       <div className="space-y-2">
-        <h4 className="text-sm font-medium">钱包环境检测</h4>
+        <h4 className="text-sm font-medium">{tAuth('connector.detect.envHeading')}</h4>
         <div className="grid grid-cols-2 gap-2">
           <div className="flex items-center space-x-2">
             {walletEnv.hasMetaMask ? (
@@ -131,7 +133,7 @@ export default function WalletConnector({ onConnect, isLoading = false, mode = '
             ) : (
               <AlertTriangle className="h-4 w-4 text-yellow-500" />
             )}
-            <span className="text-sm">MetaMask</span>
+            <span className="text-sm">{tAuth('connector.detect.metamask')}</span>
           </div>
           <div className="flex items-center space-x-2">
             {walletEnv.hasBinanceWallet ? (
@@ -139,13 +141,13 @@ export default function WalletConnector({ onConnect, isLoading = false, mode = '
             ) : (
               <AlertTriangle className="h-4 w-4 text-gray-400" />
             )}
-            <span className="text-sm">Binance Wallet</span>
+            <span className="text-sm">{tAuth('connector.detect.binance')}</span>
           </div>
         </div>
         
         {walletEnv.isMobile && (
           <Badge variant="outline" className="text-xs">
-            移动设备
+            {tAuth('connector.detect.mobileBadge')}
           </Badge>
         )}
       </div>
@@ -154,12 +156,12 @@ export default function WalletConnector({ onConnect, isLoading = false, mode = '
       <div className="bg-blue-50 p-3 rounded-lg">
         <div className="flex items-center space-x-2 mb-2">
           <Shield className="h-4 w-4 text-blue-600" />
-          <span className="text-sm font-medium text-blue-900">网络要求</span>
+          <span className="text-sm font-medium text-blue-900">{tAuth('connector.detect.networkHeading')}</span>
         </div>
         <div className="text-xs text-blue-800 space-y-1">
-          <div>• 网络：{BSC_CONFIG.chainName}</div>
-          <div>• 链ID：{BSC_CONFIG.chainId}</div>
-          <div>• 签名免费，无Gas费用</div>
+          <div>• {tAuth('connector.detect.network', { chainName })}</div>
+          <div>• {tAuth('connector.detect.chainId', { chainId })}</div>
+          <div>• {tAuth('connector.detect.free')}</div>
         </div>
       </div>
 
@@ -167,14 +169,14 @@ export default function WalletConnector({ onConnect, isLoading = false, mode = '
         <Alert>
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
-            未检测到MetaMask钱包。
+            {tAuth('connector.detect.metamaskMissing')}
             <a 
               href="https://metamask.io/download/" 
               target="_blank" 
               rel="noopener noreferrer"
               className="text-blue-600 hover:underline ml-1"
             >
-              点击安装 <ExternalLink className="h-3 w-3 inline" />
+              {tAuth('connector.detect.installMetamask')} <ExternalLink className="h-3 w-3 inline" />
             </a>
           </AlertDescription>
         </Alert>
@@ -188,12 +190,12 @@ export default function WalletConnector({ onConnect, isLoading = false, mode = '
         {isConnecting ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            连接中...
+            {tAuth('connector.buttons.connecting')}
           </>
         ) : (
           <>
             <Wallet className="h-4 w-4 mr-2" />
-            连接钱包
+            {tAuth('connector.buttons.connect')}
           </>
         )}
       </Button>
@@ -205,20 +207,20 @@ export default function WalletConnector({ onConnect, isLoading = false, mode = '
       <Loader2 className="h-8 w-8 animate-spin mx-auto text-blue-500" />
       <div>
         <h3 className="text-lg font-semibold">
-          {step === 'connect' && '连接钱包中...'}
-          {step === 'sign' && '请在钱包中签名...'}
-          {step === 'confirm' && '验证签名中...'}
+          {step === 'connect' && tAuth('connector.progress.connecting.title')}
+          {step === 'sign' && tAuth('connector.progress.signing.title')}
+          {step === 'confirm' && tAuth('connector.progress.confirm.title')}
         </h3>
         <p className="text-sm text-muted-foreground mt-2">
-          {step === 'connect' && '正在连接您的钱包，请在钱包中确认'}
-          {step === 'sign' && '请在钱包中确认签名以验证身份'}
-          {step === 'confirm' && '正在验证您的签名...'}
+          {step === 'connect' && tAuth('connector.progress.connecting.message')}
+          {step === 'sign' && tAuth('connector.progress.signing.message')}
+          {step === 'confirm' && tAuth('connector.progress.confirm.message')}
         </p>
       </div>
       
       {walletAddress && (
         <div className="bg-gray-50 p-3 rounded-lg">
-          <div className="text-xs text-muted-foreground mb-1">钱包地址</div>
+          <div className="text-xs text-muted-foreground mb-1">{tAuth('connector.labels.walletAddress')}</div>
           <div className="font-mono text-sm break-all">{walletAddress}</div>
         </div>
       )}
@@ -229,7 +231,7 @@ export default function WalletConnector({ onConnect, isLoading = false, mode = '
     <Alert className="border-red-200 bg-red-50">
       <AlertTriangle className="h-4 w-4 text-red-600" />
       <AlertDescription className="text-red-800">
-        <div className="font-medium mb-1">连接失败</div>
+        <div className="font-medium mb-1">{tAuth('connector.errors.heading')}</div>
         <div className="text-sm">{error}</div>
         <Button 
           size="sm" 
@@ -240,7 +242,7 @@ export default function WalletConnector({ onConnect, isLoading = false, mode = '
             setStep('detect')
           }}
         >
-          重试
+          {tAuth('connector.errors.retry')}
         </Button>
       </AlertDescription>
     </Alert>
@@ -251,14 +253,9 @@ export default function WalletConnector({ onConnect, isLoading = false, mode = '
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Wallet className="h-5 w-5 text-blue-500" />
-          {mode === 'login' ? '钱包登录' : '绑定钱包'}
+          {cardTitle}
         </CardTitle>
-        <CardDescription>
-          {mode === 'login' 
-            ? '使用您的Web3钱包快速登录' 
-            : '将钱包绑定到您的账户以启用Web3功能'
-          }
-        </CardDescription>
+        <CardDescription>{cardSubtitle}</CardDescription>
       </CardHeader>
       
       <CardContent className="space-y-4">
@@ -272,18 +269,18 @@ export default function WalletConnector({ onConnect, isLoading = false, mode = '
         <div className="text-xs text-muted-foreground space-y-1">
           <div className="flex items-center gap-1">
             <CheckCircle className="h-3 w-3 text-green-500" />
-            <span>基于BSC网络</span>
+            <span>{tAuth('connector.safety.bsc')}</span>
           </div>
           <div className="flex items-center gap-1">
             <CheckCircle className="h-3 w-3 text-green-500" />
-            <span>签名验证身份</span>
+            <span>{tAuth('connector.safety.siwe')}</span>
           </div>
           <div className="flex items-center gap-1">
             <CheckCircle className="h-3 w-3 text-green-500" />
-            <span>无需支付Gas费用</span>
+            <span>{tAuth('connector.safety.noGas')}</span>
           </div>
         </div>
       </CardContent>
     </Card>
   )
-} 
+}

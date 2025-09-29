@@ -2,10 +2,9 @@
  * WalletConnect与Supabase完美集成层
  * 
  * 核心功能：
- * 1. 双JWT系统：自定义JWT + Supabase兼容JWT
- * 2. 统一session管理
- * 3. RLS兼容的Web3用户认证
- * 4. 无缝的Web2/Web3用户体验
+ * 1. Supabase JWT 统一会话管理
+ * 2. RLS兼容的Web3用户认证
+ * 3. 无缝的Web2/Web3用户体验
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
@@ -14,7 +13,6 @@ import { verifyMessage } from 'viem'
 
 export interface Web3AuthResult {
   user: UnifiedWeb3User
-  customJWT: string
   supabaseJWT: string
   expiresAt: number
 }
@@ -32,7 +30,6 @@ export interface UnifiedWeb3User {
 }
 
 export interface DualJWTTokens {
-  customJWT: string      // 用于API认证和自定义逻辑
   supabaseJWT: string    // 用于Supabase RLS和数据库访问
   expiresAt: number
 }
@@ -83,9 +80,9 @@ export class WalletSupabaseIntegration {
     const web3User = await this.getOrCreateWeb3User(walletAddress)
     console.log('✅ Web3用户已准备:', web3User.email)
 
-    // 3. 生成双重JWT tokens
-    const tokens = await this.generateDualJWTs(web3User)
-    console.log('✅ 双重JWT tokens已生成')
+    // 3. 生成Supabase JWT
+    const tokens = await this.generateSupabaseJWT(web3User)
+    console.log('✅ Supabase JWT已生成')
 
     // 4. 🔑 关键步骤：设置Supabase session
     await this.setSupabaseSession(tokens.supabaseJWT)
@@ -97,7 +94,6 @@ export class WalletSupabaseIntegration {
 
     return {
       user: web3User,
-      customJWT: tokens.customJWT,
       supabaseJWT: tokens.supabaseJWT,
       expiresAt: tokens.expiresAt
     }
@@ -196,23 +192,11 @@ export class WalletSupabaseIntegration {
   /**
    * 生成双重JWT tokens
    */
-  private async generateDualJWTs(web3User: UnifiedWeb3User): Promise<DualJWTTokens> {
+  private async generateSupabaseJWT(web3User: UnifiedWeb3User): Promise<DualJWTTokens> {
     const now = Math.floor(Date.now() / 1000)
     const expiresAt = now + (24 * 60 * 60) // 24小时
 
-    // JWT 1: 自定义Web3 JWT (用于API认证)
-    const customJWT = jwt.sign({
-      userId: web3User.id,
-      walletAddress: web3User.wallet_address,
-      authType: 'walletconnect',
-      email: web3User.email,
-      iss: 'astrozi',
-      aud: 'astrozi-users',
-      iat: now,
-      exp: expiresAt
-    }, process.env.JWT_SECRET!, { algorithm: 'HS256' })
-
-    // JWT 2: Supabase兼容JWT (用于RLS和数据库访问)
+    // Supabase兼容JWT (用于RLS和数据库访问)
     const supabaseJWT = jwt.sign({
       sub: web3User.id,                    // Supabase期望的用户ID
       aud: 'authenticated',                // Supabase role
@@ -234,7 +218,6 @@ export class WalletSupabaseIntegration {
     }, process.env.SUPABASE_JWT_SECRET!, { algorithm: 'HS256' })
 
     return {
-      customJWT,
       supabaseJWT,
       expiresAt
     }
@@ -275,12 +258,17 @@ export class WalletSupabaseIntegration {
       localStorage.setItem('walletconnect_auth', JSON.stringify({
         auth_token: tokens.supabaseJWT,
         refresh_token: tokens.supabaseJWT,
-        api_token: tokens.customJWT,
         supabase_access_token: tokens.supabaseJWT,
         wallet_address: web3User.wallet_address,
         auth_method: 'walletconnect',
         expires_at: tokens.expiresAt
       }))
+
+      try {
+        localStorage.setItem('supabase_jwt', tokens.supabaseJWT)
+      } catch (error) {
+        console.warn('无法写入supabase_jwt到localStorage:', (error as Error)?.message || error)
+      }
 
       // 存储钱包会话信息
       localStorage.setItem('wallet_session', JSON.stringify({
@@ -324,8 +312,13 @@ export class WalletSupabaseIntegration {
       }
 
       // 重新生成Supabase JWT并设置session
-      const tokens = await this.generateDualJWTs(userData)
+      const tokens = await this.generateSupabaseJWT(userData)
       await this.setSupabaseSession(tokens.supabaseJWT)
+      try {
+        localStorage.setItem('supabase_jwt', tokens.supabaseJWT)
+      } catch (error) {
+        console.warn('恢复session时写入supabase_jwt失败:', (error as Error)?.message || error)
+      }
 
       console.log('✅ Web3用户session已恢复:', userData.wallet_address)
       return userData
@@ -347,6 +340,7 @@ export class WalletSupabaseIntegration {
       localStorage.removeItem('wallet_session')
       localStorage.removeItem('web3_auth')
       localStorage.removeItem('web3_user')
+      localStorage.removeItem('supabase_jwt')
       
       console.log('✅ Web3认证数据已清理')
     }

@@ -76,18 +76,7 @@ async function getServerAuthContext(request: Request): Promise<UnifiedAuthContex
 
   const token = authHeader.substring(7);
   
-  // 首先尝试Web3 JWT验证
-  try {
-    const web3Context = await validateWeb3JWT(token);
-    if (web3Context) {
-      console.log('✅ 服务器端Web3认证成功:', web3Context.user_id);
-      return web3Context;
-    }
-  } catch (error) {
-    console.log('🔍 Web3 JWT验证失败，尝试Web2认证');
-  }
-
-  // 然后尝试Supabase Web2认证
+  // 直接尝试Supabase认证
   try {
     const web2Context = await validateSupabaseToken(token);
     if (web2Context) {
@@ -120,65 +109,6 @@ async function getClientAuthContext(): Promise<UnifiedAuthContext | null> {
   }
 
   return null;
-}
-
-/**
- * 验证Web3 JWT令牌
- */
-async function validateWeb3JWT(token: string): Promise<UnifiedAuthContext | null> {
-  const jwtSecret = process.env.JWT_SECRET;
-  
-  if (!jwtSecret) {
-    throw new UnifiedAuthError('JWT_SECRET not configured', 'INVALID_TOKEN');
-  }
-
-  try {
-    const payload: any = jwt.verify(token, jwtSecret, {
-      algorithms: ['HS256'],
-      issuer: 'astrozi',
-      audience: 'astrozi-users'
-    });
-
-    // 验证payload结构
-    if (!payload.userId || !payload.walletAddress) {
-      throw new UnifiedAuthError('Invalid JWT payload', 'INVALID_TOKEN');
-    }
-
-    // 从数据库验证用户
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-    const { createClient } = require('@supabase/supabase-js');
-    const adminClient = createClient(supabaseUrl, supabaseServiceKey);
-
-    const { data: user, error } = await adminClient
-      .from('users')
-      .select('*')
-      .eq('id', payload.userId)
-      .eq('data_scope', 'web3') // 关键：只查询Web3用户
-      .single();
-
-    if (error || !user) {
-      throw new UnifiedAuthError('Web3 user not found', 'UNAUTHORIZED');
-    }
-
-    return {
-      user_id: user.id,
-      auth_method: 'web3_walletconnect',
-      user_type: 'web3',
-      data_scope: 'web3',
-      token: token,
-      expires_at: payload.exp * 1000,
-      permissions: ['web3_user'],
-      wallet_address: user.wallet_address,
-      email: user.email,
-      username: user.username
-    };
-  } catch (error) {
-    if (error instanceof jwt.JsonWebTokenError) {
-      throw new UnifiedAuthError('Invalid JWT token', 'INVALID_TOKEN');
-    }
-    throw error;
-  }
 }
 
 /**

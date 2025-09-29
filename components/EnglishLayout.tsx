@@ -129,9 +129,10 @@ export default function EnglishLayout({ children, showNavigation = true }: Engli
     
     // 特殊处理紫微页面 - 显示自定义导航
     if (pathname.startsWith('/en/ziwei')) {
+      const analysisNav = mainNavItems.find(item => item.name === 'Analysis');
       return {
         name: 'Ziwei Navigation',
-        icon: mainNavItems[0].icon,
+        icon: analysisNav?.icon ?? mainNavItems[0].icon,
         subItems: [
           { name: 'Ziwei Chart', targetId: 'ziwei-chart' },
           { name: 'Karmic Origin', targetId: 'lai-yin-analysis' },
@@ -145,9 +146,10 @@ export default function EnglishLayout({ children, showNavigation = true }: Engli
     
     // 特殊处理八字页面 - 显示自定义导航
     if (pathname.startsWith('/en/bazi')) {
+      const analysisNav = mainNavItems.find(item => item.name === 'Analysis');
       return {
         name: 'BaZi Navigation',
-        icon: mainNavItems[0].icon,
+        icon: analysisNav?.icon ?? mainNavItems[0].icon,
         subItems: [
           { name: 'BaZi Chart', targetId: 'bazi-chart' },
           { name: 'Day Master', targetId: 'day-master-analysis' },
@@ -166,12 +168,12 @@ export default function EnglishLayout({ children, showNavigation = true }: Engli
     
     // 特殊处理排盘页面
     if (pathname.startsWith('/en/create-chart')) {
-      return mainNavItems.find(item => item.name === 'Create');
+      return mainNavItems.find(item => item.name === 'Analysis');
     }
     
     // 特殊处理命书页面  
     if (pathname.startsWith('/en/charts')) {
-      return mainNavItems.find(item => item.name === 'Natal');
+      return mainNavItems.find(item => item.name === 'Charts');
     }
     
     // 特殊处理我的档案相关页面 - 归属到首页 (仅处理中文路径)
@@ -186,7 +188,7 @@ export default function EnglishLayout({ children, showNavigation = true }: Engli
     
     // 特殊处理chatbot页面
     if (pathname.startsWith('/chatbot') || pathname.startsWith('/en/chatbot')) {
-      return mainNavItems.find(item => item.name === 'AI Master');
+      return mainNavItems.find(item => item.name === 'AI Assistant');
     }
     
     const activeItem = mainNavItems
@@ -213,8 +215,8 @@ export default function EnglishLayout({ children, showNavigation = true }: Engli
         setHomeDialog('referral');
       } else if (selectedNav?.name === 'Home' && anchor === '#redeem') {
         setHomeDialog('redeem');
-      } else if (selectedNav?.name === 'AI Master' && (anchor === '#ziwei-master' || anchor === '#bazi-master')) {
-        // 处理AI Master的anchor，直接设置window.location.hash
+      } else if (selectedNav?.name === 'AI Assistant' && (anchor === '#ziwei-master' || anchor === '#bazi-master')) {
+        // 处理 AI Assistant 锚点，直接设置 window.location.hash
         window.location.hash = anchor;
       }
     } else if (path) {

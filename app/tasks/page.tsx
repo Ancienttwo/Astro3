@@ -7,6 +7,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { useLocale } from 'next-intl';
+import { assertLocale } from '@/i18n/messages';
+import { buildLocaleHref } from '@/lib/i18n/routing';
+import { useNamespaceTranslations } from '@/lib/i18n/useI18n';
 import { 
   CheckCircle2, 
   Clock, 
@@ -62,6 +66,10 @@ interface TasksData {
 }
 
 export default function TasksPage() {
+  const locale = assertLocale(useLocale());
+  const toLocaleHref = (path: string, hash?: string, options?: { localize?: boolean }) =>
+    buildLocaleHref(locale, path, hash, options);
+  const tTasks = useNamespaceTranslations('web3/tasks');
   const [tasksData, setTasksData] = useState<TasksData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -69,6 +77,9 @@ export default function TasksPage() {
   const [claimingTask, setClaimingTask] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userInfo, setUserInfo] = useState<{ userId: string | null; walletAddress: string | null } | null>(null);
+  const layoutUser = userInfo?.walletAddress
+    ? { wallet_address: userInfo.walletAddress, username: undefined }
+    : null;
 
   useEffect(() => {
     checkAuthAndFetchTasks();
@@ -108,7 +119,7 @@ export default function TasksPage() {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
-        setError('Please login to view tasks');
+        setError(tTasks('errors.loginRequired'));
         return;
       }
 
@@ -130,11 +141,11 @@ export default function TasksPage() {
       if (data.success) {
         setTasksData(data.data);
       } else {
-        setError(data.error || 'Failed to load tasks');
+        setError(data.error || tTasks('errors.fetchFailed'));
       }
     } catch (err) {
       console.error('Error fetching tasks:', err);
-      setError('Failed to load tasks');
+      setError(tTasks('errors.fetchFailed'));
     } finally {
       setLoading(false);
     }
@@ -158,7 +169,7 @@ export default function TasksPage() {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
-        alert('Please login first');
+        alert(tTasks('alerts.loginRequired'));
         return;
       }
 
@@ -175,13 +186,13 @@ export default function TasksPage() {
       
       if (data.success) {
         await fetchTasks(); // Refresh tasks
-        alert(`Congratulations! You earned ${data.data.pointsEarned} points!`);
+        alert(tTasks('alerts.claimSuccess', { points: data.data.pointsEarned }));
       } else {
-        alert(data.error || 'Failed to claim reward, please try again');
+        alert(data.error || tTasks('alerts.claimFailure'));
       }
     } catch (err) {
       console.error('Error claiming reward:', err);
-      alert('Failed to claim reward, please try again');
+      alert(tTasks('alerts.claimFailure'));
     } finally {
       setClaimingTask(null);
     }
@@ -193,7 +204,7 @@ export default function TasksPage() {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
-        alert('Please login first');
+        alert(tTasks('alerts.loginRequired'));
         return;
       }
 
@@ -216,7 +227,7 @@ export default function TasksPage() {
         await fetchTasks(); // Refresh tasks
         
         if (data.data.canClaim) {
-          alert('Task completed! You can claim your reward now!');
+          alert(tTasks('alerts.progressCompleted'));
         }
       }
     } catch (err) {
@@ -245,26 +256,37 @@ export default function TasksPage() {
     }
   };
 
+  const getTaskTypeLabel = (taskType: Task['taskType']) => {
+    switch (taskType) {
+      case 'daily':
+        return tTasks('taskTypes.daily');
+      case 'recurring':
+        return tTasks('taskTypes.recurring');
+      default:
+        return tTasks('taskTypes.onetime');
+    }
+  };
+
   const getStatusBadge = (task: Task) => {
     if (task.status === 'claimed') {
       return (
         <Badge className="bg-green-100 dark:bg-green-900 border-green-300 dark:border-green-700 text-green-800 dark:text-green-300 font-rajdhani font-bold">
           <CheckCircle2 className="w-3 h-3 mr-1" />
-          Claimed
+          {tTasks('status.claimed')}
         </Badge>
       );
     } else if (task.status === 'completed') {
       return (
         <Badge className="bg-[#FBCB0A]/20 border-[#FBCB0A]/50 text-[#3D0B5B] dark:text-[#FBCB0A] font-rajdhani font-bold">
           <Sparkles className="w-3 h-3 mr-1" />
-          Claimable
+          {tTasks('status.claimable')}
         </Badge>
       );
     } else {
       return (
         <Badge className="bg-[#3D0B5B]/10 dark:bg-[#FBCB0A]/10 border-[#3D0B5B]/20 dark:border-[#FBCB0A]/20 text-[#3D0B5B] dark:text-[#FBCB0A] font-rajdhani font-bold">
           <Clock className="w-3 h-3 mr-1" />
-          In Progress
+          {tTasks('status.inProgress')}
         </Badge>
       );
     }
@@ -277,7 +299,7 @@ export default function TasksPage() {
           disabled 
           className="bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 font-rajdhani font-bold rounded-lg"
         >
-          Completed
+          {tTasks('actions.completed')}
         </Button>
       );
     } else if (task.status === 'completed') {
@@ -287,7 +309,7 @@ export default function TasksPage() {
           disabled={claimingTask === task.taskKey}
           className="bg-[#FBCB0A] text-[#3D0B5B] hover:bg-[#3D0B5B] hover:text-[#FBCB0A] font-rajdhani font-bold rounded-lg transition-all hover:-translate-y-1 disabled:opacity-50"
         >
-          {claimingTask === task.taskKey ? 'Claiming...' : 'Claim Reward'}
+          {claimingTask === task.taskKey ? tTasks('actions.claiming') : tTasks('actions.claimReward')}
         </Button>
       );
     } else {
@@ -296,32 +318,32 @@ export default function TasksPage() {
           onClick={() => handleTaskAction(task)}
           className="bg-[#FBCB0A]/10 dark:bg-black/25 text-[#3D0B5B] dark:text-[#FBCB0A] border border-[#3D0B5B]/50 dark:border-[#FBCB0A]/50 hover:bg-[#FBCB0A] hover:text-[#420868] dark:hover:text-[#1A2242] font-rajdhani font-bold transition-all duration-300 rounded-lg hover:-translate-y-1"
         >
-          Start Task
+          {tTasks('actions.startTask')}
         </Button>
       );
     }
   };
 
   return (
-    <Web3Layout>
+    <Web3Layout user={layoutUser}>
       {!isAuthenticated ? (
         <div className="text-center py-12">
           <div className="w-16 h-16 rounded-xl bg-[#FBCB0A] flex items-center justify-center mx-auto mb-4">
             <Zap className="w-8 h-8 text-[#3D0B5B]" />
           </div>
-          <h2 className="text-2xl font-bold text-[#3D0B5B] dark:text-[#FBCB0A] mb-2 font-rajdhani">Login to View Tasks</h2>
-          <p className="text-[#333333]/70 dark:text-[#E0E0E0]/70 mb-6 font-rajdhani">Please login to view and complete tasks</p>
+          <h2 className="text-2xl font-bold text-[#3D0B5B] dark:text-[#FBCB0A] mb-2 font-rajdhani">{tTasks('auth.title')}</h2>
+          <p className="text-[#333333]/70 dark:text-[#E0E0E0]/70 mb-6 font-rajdhani">{tTasks('auth.description')}</p>
           <Button 
-            onClick={() => window.location.href = '/auth'}
+            onClick={() => window.location.href = toLocaleHref('/auth')}
             className="bg-[#FBCB0A] text-[#3D0B5B] border-2 border-[#FBCB0A] hover:bg-[#3D0B5B] hover:text-[#FBCB0A] font-rajdhani font-bold text-lg px-8 py-6 rounded-lg transition-all hover:-translate-y-1"
           >
-            Go to Login
+            {tTasks('auth.cta')}
           </Button>
         </div>
       ) : loading ? (
         <div className="text-center py-12">
           <div className="animate-spin w-8 h-8 border-2 border-[#3D0B5B] dark:border-[#FBCB0A] border-t-transparent rounded-full mx-auto mb-4"></div>
-          <p className="text-[#333333] dark:text-[#E0E0E0] font-rajdhani">Loading tasks...</p>
+          <p className="text-[#333333] dark:text-[#E0E0E0] font-rajdhani">{tTasks('loading')}</p>
         </div>
       ) : error ? (
         <div className="text-center py-12">
@@ -330,7 +352,7 @@ export default function TasksPage() {
             onClick={fetchTasks}
             className="bg-[#FBCB0A] text-[#3D0B5B] hover:bg-[#3D0B5B] hover:text-[#FBCB0A] font-rajdhani font-bold rounded-lg transition-all"
           >
-            Retry
+            {tTasks('errors.retry')}
           </Button>
         </div>
       ) : (
@@ -338,10 +360,10 @@ export default function TasksPage() {
           {/* Header */}
           <div className="mb-8 text-center">
             <h1 className="text-[3.5rem] font-bold text-[#3D0B5B] dark:text-[#FBCB0A] mb-2 font-rajdhani leading-tight">
-              Task Center
+              {tTasks('hero.title')}
             </h1>
             <p className="text-[1.5rem] text-[#333333] dark:text-[#E0E0E0] font-normal font-rajdhani">
-              Complete tasks and earn rewards in your Web3 journey
+              {tTasks('hero.subtitle')}
             </p>
           </div>
 
@@ -351,7 +373,7 @@ export default function TasksPage() {
               <Card className="bg-white/95 dark:bg-black/20 border-[#3D0B5B]/20 dark:border-[#FBCB0A]/20 hover:border-[#3D0B5B]/40 dark:hover:border-[#FBCB0A]/40 transition-all hover:-translate-y-1 rounded-xl shadow-sm">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-[#3D0B5B] dark:text-[#FBCB0A] font-rajdhani font-bold text-[1.5rem]">Completed</CardTitle>
+                  <CardTitle className="text-[#3D0B5B] dark:text-[#FBCB0A] font-rajdhani font-bold text-[1.5rem]">{tTasks('stats.completed.title')}</CardTitle>
                     <div className="w-10 h-10 rounded-lg bg-[#FBCB0A] flex items-center justify-center">
                       <CheckCircle2 className="w-5 h-5 text-[#3D0B5B]" />
                     </div>
@@ -364,14 +386,14 @@ export default function TasksPage() {
                     </span>
                     <span className="text-[#333333]/60 dark:text-[#E0E0E0]/60">/ {tasksData.stats.totalTasks}</span>
                   </div>
-                  <p className="text-sm text-[#333333]/60 dark:text-[#E0E0E0]/60 mt-2">Tasks Completed</p>
+                  <p className="text-sm text-[#333333]/60 dark:text-[#E0E0E0]/60 mt-2">{tTasks('stats.completed.subtitle')}</p>
                 </CardContent>
               </Card>
 
               <Card className="bg-white/95 dark:bg-black/20 border-[#3D0B5B]/20 dark:border-[#FBCB0A]/20 hover:border-[#3D0B5B]/40 dark:hover:border-[#FBCB0A]/40 transition-all hover:-translate-y-1 rounded-xl shadow-sm">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-[#3D0B5B] dark:text-[#FBCB0A] font-rajdhani font-bold text-[1.5rem]">Points Earned</CardTitle>
+                  <CardTitle className="text-[#3D0B5B] dark:text-[#FBCB0A] font-rajdhani font-bold text-[1.5rem]">{tTasks('stats.pointsEarned.title')}</CardTitle>
                     <div className="w-10 h-10 rounded-lg bg-[#FBCB0A] flex items-center justify-center">
                       <Star className="w-5 h-5 text-[#3D0B5B]" />
                     </div>
@@ -380,16 +402,16 @@ export default function TasksPage() {
                 <CardContent>
                   <div className="flex items-baseline space-x-2">
                     <span className="text-3xl font-bold text-[#333333] dark:text-[#E0E0E0]">{tasksData.stats.totalPointsEarned}</span>
-                    <span className="text-[#333333]/60 dark:text-[#E0E0E0]/60">pts</span>
+                    <span className="text-[#333333]/60 dark:text-[#E0E0E0]/60">{tTasks('stats.units.points')}</span>
                   </div>
-                  <p className="text-sm text-[#333333]/60 dark:text-[#E0E0E0]/60 mt-2">Points Earned</p>
+                  <p className="text-sm text-[#333333]/60 dark:text-[#E0E0E0]/60 mt-2">{tTasks('stats.pointsEarned.subtitle')}</p>
                 </CardContent>
               </Card>
 
               <Card className="bg-white/95 dark:bg-black/20 border-[#3D0B5B]/20 dark:border-[#FBCB0A]/20 hover:border-[#3D0B5B]/40 dark:hover:border-[#FBCB0A]/40 transition-all hover:-translate-y-1 rounded-xl shadow-sm">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-[#3D0B5B] dark:text-[#FBCB0A] font-rajdhani font-bold text-[1.5rem]">Available</CardTitle>
+                  <CardTitle className="text-[#3D0B5B] dark:text-[#FBCB0A] font-rajdhani font-bold text-[1.5rem]">{tTasks('stats.available.title')}</CardTitle>
                     <div className="w-10 h-10 rounded-lg bg-[#FBCB0A] flex items-center justify-center">
                       <Gift className="w-5 h-5 text-[#3D0B5B]" />
                     </div>
@@ -398,9 +420,9 @@ export default function TasksPage() {
                 <CardContent>
                   <div className="flex items-baseline space-x-2">
                     <span className="text-3xl font-bold text-[#333333] dark:text-[#E0E0E0]">{tasksData.stats.totalPointsAvailable}</span>
-                    <span className="text-[#333333]/60 dark:text-[#E0E0E0]/60">pts</span>
+                    <span className="text-[#333333]/60 dark:text-[#E0E0E0]/60">{tTasks('stats.units.points')}</span>
                   </div>
-                  <p className="text-sm text-[#333333]/60 dark:text-[#E0E0E0]/60 mt-2">Points Available</p>
+                  <p className="text-sm text-[#333333]/60 dark:text-[#E0E0E0]/60 mt-2">{tTasks('stats.available.subtitle')}</p>
                 </CardContent>
               </Card>
             </div>
@@ -411,7 +433,7 @@ export default function TasksPage() {
             <CardHeader>
               <CardTitle className="text-[#3D0B5B] dark:text-[#FBCB0A] font-rajdhani font-bold text-[2rem] flex items-center">
                 <Target className="w-6 h-6 mr-2" />
-                Task Categories
+                {tTasks('categories.title')}
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
@@ -428,9 +450,9 @@ export default function TasksPage() {
                     <div className="w-8 h-8 rounded-full bg-[#FBCB0A] flex items-center justify-center">
                       <Users className="w-4 h-4 text-[#3D0B5B]" />
                     </div>
-                    <h3 className="font-bold text-[#3D0B5B] dark:text-[#FBCB0A] font-rajdhani">Beginner Tasks</h3>
+                    <h3 className="font-bold text-[#3D0B5B] dark:text-[#FBCB0A] font-rajdhani">{tTasks('categories.newbie.title')}</h3>
                   </div>
-                  <p className="text-sm text-[#333333]/70 dark:text-[#E0E0E0]/70">Simple tasks for first-time users to quickly get started with Web3 features</p>
+                  <p className="text-sm text-[#333333]/70 dark:text-[#E0E0E0]/70">{tTasks('categories.newbie.description')}</p>
                 </div>
                 
                 <div 
@@ -445,9 +467,9 @@ export default function TasksPage() {
                     <div className="w-8 h-8 rounded-full bg-[#FBCB0A] flex items-center justify-center">
                       <Award className="w-4 h-4 text-[#3D0B5B]" />
                     </div>
-                    <h3 className="font-bold text-[#3D0B5B] dark:text-[#FBCB0A] font-rajdhani">Advanced Tasks</h3>
+                    <h3 className="font-bold text-[#3D0B5B] dark:text-[#FBCB0A] font-rajdhani">{tTasks('categories.advanced.title')}</h3>
                   </div>
-                  <p className="text-sm text-[#333333]/70 dark:text-[#E0E0E0]/70">Advanced tasks that require more time and effort, offering generous rewards</p>
+                  <p className="text-sm text-[#333333]/70 dark:text-[#E0E0E0]/70">{tTasks('categories.advanced.description')}</p>
                 </div>
               </div>
             </CardContent>
@@ -475,13 +497,13 @@ export default function TasksPage() {
                               <div className="w-6 h-6 rounded-full bg-[#FBCB0A] flex items-center justify-center">
                                 <Star className="w-3 h-3 text-[#3D0B5B]" />
                               </div>
-                              <span className="text-[#3D0B5B] dark:text-[#FBCB0A] font-bold font-rajdhani">{task.pointsReward} Points</span>
+                              <span className="text-[#3D0B5B] dark:text-[#FBCB0A] font-bold font-rajdhani">{tTasks('task.points', { points: task.pointsReward })}</span>
                             </div>
                             <div className="flex items-center space-x-2">
                               <div className="w-6 h-6 rounded-full bg-[#FBCB0A] flex items-center justify-center">
                                 <Clock className="w-3 h-3 text-[#3D0B5B]" />
                               </div>
-                              <span className="text-[#333333] dark:text-[#E0E0E0] font-rajdhani">{task.taskType === 'daily' ? 'Daily Task' : 'One-time Task'}</span>
+                              <span className="text-[#333333] dark:text-[#E0E0E0] font-rajdhani">{getTaskTypeLabel(task.taskType)}</span>
                             </div>
                           </div>
                         </div>
@@ -502,10 +524,10 @@ export default function TasksPage() {
               <CardHeader>
                 <CardTitle className="text-[#3D0B5B] dark:text-[#FBCB0A] font-rajdhani font-bold text-[2rem] flex items-center">
                   <Sparkles className="w-6 h-6 mr-2" />
-                  Overall Progress
+                  {tTasks('progress.title')}
                 </CardTitle>
                 <CardDescription className="text-[#333333]/70 dark:text-[#E0E0E0]/70 font-rajdhani">
-                  Track your journey to Web3 mastery
+                  {tTasks('progress.subtitle')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -516,10 +538,10 @@ export default function TasksPage() {
                   />
                   <div className="flex justify-between text-sm font-rajdhani">
                     <span className="text-[#333333] dark:text-[#E0E0E0]">
-                      Completed {tasksData.stats.completedTasks} tasks
+                      {tTasks('progress.completed', { count: tasksData.stats.completedTasks })}
                     </span>
                     <span className="text-[#333333]/60 dark:text-[#E0E0E0]/60">
-                      {tasksData.stats.pendingTasks} tasks remaining
+                      {tTasks('progress.remaining', { count: tasksData.stats.pendingTasks })}
                     </span>
                   </div>
                 </div>

@@ -1,0 +1,37 @@
+# Task ID: 2
+# Title: Enhance mobile support for /en/bazi and /en/ziwei
+# Status: done
+# Dependencies: None
+# Priority: high
+# Description: Ensure both English horoscope pages render correctly on common mobile breakpoints and gestures.
+# Details:
+1. Audit current layouts on 375px and 414px widths. 2. Update layout/styles so charts, forms, and call-to-action sections stack correctly and remain legible. 3. Verify nav, tabs, and interactive elements are touch-friendly. 4. Document the responsive testing steps and devices used.
+
+# Test Strategy:
+
+
+# Subtasks:
+## 1. Audit mobile layout issues on /en/bazi and /en/ziwei [done]
+### Dependencies: None
+### Description: 
+### Details:
+
+
+## 2. Implement responsive layout and style updates [done]
+### Dependencies: None
+### Description: 
+### Details:
+
+
+## 3. Verify interactions on common mobile devices [done]
+### Dependencies: None
+### Description: 
+### Details:
+
+
+## 4. Document responsive testing approach [done]
+### Dependencies: None
+### Description: 
+### Details:
+
+

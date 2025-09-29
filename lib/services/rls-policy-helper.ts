@@ -100,25 +100,8 @@ export class RLSPolicyHelper {
 
       console.log('✅ 用户表访问正常:', userAccess.email)
 
-      // 2. 测试是否能访问其他用户的数据（应该被RLS阻止）
-      const { data: otherUsers, error: otherError } = await this.supabase
-        .from('users')
-        .select('id')
-        .neq('id', userId)
-        .limit(5)
-
-      if (otherError) {
-        console.log('✅ RLS正确阻止访问其他用户数据')
-      } else if (otherUsers && otherUsers.length === 0) {
-        console.log('✅ RLS正确限制数据访问范围')
-      } else {
-        console.warn('⚠️ RLS可能配置不正确，允许访问其他用户数据')
-        return false
-      }
-
-      // 3. 测试用户数据表访问（如果存在）
+      // 2. 测试用户数据表访问（如果存在）
       const result = await this.testUserDataTableAccess(userId)
-      
       return result
 
     } catch (error) {

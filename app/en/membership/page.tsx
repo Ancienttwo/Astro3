@@ -171,7 +171,7 @@ export default function EnglishMembershipPageSimple() {
   if (!userType.isWeb3 && !userType.isWeb2) {
     return (
       <EnglishLayout>
-        <div className="container mx-auto px-4 py-8 max-w-2xl">
+        <div className="mx-auto w-full max-w-page px-page-inline py-section-stack">
           <Alert className="border-red-200 bg-red-50">
             <AlertTriangle className="h-4 w-4 text-red-600" />
             <AlertDescription className="text-red-700">
@@ -179,7 +179,7 @@ export default function EnglishMembershipPageSimple() {
             </AlertDescription>
           </Alert>
           
-          <div className="mt-4 text-center">
+            <div className="mt-4 text-center">
             <Button onClick={() => window.location.href = '/auth'}>
               Go to Login
             </Button>
@@ -191,9 +191,9 @@ export default function EnglishMembershipPageSimple() {
 
   return (
     <EnglishLayout>
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="mx-auto w-full max-w-page px-page-inline py-section-stack">
         {/* Page Header */}
-        <div className="text-center mb-8">
+        <div className="text-center">
           <div className="flex items-center justify-center gap-3 mb-4">
             <Crown className="w-8 h-8 text-yellow-600" />
             <h1 className="text-3xl font-bold text-yellow-600">
@@ -206,7 +206,7 @@ export default function EnglishMembershipPageSimple() {
         </div>
 
         {/* User Type Badge */}
-        <div className="mb-6 text-center">
+        <div className="text-center">
           {userType.isWeb3 ? (
             <Badge className="bg-blue-100 text-blue-800 border-blue-200">
               <Wallet className="w-4 h-4 mr-2" />
@@ -221,8 +221,8 @@ export default function EnglishMembershipPageSimple() {
         </div>
 
         {/* Membership Status */}
-        <Card className="mb-8 bg-gradient-to-r from-yellow-50 to-orange-50">
-          <CardHeader>
+        <Card className="mb-section-stack border border-amber-200 bg-gradient-to-r from-yellow-50 to-orange-50 p-card-padding shadow-soft dark:border-amber-700 dark:from-yellow-900/20 dark:to-orange-900/20">
+          <CardHeader className="p-0 pb-4">
             <CardTitle className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Star className="w-6 h-6 text-yellow-600" />
@@ -239,7 +239,7 @@ export default function EnglishMembershipPageSimple() {
               )}
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-6 p-0">
             {(statusLoading || usageLoading) ? (
               <div className="flex justify-center items-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400"></div>
@@ -248,7 +248,7 @@ export default function EnglishMembershipPageSimple() {
               <div className="space-y-6">
                 {/* AI Chat Usage */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-blue-50 p-4 rounded-lg">
+                  <Card className="border border-blue-200 bg-blue-50 p-card-padding shadow-soft dark:border-blue-700 dark:bg-blue-900/20">
                     <div className="flex items-center justify-between mb-2">
                       <h4 className="text-sm font-medium text-blue-800">AI Chat Bot</h4>
                       <Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-200">
@@ -274,9 +274,9 @@ export default function EnglishMembershipPageSimple() {
                         {userUsage?.chatbotRemaining || 0} chats remaining
                       </div>
                     </div>
-                  </div>
+                  </Card>
 
-                  <div className="bg-green-50 p-4 rounded-lg">
+                  <Card className="border border-green-200 bg-green-50 p-card-padding shadow-soft dark:border-green-700 dark:bg-green-900/20">
                     <div className="flex items-center justify-between mb-2">
                       <h4 className="text-sm font-medium text-green-800">Free Reports</h4>
                       <Badge variant="outline" className="bg-green-100 text-green-700 border-green-200">
@@ -302,12 +302,12 @@ export default function EnglishMembershipPageSimple() {
                         {userUsage?.freeReportsRemaining || 0} reports remaining
                       </div>
                     </div>
-                  </div>
+                  </Card>
                 </div>
 
                 {/* Paid Reports (if user has any) */}
                 {(userUsage?.paidReportsPurchased || 0) > 0 && (
-                  <div className="bg-purple-50 p-4 rounded-lg">
+                  <Card className="border border-purple-200 bg-purple-50 p-card-padding shadow-soft dark:border-purple-700 dark:bg-purple-900/20">
                     <div className="flex items-center justify-between mb-2">
                       <h4 className="text-sm font-medium text-purple-800">Premium Reports</h4>
                       <Badge variant="outline" className="bg-purple-100 text-purple-700 border-purple-200">
@@ -333,7 +333,7 @@ export default function EnglishMembershipPageSimple() {
                         {userUsage?.paidReportsRemaining || 0} premium reports remaining
                       </div>
                     </div>
-                  </div>
+                  </Card>
                 )}
 
                 {/* Membership Tier Benefits */}
@@ -484,8 +484,8 @@ export default function EnglishMembershipPageSimple() {
         )}
 
         {/* Upgrade Section */}
-        <Card className="border-amber-200 bg-amber-50">
-          <CardContent className="p-6">
+        <Card className="border border-amber-200 bg-amber-50 p-card-padding shadow-soft dark:border-amber-700 dark:bg-amber-900/20">
+          <CardContent className="p-0">
             <div className="text-center">
               <Crown className="w-12 h-12 text-amber-600 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-amber-800 mb-2">

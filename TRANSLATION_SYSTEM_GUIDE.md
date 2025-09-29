@@ -25,6 +25,11 @@
 ### 前端界面
 - `/admin/translations` - 翻译管理后台
 
+### 代码集成（Phase 2）
+- 前端代码中的业务文案已经迁移到 `i18n/messages/<locale>/<namespace>.json` 结构，例如 `web3/layout`、`astro/fortune` 等命名空间。
+- `i18n/request.ts` 会根据路由自动加载所需命名空间，并与保留的遗留字典合并，确保渐进式迁移安全。
+- 如需新增文案，请在英语 `en` 目录下先创建（作为基准），再补齐 `zh`/`ja` 等对应文件，并运行 `pnpm i18n:lint` 校验键值。
+
 ## 🚀 快速开始
 
 ### 1. 数据库初始化

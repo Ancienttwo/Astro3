@@ -1,0 +1,117 @@
+{
+  "loading": "Loading Web3 Dashboard...",
+  "overview": {
+    "dailyProgress": "Today's Progress",
+    "tasksCompleted": "Tasks completed",
+    "points": "Cosmic Points",
+    "streak": "Check-in streak"
+  },
+  "cards": {
+    "tasks": {
+      "title": "Task Center",
+      "description": "Complete quests to earn points"
+    },
+    "leaderboard": {
+      "title": "Leaderboard",
+      "description": "See how you rank against other hunters"
+    },
+    "rewards": {
+      "title": "Rewards",
+      "description": "Redeem Cosmic Points for drops"
+    }
+  },
+  "stats": {
+    "score": {
+      "title": "Cosmic Points",
+      "subtitle": "Fortune Hunter Score",
+      "trend": "+125 today"
+    },
+    "streak": {
+      "title": "Daily Streak",
+      "subtitle": "On fire! Next milestone: 30"
+    },
+    "rank": {
+      "title": "Rank",
+      "subtitle": "Top 5% Fortune Hunters",
+      "trend": "↗ +5"
+    }
+  },
+  "status": {
+    "streakLabel": "🔥 {count} day streak"
+  },
+  "features": {
+    "fortuneBadges": {
+      "title": "Fortune Badges",
+      "description": "Collect rare achievement badges on your hunter journey",
+      "badge": "Collection Game",
+      "motto": "Gotta catch 'em all"
+    },
+    "cosmicShop": {
+      "title": "Cosmic Shop",
+      "description": "Spend Cosmic Points on exclusive Fortune Hunter items",
+      "badge": "Coming Soon",
+      "motto": "Points for Power"
+    },
+    "daid": {
+      "title": "D'aid Network",
+      "description": "Elite Fortune Hunters help others - Karma cycles back with compound interest",
+      "badge": "Elite Hunters Only",
+      "motto": "Fortune shared multiplies"
+    },
+    "baziAnalysis": {
+      "title": "Destiny Charts",
+      "description": "Create your cosmic profile - First quest for all Fortune Hunters",
+      "badge": "Newbie Quest",
+      "motto": "+50 Cosmic Points"
+    },
+    "guandiOracle": {
+      "title": "Oracle Quests",
+      "description": "Daily fortune draws - Core activity for point farming",
+      "badge": "Daily Quest",
+      "motto": "+15 Points/Day"
+    },
+    "aiChatbot": {
+      "title": "Fortune AI Sage",
+      "description": "Chat with AI for personalized Fortune Hunter guidance",
+      "badge": "AI Powered",
+      "motto": "Wisdom + Tech"
+    },
+    "web3Rewards": {
+      "title": "Airdrop Portal",
+      "description": "Your Cosmic Points = Future token allocation weight",
+      "badge": "Token Economy",
+      "motto": "HODL Points = HODL Wealth"
+    }
+  },
+  "featureActions": {
+    "start": "Start Quest",
+    "comingSoon": "Coming Soon"
+  },
+  "fortuneSection": {
+    "title": "Oracle Daily Quest",
+    "subtitle": "Connect with the divine wisdom of Guan Yu. Complete your daily Fortune Draw to earn Cosmic Points and unlock ancient wisdom.",
+    "tagline": "🏛️ Sacred Fortune Hunter divination • Daily +15 Cosmic Points",
+    "highlights": {
+      "daily": "Daily quest available",
+      "rewards": "Cosmic Points rewards",
+      "community": "Community sharing"
+    },
+    "cta": "Complete Daily Fortune Quest",
+    "badges": {
+      "sacredSigns": "100 Sacred Signs",
+      "quest": "Fortune Hunter Quest",
+      "rewards": "Daily Rewards"
+    }
+  },
+  "ecosystem": {
+    "title": "Fortune Hunter Ecosystem",
+    "subtitle": "Explore all the ways to earn Cosmic Points and build your legacy"
+  },
+  "quickActions": {
+    "title": "Command Center",
+    "subtitle": "Access the most popular Web3 features in one tap",
+    "viewTasks": "View tasks",
+    "viewRewards": "Check leaderboard",
+    "disclaimer": "✨ Every Cosmic Point counts towards your future airdrop allocation"
+  }
+}

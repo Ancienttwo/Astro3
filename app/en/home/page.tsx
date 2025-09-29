@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 import { Gift, ChevronRight, BookOpen, FileText, Target, Bot, Sparkles, Calendar, TrendingUp, Home, Book, Menu, Compass, SunMoon, X, Star, Share2, Users, BarChart3, CheckCircle, ArrowRight, Zap } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -234,9 +234,25 @@ export default function EnglishHomePage() {
     router.push(route);
   };
 
+  const scrollToCheckinSection = () => {
+    if (typeof document === 'undefined') {
+      return;
+    }
+
+    const checkinSection = document.querySelector('[data-checkin-section]');
+    if (checkinSection) {
+      checkinSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+      // Fallback: navigate to home with hash so hydration occurs with section visible
+      router.push('/en/home#checkin');
+    }
+  };
+
   const handleCardClick = (route: string) => {
     if (route === '#referral') {
       handleReferral();
+    } else if (route === 'checkin') {
+      scrollToCheckinSection();
     } else {
       router.push(route);
     }
@@ -270,11 +286,12 @@ export default function EnglishHomePage() {
   return (
     <EnglishLayout>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-700">
-        <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8 max-w-7xl">
+        <div className="mx-auto w-full max-w-page px-page-inline py-section-stack">
+          <div className="flex flex-col gap-section-stack">
 
           {/* Loading State */}
           {isLoadingUser && (
-            <div className="text-center mb-8">
+            <div className="text-center">
               <div className="inline-flex items-center gap-2 bg-white/80 dark:bg-slate-800/80 px-4 py-2 rounded-lg shadow-sm">
                 <div className="animate-spin rounded-full h-4 w-4 border-2 border-purple-600 border-t-transparent"></div>
                 <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
@@ -285,7 +302,7 @@ export default function EnglishHomePage() {
           )}
 
           {/* Welcome Section */}
-          <div className="text-center mb-8 sm:mb-12">
+          <div className="text-center">
             <div className="flex justify-center items-center mb-4 sm:mb-6">
               <Logo className="w-12 h-12 sm:w-16 sm:h-16 text-purple-600 dark:text-amber-400" />
             </div>
@@ -314,11 +331,11 @@ export default function EnglishHomePage() {
               {/* Onboarding Steps */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
                 {/* Step 1: Daily Check-in */}
-                <Card className="relative overflow-hidden border-2 border-green-200 dark:border-green-800 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
+                <Card className="relative overflow-hidden border border-green-200 bg-gradient-to-br from-green-50 to-emerald-50 p-card-padding shadow-soft dark:border-green-800 dark:from-green-900/20 dark:to-emerald-900/20">
                   <div className="absolute top-0 right-0 bg-green-500 text-white px-3 py-1 text-xs font-bold rounded-bl-lg">
                     STEP 1
                   </div>
-                  <CardContent className="p-4 sm:p-6">
+                  <CardContent className="space-y-3 p-0">
                     <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl flex items-center justify-center mb-3 sm:mb-4 shadow-lg">
                       <Calendar className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                     </div>
@@ -336,11 +353,11 @@ export default function EnglishHomePage() {
                 </Card>
 
                 {/* Step 2: Chart Analysis */}
-                <Card className="relative overflow-hidden border-2 border-purple-200 dark:border-purple-800 bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20">
+                <Card className="relative overflow-hidden border border-purple-200 bg-gradient-to-br from-purple-50 to-indigo-50 p-card-padding shadow-soft dark:border-purple-800 dark:from-purple-900/20 dark:to-indigo-900/20">
                   <div className="absolute top-0 right-0 bg-purple-500 text-white px-3 py-1 text-xs font-bold rounded-bl-lg">
                     STEP 2
                   </div>
-                  <CardContent className="p-4 sm:p-6">
+                  <CardContent className="space-y-3 p-0">
                     <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center mb-4 shadow-lg">
                       <Compass className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                     </div>
@@ -358,11 +375,11 @@ export default function EnglishHomePage() {
                 </Card>
 
                 {/* Step 3: Invite Friends */}
-                <Card className="relative overflow-hidden border-2 border-orange-200 dark:border-orange-800 bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20">
+                <Card className="relative overflow-hidden border border-orange-200 bg-gradient-to-br from-orange-50 to-amber-50 p-card-padding shadow-soft dark:border-orange-800 dark:from-orange-900/20 dark:to-amber-900/20">
                   <div className="absolute top-0 right-0 bg-orange-500 text-white px-3 py-1 text-xs font-bold rounded-bl-lg">
                     STEP 3
                   </div>
-                  <CardContent className="p-4 sm:p-6">
+                  <CardContent className="space-y-3 p-0">
                     <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-orange-500 to-amber-600 rounded-xl flex items-center justify-center mb-4 shadow-lg">
                       <Users className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                     </div>
@@ -380,11 +397,11 @@ export default function EnglishHomePage() {
                 </Card>
 
                 {/* Step 4: Learn Knowledge */}
-                <Card className="relative overflow-hidden border-2 border-blue-200 dark:border-blue-800 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20">
+                <Card className="relative overflow-hidden border border-blue-200 bg-gradient-to-br from-blue-50 to-cyan-50 p-card-padding shadow-soft dark:border-blue-800 dark:from-blue-900/20 dark:to-cyan-900/20">
                   <div className="absolute top-0 right-0 bg-blue-500 text-white px-3 py-1 text-xs font-bold rounded-bl-lg">
                     STEP 4
                   </div>
-                  <CardContent className="p-4 sm:p-6">
+                  <CardContent className="space-y-3 p-0">
                     <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-blue-500 to-cyan-600 rounded-xl flex items-center justify-center mb-4 shadow-lg">
                       <BookOpen className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                     </div>
@@ -403,22 +420,15 @@ export default function EnglishHomePage() {
               </div>
 
               {/* Quick Start Actions */}
-              <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 border border-gray-200 dark:border-slate-700 shadow-lg">
-                <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4 text-center">
-                  🚀 Ready to Start Your Journey?
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              <Card className="border border-slate-200 bg-white p-card-padding shadow-soft dark:border-slate-700 dark:bg-slate-800">
+                <CardHeader className="p-0 pb-4 text-center">
+                  <CardTitle className="text-lg font-bold text-gray-900 dark:text-white sm:text-xl">
+                    🚀 Ready to Start Your Journey?
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 gap-3 p-0 sm:grid-cols-2 lg:grid-cols-4">
                   <Button
-                    onClick={() => {
-                      // Trigger check-in functionality - scroll to check-in section
-                      const checkinSection = document.querySelector('[data-checkin-section]');
-                      if (checkinSection) {
-                        checkinSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                      } else {
-                        // Fallback: refresh page to show check-in section
-                        window.location.reload();
-                      }
-                    }}
+                    onClick={scrollToCheckinSection}
                     className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold py-3 sm:py-3 px-3 sm:px-4 rounded-lg shadow-md transition-all duration-300 hover:scale-105 text-sm sm:text-base"
                   >
                     <Calendar className="w-5 h-5 mr-2" />
@@ -448,37 +458,37 @@ export default function EnglishHomePage() {
                     <BookOpen className="w-5 h-5 mr-2" />
                     Learn Now
                   </Button>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             </div>
           )}
 
           {/* Quick Action Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-12">
+          <div className="mb-section-stack grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
             {featureCards.map((card) => (
               <Card 
                 key={card.id}
-                className="cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-xl dark:bg-slate-800 dark:border-slate-700"
+                className="cursor-pointer border border-slate-200 shadow-soft transition-all duration-300 hover:scale-105 hover:shadow-medium dark:border-slate-700 dark:bg-slate-800"
                 onClick={() => handleCardClick(card.route)}
               >
-                <CardContent className="p-4 sm:p-6">
-                  <div className={`w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r ${card.gradient} rounded-xl flex items-center justify-center mb-3 sm:mb-4 shadow-lg`}>
+                <CardContent className="space-y-3 p-card-padding">
+                  <div className={`flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-r ${card.gradient} shadow-lg sm:h-16 sm:w-16`}>
                     <card.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                   </div>
                   
-                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-2">
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white sm:text-xl">
                     {card.title}
                   </h3>
                   
-                  <p className="text-xs sm:text-sm text-purple-600 dark:text-purple-400 font-semibold mb-2 sm:mb-3">
+                  <p className="text-xs font-semibold text-purple-600 dark:text-purple-400 sm:text-sm">
                     {card.subtitle}
                   </p>
                   
-                  <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm leading-relaxed mb-3 sm:mb-4">
+                  <p className="text-xs leading-relaxed text-gray-600 dark:text-gray-300 sm:text-sm">
                     {card.description}
                   </p>
                   
-                  <div className="flex items-center text-purple-600 dark:text-purple-400 text-xs sm:text-sm font-medium">
+                  <div className="flex items-center text-xs font-medium text-purple-600 dark:text-purple-400 sm:text-sm">
                     <span>Get Started</span>
                     <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1" />
                   </div>
@@ -497,7 +507,7 @@ export default function EnglishHomePage() {
           </div>
 
           {/* Quick Links */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
             <Button
               variant="outline"
               onClick={() => handleNavigation('/charts?lang=en')}
@@ -535,6 +545,7 @@ export default function EnglishHomePage() {
             </Button>
           </div>
 
+        </div>
         </div>
       </div>
 

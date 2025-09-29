@@ -50,6 +50,13 @@ body {
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+    --page-max-width: 1120px;
+    --space-page-inline: 1.25rem;
+    --space-section-stack: 1.5rem;
+    --space-card-padding: 1rem;
+    --radius-section: 1rem;
+    --shadow-soft: 0 12px 30px -12px rgba(15, 23, 42, 0.2);
+    --shadow-medium: 0 20px 45px -15px rgba(15, 23, 42, 0.35);
   }
   .dark {
     /* Landing Page配色 - 黑金紫配色方案 */
@@ -85,6 +92,24 @@ body {
     --sidebar-accent-foreground: 45 93% 58%;
     --sidebar-border: 220 13% 18%;
     --sidebar-ring: 45 93% 58%;
+    --shadow-soft: 0 12px 30px -12px rgba(3, 7, 18, 0.5);
+    --shadow-medium: 0 20px 45px -15px rgba(3, 7, 18, 0.65);
+  }
+}
+
+@media (min-width: 640px) {
+  :root {
+    --space-page-inline: 1.75rem;
+    --space-section-stack: 2rem;
+    --space-card-padding: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --space-page-inline: 2.25rem;
+    --space-section-stack: 2.25rem;
+    --space-card-padding: 2rem;
   }
 }
 

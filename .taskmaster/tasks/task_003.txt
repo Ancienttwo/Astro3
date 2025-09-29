@@ -1,0 +1,37 @@
+# Task ID: 3
+# Title: Adopt ShadCN UI toolkit and introduce design tokens
+# Status: done
+# Dependencies: None
+# Priority: medium
+# Description: Refine shared UI components with ShadCN primitives and consolidate styling via a reusable design token layer.
+# Details:
+1. Evaluate current component library usage and gaps for ShadCN adoption. 2. Map typography, color, spacing, and radius values into a design token source of truth (e.g., design.tokens.ts). 3. Migrate key shared components to ShadCN equivalents while honoring the new tokens. 4. Document guidelines for applying tokens across /en/bazi and /en/ziwei.
+
+# Test Strategy:
+
+
+# Subtasks:
+## 1. Define design token structure and storage [done]
+### Dependencies: None
+### Description: 
+### Details:
+
+
+## 2. Create core tokens for color, typography, spacing, radius [done]
+### Dependencies: None
+### Description: 
+### Details:
+
+
+## 3. Refactor shared components to ShadCN primitives using tokens [done]
+### Dependencies: None
+### Description: 
+### Details:
+
+
+## 4. Document token usage and rollout plan [done]
+### Dependencies: None
+### Description: 
+### Details:
+
+

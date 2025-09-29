@@ -1,0 +1,36 @@
+{
+  "title": "Fortune Oracle",
+  "subtitle": "Draw a divine slip and receive tailored guidance",
+  "temple": {
+    "selectTemple": "Select a temple system",
+    "noTemples": "No temples available",
+    "loading": "Loading temple systems...",
+    "name": "Temple",
+    "location": "Location",
+    "deity": "Deity",
+    "specialization": "Specialization"
+  },
+  "slip": {
+    "inputLabel": "Slip number",
+    "inputPlaceholder": "Enter slip number",
+    "drawButton": "Draw slip",
+    "randomButton": "Random draw",
+    "level": "Fortune level",
+    "content": "Slip content",
+    "interpretation": "Basic interpretation",
+    "categories": "Applicable domains"
+  },
+  "fortuneLevel": {
+    "excellent": "Excellent",
+    "good": "Good",
+    "average": "Average",
+    "caution": "Caution",
+    "warning": "Warning"
+  },
+  "ai": {
+    "cta": "Request AI interpretation",
+    "loginRequired": "Sign in to unlock full AI insights",
+    "generating": "Generating personalized interpretation...",
+    "retry": "Retry analysis"
+  }
+}

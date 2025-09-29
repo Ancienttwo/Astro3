@@ -4,6 +4,7 @@ export const dynamic = 'force-dynamic'
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -1035,10 +1036,10 @@ function ZiweiPage() {
     <EnglishLayout showNavigation={true}>
       <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
         {/* 主要内容 - 使用EnglishLayout统一导航 */}
-        <div className="pb-0 md:pb-4 px-1 md:px-4 w-full">
+        <div className="mx-auto flex w-full max-w-page flex-col gap-section-stack px-page-inline pb-0 md:pb-4">
         {ziweiResult ? (
           <div>
-            <div className="flex justify-between items-start mb-6 gap-4">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-6">
               <div className="flex-1">
                 <h2 className="text-3xl font-bold text-purple-600 dark:text-amber-400 font-noto">{birthData.username} 的星盘</h2>
                 <div className="text-sm text-gray-300 mt-2 space-y-1">
@@ -1074,7 +1075,7 @@ function ZiweiPage() {
             
             <div className="space-y-4 sm:space-y-6">
               {/* Birth Time Accuracy Notice */}
-              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/30 rounded-lg p-4">
+              <Card className="border border-amber-200 bg-amber-50 p-card-padding shadow-soft dark:border-amber-800/30 dark:bg-amber-900/20">
                 <div className="flex items-start gap-3">
                   <div className="flex-shrink-0 mt-0.5">
                     <Clock className="h-5 w-5 text-amber-600 dark:text-amber-400" />
@@ -1091,10 +1092,13 @@ function ZiweiPage() {
                     </p>
                   </div>
                 </div>
-              </div>
+              </Card>
 
-              <div id="ziwei-chart" className="bg-white dark:bg-slate-800 md:rounded-lg md:shadow-lg mt-0 md:mt-4 p-0 md:p-4">
-                <div className="flex items-center justify-between mb-3 p-4 pb-0 xl:pr-0">
+              <Card
+                id="ziwei-chart"
+                className="mt-0 rounded-section border border-border bg-card p-0 shadow-soft md:mt-4"
+              >
+                <CardHeader className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between border-0 p-card-padding pb-0 xl:pr-0">
                   <h3 className="text-lg font-semibold flex items-center gap-2">
                     <Star className="w-5 h-5 text-purple-500" />
                     Zi Wei Chart
@@ -1106,9 +1110,10 @@ function ZiweiPage() {
                   >
                     💡
                   </button>
-                </div>
+                </CardHeader>
                 {/* 🔥 新布局方案：左侧统一容器 + 右侧信息区域 (3:2比例) */}
-                <div className="grid grid-cols-1 xl:grid-cols-[3fr_2fr] gap-0 md:gap-4 items-start">
+                <CardContent className="p-card-padding">
+                  <div className="grid grid-cols-1 xl:grid-cols-[3fr_2fr] gap-0 md:gap-4 items-start">
                   {/* 左侧：星盘+选择器的统一容器 (桌面端占3/5) */}
                   <div className="w-full max-w-full bg-white dark:bg-slate-800 md:rounded-lg md:border md:border-gray-200 dark:md:border-slate-600 md:shadow-sm overflow-hidden xl:flex-[3]">
                     {/* 统一容器：星盘+选择器整体，内部无边距 */}
@@ -1148,8 +1153,8 @@ function ZiweiPage() {
                   
                   {/* 右侧：星盘信息提示区域 (桌面端占2/5) */}
                   <div className="w-full xl:flex-[2]">
-                    <div className="bg-gray-50 dark:bg-slate-700/60 md:rounded-lg md:border md:border-gray-200 dark:md:border-slate-600 p-2 md:p-4 min-h-[200px]">
-                      <div className="flex justify-between items-center mb-3">
+                    <div className="min-h-[200px] rounded-lg border border-gray-200 bg-gray-50 p-card-padding dark:border-slate-600 dark:bg-slate-700/60 md:border">
+                      <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
                           <h4 className="font-bold text-purple-600 dark:text-amber-400">
                           {selectedPalaceForSihua ? `${selectedPalaceForSihua.name} (${selectedPalaceForSihua.heavenlyStem}${selectedPalaceForSihua.branch}) Four Transformations` : "Chart Information:"}
                           </h4>
@@ -1175,8 +1180,9 @@ function ZiweiPage() {
                       </div>
                     </div>
                   </div>
-                </div>
-              </div>
+                  </div>
+                </CardContent>
+              </Card>
 
               {/* 宿世因缘 */}
               <div id="lai-yin-analysis" className="mt-2 md:mt-4">
@@ -1194,7 +1200,10 @@ function ZiweiPage() {
                   )}
                 </div>
 
-                <div id="birth-year-sihua" className="bg-white dark:bg-slate-800 md:rounded-lg md:shadow-lg mt-2 md:mt-4 p-2 md:p-4">
+                <div
+                  id="birth-year-sihua"
+                  className="mt-2 rounded-lg bg-white p-card-padding dark:bg-slate-800 md:mt-4 md:shadow-lg"
+                >
                   <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
                     <Sparkles className="w-5 h-5 text-purple-500" />
                     Birth Year Four Transformations
@@ -1204,7 +1213,7 @@ function ZiweiPage() {
                   <div className="mb-6">
                     <button
                       onClick={() => setShowSihuaScience(!showSihuaScience)}
-                      className="w-full flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-700/40 rounded-lg border border-gray-200 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700/60 transition-colors"
+                      className="w-full flex flex-wrap items-center justify-between gap-3 p-3 bg-gray-50 dark:bg-slate-700/40 rounded-lg border border-gray-200 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700/60 transition-colors"
                     >
                       <div className="flex items-center gap-2">
                         <Lightbulb className="w-4 h-4 text-purple-500" />
@@ -1591,7 +1600,10 @@ function ZiweiPage() {
                 </div>
 
                 {/* 我的身宫 */}
-                <div id="shen-gong-analysis" className="bg-white dark:bg-slate-800 md:rounded-lg md:shadow-lg mt-2 md:mt-4 p-2 md:p-4">
+                <div
+                  id="shen-gong-analysis"
+                  className="mt-2 rounded-lg bg-white p-card-padding dark:bg-slate-800 md:mt-4 md:shadow-lg"
+                >
                   <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
                     <Clock className="w-5 h-5 text-purple-500" />
                     My Body Palace
@@ -1601,7 +1613,7 @@ function ZiweiPage() {
                   <div className="mb-6">
                     <button
                       onClick={() => setShowShenGongScience(!showShenGongScience)}
-                      className="w-full flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-700/40 rounded-lg border border-gray-200 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700/60 transition-colors"
+                      className="w-full flex flex-wrap items-center justify-between gap-3 p-3 bg-gray-50 dark:bg-slate-700/40 rounded-lg border border-gray-200 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700/60 transition-colors"
                     >
                       <div className="flex items-center gap-2">
                         <Lightbulb className="w-4 h-4 text-purple-500" />
@@ -1682,7 +1694,7 @@ function ZiweiPage() {
                         <div className="space-y-0">
                           {/* 身宫位置 */}
                           <div className="py-4 border-b border-gray-100 dark:border-slate-700">
-                            <div className="flex items-center justify-between mb-3">
+                            <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
                               <div className="flex items-center gap-3">
                                 <span className="w-3 h-3 bg-purple-500 rounded-full"></span>
                                 <h6 className="font-semibold text-purple-700 dark:text-purple-400 text-sm">Body Palace Position</h6>
@@ -1778,7 +1790,10 @@ function ZiweiPage() {
                 </div>
 
                 {/* 命运之箭分析 */}
-                <div id="destiny-arrow-analysis" className="bg-white dark:bg-slate-800 md:rounded-lg md:shadow-lg mt-2 md:mt-4 p-2 md:p-4">
+                <div
+                  id="destiny-arrow-analysis"
+                  className="mt-2 rounded-lg bg-white p-card-padding dark:bg-slate-800 md:mt-4 md:shadow-lg"
+                >
                   <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
                     <BarChart className="w-5 h-5 text-purple-500" />
                     Destiny Arrow
@@ -1866,7 +1881,7 @@ function ZiweiPage() {
 
                           {/* 命宫 - 箭头 */}
                           <div className="py-4 border-b border-gray-100 dark:border-slate-700">
-                            <div className="flex items-center justify-between mb-3">
+                            <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
                               <div className="flex items-center gap-3">
                                 <span className="w-3 h-3 bg-red-500 rounded-full"></span>
                                 <h6 className="font-semibold text-red-700 dark:text-red-400 text-sm">Life Palace (Arrow Tip)</h6>
@@ -1895,7 +1910,7 @@ function ZiweiPage() {
 
                           {/* 迁移宫 - 弓弦 */}
                           <div className="py-4 border-b border-gray-100 dark:border-slate-700">
-                            <div className="flex items-center justify-between mb-3">
+                            <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
                               <div className="flex items-center gap-3">
                                 <span className="w-3 h-3 bg-green-500 rounded-full"></span>
                                 <h6 className="font-semibold text-green-700 dark:text-green-400 text-sm">Travel Palace (Bow String)</h6>
@@ -1924,7 +1939,7 @@ function ZiweiPage() {
 
                           {/* 财帛宫 - 箭身 */}
                           <div className="py-4 border-b border-gray-100 dark:border-slate-700">
-                            <div className="flex items-center justify-between mb-3">
+                            <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
                               <div className="flex items-center gap-3">
                                 <span className="w-3 h-3 bg-yellow-500 rounded-full"></span>
                                 <h6 className="font-semibold text-yellow-700 dark:text-yellow-400 text-sm">Wealth Palace (Arrow Shaft)</h6>
@@ -1953,7 +1968,7 @@ function ZiweiPage() {
 
                           {/* 官禄宫 - 箭羽 */}
                           <div className="py-4 border-b border-gray-100 dark:border-slate-700">
-                            <div className="flex items-center justify-between mb-3">
+                            <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
                               <div className="flex items-center gap-3">
                                 <span className="w-3 h-3 bg-blue-500 rounded-full"></span>
                                 <h6 className="font-semibold text-blue-700 dark:text-blue-400 text-sm">Career Palace (Arrow Fletching)</h6>
@@ -2053,7 +2068,7 @@ function ZiweiPage() {
 
 
 
-            <div className="bg-white dark:bg-slate-800/60 rounded-lg border border-gray-200 dark:border-slate-700 shadow-sm p-4 lg:p-6 relative">
+            <Card className="relative border border-border bg-card p-card-padding shadow-soft">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-6 items-center mb-6 lg:mb-8">
                 <div>
                   <Label htmlFor="username" className="text-purple-600 dark:text-amber-400 text-base lg:text-lg font-semibold font-noto text-center">
@@ -2192,7 +2207,7 @@ function ZiweiPage() {
                     </Button>
                   )}
               </div>
-            </div>
+            </Card>
           </div>
               )}
       </div>
@@ -2253,12 +2268,16 @@ function ZiweiPage() {
           <div className="mt-4 flex-1 overflow-y-auto pr-2">
             <div className="space-y-6">
               {/* 基本介绍 */}
-              <div className="p-4 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg border border-purple-200 dark:border-purple-800/30">
-                <h3 className="text-lg font-semibold text-purple-700 dark:text-purple-400 mb-3">两大命理体系的智慧对比</h3>
-                <p className="text-gray-700 dark:text-slate-300 leading-relaxed">
+              <Card className="rounded-section border border-purple-200/70 bg-card p-card-padding shadow-soft ring-1 ring-purple-500/10 dark:border-purple-700/50">
+                <CardHeader className="p-0 pb-3">
+                  <CardTitle className="text-lg font-semibold text-purple-700 dark:text-purple-400">
+                    两大命理体系的智慧对比
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0 text-sm leading-relaxed text-gray-700 dark:text-slate-300">
                   紫微斗数和八字命理都是中华传统文化中的瑰宝，它们从不同角度揭示人生的奥秘。了解两者的特点，有助于您更全面地认识自己的命运。
-                </p>
-              </div>
+                </CardContent>
+              </Card>
 
               {/* 对比表格 */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -2340,9 +2359,11 @@ function ZiweiPage() {
               </div>
 
               {/* 应用建议 */}
-              <div className="p-4 bg-gradient-to-r from-blue-50 to-green-50 dark:from-blue-900/20 dark:to-green-900/20 rounded-lg border border-blue-200 dark:border-blue-800/30">
-                <h3 className="text-lg font-semibold text-blue-700 dark:text-blue-400 mb-3">💡 使用建议</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card className="rounded-section border border-blue-200/70 bg-card p-card-padding shadow-soft ring-1 ring-blue-500/10 dark:border-blue-700/50">
+                <CardHeader className="p-0 pb-3">
+                  <CardTitle className="text-lg font-semibold text-blue-700 dark:text-blue-400">💡 使用建议</CardTitle>
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 gap-4 p-0 md:grid-cols-2">
                   <div>
                     <h4 className="font-semibold text-purple-600 dark:text-purple-400 text-sm mb-2">适合选择紫微斗数</h4>
                     <ul className="text-gray-600 dark:text-slate-400 text-sm space-y-1">
@@ -2361,34 +2382,38 @@ function ZiweiPage() {
                       <li>• 需要具体事件的吉凶判断</li>
                     </ul>
                   </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
 
               {/* 结合使用 */}
-              <div className="p-4 bg-gradient-to-r from-green-50 to-purple-50 dark:from-green-900/20 dark:to-purple-900/20 rounded-lg border border-green-200 dark:border-green-800/30">
-                <h3 className="text-lg font-semibold text-green-700 dark:text-green-400 mb-3">🌟 最佳实践</h3>
-                <p className="text-gray-700 dark:text-slate-300 leading-relaxed mb-3">
-                  两个体系各有优势，结合使用效果更佳：
-                </p>
-                <ul className="text-gray-600 dark:text-slate-400 text-sm space-y-2">
-                  <li className="flex items-start gap-2">
-                    <span className="text-green-500 mt-1">✓</span>
-                    <span>用紫微斗数了解整体格局和性格特质</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-green-500 mt-1">✓</span>
-                    <span>用八字命理进行精确的时间预测</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-green-500 mt-1">✓</span>
-                    <span>互相验证，提高预测的准确性</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-green-500 mt-1">✓</span>
-                    <span>从多角度获得更全面的人生指导</span>
-                  </li>
-                </ul>
-              </div>
+              <Card className="rounded-section border border-green-200/70 bg-card p-card-padding shadow-soft ring-1 ring-green-500/10 dark:border-green-700/50">
+                <CardHeader className="p-0 pb-3">
+                  <CardTitle className="text-lg font-semibold text-green-700 dark:text-green-400">🌟 最佳实践</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3 p-0 text-sm text-gray-700 dark:text-slate-300">
+                  <p className="leading-relaxed">
+                    两个体系各有优势，结合使用效果更佳：
+                  </p>
+                  <ul className="space-y-2 text-gray-600 dark:text-slate-400">
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-500 mt-1">✓</span>
+                      <span>用紫微斗数了解整体格局和性格特质</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-500 mt-1">✓</span>
+                      <span>用八字命理进行精确的时间预测</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-500 mt-1">✓</span>
+                      <span>互相验证，提高预测的准确性</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-500 mt-1">✓</span>
+                      <span>从多角度获得更全面的人生指导</span>
+                    </li>
+                  </ul>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </DialogContent>

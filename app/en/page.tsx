@@ -189,7 +189,7 @@ export default function LandingPage() {
     <MainLayout language={language} setLanguage={setLanguage} t={t}>
       <div className="flex flex-col min-h-screen bg-transparent">
         {/* Header */}
-        <header className="py-6 bg-transparent text-center">
+        <header className="py-6 bg-transparent text-center px-page-inline">
           <StaggerContainer>
             <StaggerItem>
               <h1 className="text-5xl font-extrabold text-yellow-400 font-rajdhani">
@@ -208,9 +208,9 @@ export default function LandingPage() {
         </header>
 
         {/* Main Content */}
-        <main className="flex-grow container mx-auto px-4 py-8 md:py-12 flex flex-col items-center justify-center">
+        <main className="flex-grow mx-auto flex w-full max-w-page flex-col items-center justify-center gap-section-stack px-page-inline py-section-stack">
           {/* Hero Section */}
-          <div className="w-full max-w-6xl grid md:grid-cols-2 gap-8 md:gap-12 items-center mb-16">
+          <div className="grid w-full items-center gap-8 md:grid-cols-2 md:gap-12">
             {/* Left Content */}
             <FadeRight delay={0.2}>
               <div className="space-y-6 text-center md:text-left">
@@ -221,11 +221,11 @@ export default function LandingPage() {
                   {t.hero.subtitle}
                 </p>
               
-              <div className="bg-gradient-to-r from-yellow-500/20 to-purple-500/20 p-4 rounded-lg border border-yellow-500/30 backdrop-blur-sm">
-                <p className="text-yellow-400 font-semibold text-center whitespace-pre-line">
+              <Card className="border border-yellow-500/30 bg-gradient-to-r from-yellow-500/20 to-purple-500/20 p-card-padding shadow-soft backdrop-blur-sm">
+                <p className="text-center text-sm font-semibold text-yellow-400 whitespace-pre-line">
                   {t.hero.highlight}
                 </p>
-              </div>
+              </Card>
               
               <Alert className="bg-purple-900/30 border-purple-500/30 backdrop-blur-sm">
                 <Rocket className="h-5 w-5 text-yellow-400" />
@@ -285,7 +285,7 @@ export default function LandingPage() {
           </div>
 
           {/* Dual-System Engineering Section */}
-          <div className="w-full max-w-6xl mb-16">
+          <div className="w-full">
             <FadeUp>
               <div className="text-center mb-12">
                 <h2 className="text-3xl md:text-4xl font-bold text-yellow-400 mb-6">{t.systemsTitle}</h2>
@@ -297,11 +297,9 @@ export default function LandingPage() {
             <StaggerContainer className="grid md:grid-cols-2 gap-8 mb-12">
               {t.systems.map((system, index) => (
                 <StaggerItem key={index}>
-                  <Card
-                    className="bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/15 transition-all duration-300"
-                  >
-                    <CardContent className="p-8">
-                    <div className="flex items-center space-x-4 mb-6">
+                  <Card className="border border-white/20 bg-white/10 backdrop-blur-md transition-all duration-300 hover:bg-white/15">
+                    <CardContent className="space-y-6 p-card-padding">
+                    <div className="flex items-center gap-4">
                       <div className={`w-16 h-16 rounded-full bg-gradient-to-r ${system.color} flex items-center justify-center`}>
                         <system.icon className="w-8 h-8 text-white" />
                       </div>
@@ -310,7 +308,7 @@ export default function LandingPage() {
                         <p className="text-yellow-400 font-semibold">{system.system}</p>
                       </div>
                     </div>
-                    <p className="text-gray-200 dark:text-gray-200 leading-relaxed mb-6">{system.description}</p>
+                    <p className="text-gray-200 dark:text-gray-200 leading-relaxed">{system.description}</p>
                     <div className="space-y-2">
                       {system.features.map((feature, idx) => (
                         <div key={idx} className="flex items-center space-x-2">
@@ -327,7 +325,7 @@ export default function LandingPage() {
           </div>
 
           {/* Engineering Applications */}
-          <div className="w-full max-w-6xl mb-16">
+          <div className="w-full">
             <FadeUp>
               <div className="text-center mb-12">
                 <h2 className="text-3xl md:text-4xl font-bold text-yellow-400 mb-6">{t.engineeringTitle}</h2>
@@ -340,28 +338,28 @@ export default function LandingPage() {
                   <Card
                     className="bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/15 transition-all duration-300"
                   >
-                  <CardContent className="p-6">
+                  <CardContent className="space-y-3 p-card-padding">
                     <div className="flex items-center space-x-3 mb-4">
                       <case_.icon className="w-8 h-8 text-yellow-400" />
                       <h3 className="text-lg font-bold text-white">{case_.title}</h3>
                     </div>
                     
-                    <div className="space-y-3 text-sm">
-                      <div className="bg-yellow-500/20 p-3 rounded border-l-4 border-yellow-500">
+                      <div className="space-y-3 text-sm">
+                      <Card className="border-l-4 border-l-yellow-500 bg-yellow-500/20 p-card-padding shadow-soft">
                         <p className="text-yellow-400 font-semibold">{t.engineeringLabels.solar}</p>
                         <p className="text-gray-200 dark:text-gray-200">{case_.solar}</p>
-                      </div>
+                      </Card>
                       
-                      <div className="bg-purple-500/20 p-3 rounded border-l-4 border-purple-500">
+                      <Card className="border-l-4 border-l-purple-500 bg-purple-500/20 p-card-padding shadow-soft">
                         <p className="text-purple-400 font-semibold">{t.engineeringLabels.lunar}</p>
                         <p className="text-gray-200 dark:text-gray-200">{case_.lunar}</p>
-                      </div>
+                      </Card>
                       
-                      <div className="bg-green-500/20 p-3 rounded border-l-4 border-green-500">
+                      <Card className="border-l-4 border-l-green-500 bg-green-500/20 p-card-padding shadow-soft">
                         <p className="text-green-400 font-semibold">{t.engineeringLabels.solution}</p>
                         <p className="text-gray-200 dark:text-gray-200">{case_.combined}</p>
+                      </Card>
                       </div>
-                    </div>
                   </CardContent>
                 </Card>
               </StaggerItem>
@@ -370,7 +368,7 @@ export default function LandingPage() {
           </div>
 
           {/* Revolution Section */}
-          <div className="w-full max-w-6xl mb-16">
+          <div className="w-full">
             <FadeUp>
               <div className="text-center mb-12">
                 <h2 className="text-3xl md:text-4xl font-bold mb-4 text-yellow-400">
@@ -381,10 +379,10 @@ export default function LandingPage() {
                 </p>
                 
                 <ScrollReveal direction="fade" delay={0.3}>
-                  <div className="bg-gradient-to-r from-red-500/20 to-green-500/20 p-6 rounded-lg border border-white/20 backdrop-blur-sm">
-                    <p className="text-2xl font-bold text-white mb-2">{t.revolutionHighlight.title}</p>
+                  <Card className="border border-white/20 bg-gradient-to-r from-red-500/20 to-green-500/20 p-card-padding shadow-soft backdrop-blur-sm">
+                    <p className="mb-2 text-2xl font-bold text-white">{t.revolutionHighlight.title}</p>
                     <p className="text-gray-200 dark:text-gray-200">{t.revolutionHighlight.description}</p>
-                  </div>
+                  </Card>
                 </ScrollReveal>
               </div>
             </FadeUp>
@@ -392,8 +390,8 @@ export default function LandingPage() {
             <StaggerContainer className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {t.advantages.map((advantage, index) => (
                 <StaggerItem key={index}>
-                  <Card className="bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/15 transition-all duration-300">
-                    <CardContent className="p-6 text-center">
+                  <Card className="border border-white/20 bg-white/10 backdrop-blur-md transition-all duration-300 hover:bg-white/15">
+                    <CardContent className="p-card-padding text-center">
                     <advantage.icon className="w-12 h-12 mx-auto mb-4 text-yellow-400" />
                     <h3 className="text-xl font-semibold mb-3 text-white">{advantage.title}</h3>
                     <p className="text-gray-200 dark:text-gray-200 leading-relaxed text-sm">{advantage.description}</p>
@@ -422,8 +420,8 @@ export default function LandingPage() {
           {/* Final CTA */}
           <FadeUp delay={0.2}>
             <div className="w-full max-w-3xl text-center">
-              <Card className="bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/15 transition-all duration-300">
-                <CardContent className="p-8">
+              <Card className="border border-white/20 bg-white/10 backdrop-blur-md transition-all duration-300 hover:bg-white/15">
+                <CardContent className="space-y-6 p-card-padding">
                   <h2 className="text-3xl font-bold mb-4 text-yellow-400">
                     {language === 'zh' ? '1天体验 - 限购一次' : '1-Day Trial - One-time Only'}
                   </h2>
@@ -435,8 +433,8 @@ export default function LandingPage() {
                     }
                   </p>
                   
-                  <div className="bg-gradient-to-r from-yellow-500/20 to-purple-500/20 p-6 rounded-lg border border-yellow-500/30 backdrop-blur-sm mb-6">
-                    <div className="text-center">
+                  <Card className="mb-6 border border-yellow-500/30 bg-gradient-to-r from-yellow-500/20 to-purple-500/20 p-card-padding shadow-soft backdrop-blur-sm">
+                    <div className="text-center space-y-3">
                       <div className="text-4xl font-bold text-yellow-400 mb-3">
                         {language === 'zh' ? '¥9.9' : 'FREE'}
                       </div>
@@ -458,7 +456,7 @@ export default function LandingPage() {
                         )}
                       </div>
                     </div>
-                  </div>
+                  </Card>
                   
                   <a href={language === 'zh' ? "/subscription" : "/auth"}>
                     <button className="relative bg-gradient-to-r from-purple-900 to-indigo-900 hover:from-purple-800 hover:to-indigo-800 px-12 py-6 text-2xl font-bold rounded-lg shadow-2xl transform hover:scale-105 transition-all duration-300 overflow-hidden group border-2 border-yellow-400 hover:border-yellow-300">

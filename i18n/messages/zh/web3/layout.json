@@ -1,0 +1,99 @@
+{
+  "hero": {
+    "title": "财富猎人控制台",
+    "subtitle": "通往 Web3 精通的宇宙旅程"
+  },
+  "status": {
+    "eliteBadge": "精英财富猎人",
+    "rankLabel": "排名 #{rank}",
+    "streak": "🔥 连续签到 {streak} 天"
+  },
+  "actions": {
+    "startQuest": "开始任务",
+    "comingSoon": "即将上线"
+  },
+  "themeToggle": "切换主题",
+  "secondaryNav": {
+    "collapse": "收起",
+    "expand": "展开导航"
+  },
+  "navigationHeading": "导航",
+  "navItems": {
+    "home": {
+      "label": "首页",
+      "subItems": {
+        "dashboard": "仪表盘",
+        "dailyTasks": "每日任务",
+        "privileges": "Web3 权限",
+        "quickActions": "快捷操作",
+        "docs": "文档"
+      }
+    },
+    "analysis": {
+      "label": "分析",
+      "subItems": {
+        "bazi": "八字分析",
+        "ziwei": "紫微斗数",
+        "fortune": "关帝灵签",
+        "createChart": "创建命盘",
+        "myCharts": "我的命盘"
+      }
+    },
+    "wiki": {
+      "label": "知识库",
+      "subItems": {
+        "wikiHome": "知识总览",
+        "baziGuide": "八字指南",
+        "ziweiGuide": "紫微指南",
+        "glossary": "术语表"
+      }
+    },
+    "aiAssistant": {
+      "label": "AI 助手",
+      "subItems": {
+        "chat": "AI 对话",
+        "baziMaster": "八字大师",
+        "ziweiMaster": "紫微大师",
+        "general": "综合指导"
+      }
+    },
+    "web3Features": {
+      "label": "Web3 功能",
+      "subItems": {
+        "tasks": "任务中心",
+        "leaderboard": "排行榜",
+        "rewards": "奖励中心",
+        "credits": "积分管理",
+        "nfts": "NFT 收藏",
+        "staking": "质押池"
+      }
+    },
+    "profile": {
+      "label": "个人中心",
+      "subItems": {
+        "web3Profile": "Web3 档案",
+        "birthInfo": "出生信息",
+        "membership": "会员中心",
+        "subscription": "订阅管理"
+      }
+    },
+    "settings": {
+      "label": "设置",
+      "subItems": {
+        "web3Settings": "Web3 设置",
+        "preferences": "偏好设置",
+        "privacy": "隐私与安全",
+        "helpCenter": "帮助中心",
+        "disconnect": "断开钱包"
+      }
+    }
+  },
+  "wallet": {
+    "connected": "已连接的钱包",
+    "copy": "复制地址",
+    "disconnectTitle": "断开钱包",
+    "disconnectMessage": "确定要断开当前钱包吗？断开后需要重新连接才能使用 Web3 功能。",
+    "disconnectConfirm": "断开连接",
+    "disconnectCancel": "取消"
+  }
+}

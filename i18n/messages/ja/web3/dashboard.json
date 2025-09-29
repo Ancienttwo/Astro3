@@ -1,0 +1,117 @@
+{
+  "loading": "Web3 ダッシュボードを読み込み中...",
+  "overview": {
+    "dailyProgress": "本日の進捗",
+    "tasksCompleted": "完了したタスク",
+    "points": "コズミックポイント",
+    "streak": "連続チェックイン"
+  },
+  "cards": {
+    "tasks": {
+      "title": "タスクセンター",
+      "description": "クエストをこなしてポイントを獲得"
+    },
+    "leaderboard": {
+      "title": "ランキング",
+      "description": "他のハンターとの順位を確認"
+    },
+    "rewards": {
+      "title": "リワード",
+      "description": "コズミックポイントを特典に交換"
+    }
+  },
+  "stats": {
+    "score": {
+      "title": "コズミックポイント",
+      "subtitle": "フォーチュンハンタースコア",
+      "trend": "+125（本日）"
+    },
+    "streak": {
+      "title": "連続記録",
+      "subtitle": "絶好調！次のマイルストーン：30 日"
+    },
+    "rank": {
+      "title": "ランキング",
+      "subtitle": "フォーチュンハンター上位 5%",
+      "trend": "↗ 今週 +5"
+    }
+  },
+  "status": {
+    "streakLabel": "🔥 {count} 日連続"
+  },
+  "features": {
+    "fortuneBadges": {
+      "title": "フォーチュンバッジ",
+      "description": "希少な実績バッジを集めてハンターの旅を記録",
+      "badge": "バッジコレクション",
+      "motto": "全部集めよう"
+    },
+    "cosmicShop": {
+      "title": "コズミックショップ",
+      "description": "コズミックポイントで限定ハンターアイテムを交換",
+      "badge": "近日公開",
+      "motto": "ポイントで力を手に入れる"
+    },
+    "daid": {
+      "title": "D'aid ネットワーク",
+      "description": "エリートハンターが互いを支援し、カルマが倍増して還元",
+      "badge": "エリート限定",
+      "motto": "分かち合えば福が倍増"
+    },
+    "baziAnalysis": {
+      "title": "運命チャート",
+      "description": "宇宙プロフィールを作成—全ハンターの第一クエスト",
+      "badge": "ビギナークエスト",
+      "motto": "+50 コズミックポイント"
+    },
+    "guandiOracle": {
+      "title": "オラクエスト",
+      "description": "毎日のおみくじでポイントを稼ぐ中核アクティビティ",
+      "badge": "デイリークエスト",
+      "motto": "+15 ポイント/日"
+    },
+    "aiChatbot": {
+      "title": "フォーチュンAI セージ",
+      "description": "AI がパーソナライズされたハンター指針を提供",
+      "badge": "AI パワード",
+      "motto": "知恵 × テクノロジー"
+    },
+    "web3Rewards": {
+      "title": "エアドロップポータル",
+      "description": "コズミックポイント＝将来のトークン配分重み",
+      "badge": "トークンエコノミー",
+      "motto": "ポイントを貯めて報酬をHODL"
+    }
+  },
+  "featureActions": {
+    "start": "クエスト開始",
+    "comingSoon": "近日公開"
+  },
+  "fortuneSection": {
+    "title": "おみくじ日課",
+    "subtitle": "関帝の神託にアクセスし、毎日の抽籤でコズミックポイントと古代の智慧を手に入れましょう。",
+    "tagline": "🏛️ 神聖なおみくじ • 1日 +15 ポイント",
+    "highlights": {
+      "daily": "デイリークエスト解放中",
+      "rewards": "ポイントリワード",
+      "community": "コミュニティ共有"
+    },
+    "cta": "デイリーおみくじを完了",
+    "badges": {
+      "sacredSigns": "100 枚の神籤",
+      "quest": "フォーチュンハンタークエスト",
+      "rewards": "デイリーリワード"
+    }
+  },
+  "ecosystem": {
+    "title": "フォーチュンハンターエコシステム",
+    "subtitle": "コズミックポイントを稼ぎ、レガシーを築くすべての方法を探索しよう"
+  },
+  "quickActions": {
+    "title": "コマンドセンター",
+    "subtitle": "人気の Web3 機能にワンタップでアクセス",
+    "viewTasks": "タスクを表示",
+    "viewRewards": "ランキングを見る",
+    "disclaimer": "✨ すべてのコズミックポイントが将来のエアドロップ配分に影響します"
+  }
+}
