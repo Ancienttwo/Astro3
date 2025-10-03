@@ -1,0 +1,21 @@
+{
+  "title": "紫微斗数算命",
+  "subtitle": "紫微星命理学",
+  "calculate": "紫微盤を計算",
+  "result": "紫微命盤結果",
+  "palaces": "十二宮",
+  "lifePalace": "命宮",
+  "parentsPalace": "父母宮",
+  "fortunePalace": "福徳宮",
+  "propertyPalace": "田宅宮",
+  "careerPalace": "官禄宮",
+  "subordinatesPalace": "僕役宮",
+  "travelPalace": "遷移宮",
+  "healthPalace": "疾厄宮",
+  "wealthPalace": "財帛宮",
+  "childrenPalace": "子女宮",
+  "spousePalace": "夫妻宮",
+  "siblingsPalace": "兄弟宮",
+  "majorStars": "主星",
+  "minorStars": "副星"
+}

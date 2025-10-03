@@ -7,5 +7,20 @@
   "back": "戻る",
   "next": "次へ",
   "submit": "送信",
-  "close": "閉じる"
+  "close": "閉じる",
+  "calculate": "計算",
+  "save": "保存",
+  "clear": "クリア",
+  "success": "成功",
+  "reset": "リセット",
+  "search": "検索",
+  "filter": "フィルター",
+  "refresh": "更新",
+  "edit": "編集",
+  "delete": "削除",
+  "add": "追加",
+  "create": "作成",
+  "menu": "メニュー",
+  "all": "すべて",
+  "or": "または"
 }

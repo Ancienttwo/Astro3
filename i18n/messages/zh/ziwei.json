@@ -1,0 +1,21 @@
+{
+  "title": "紫微斗数排盘",
+  "subtitle": "紫微星命理学",
+  "calculate": "开始排盘",
+  "result": "紫微命盘结果",
+  "palaces": "十二宫",
+  "lifePalace": "命宫",
+  "parentsPalace": "父母宫",
+  "fortunePalace": "福德宫",
+  "propertyPalace": "田宅宫",
+  "careerPalace": "官禄宫",
+  "subordinatesPalace": "仆役宫",
+  "travelPalace": "迁移宫",
+  "healthPalace": "疾厄宫",
+  "wealthPalace": "财帛宫",
+  "childrenPalace": "子女宫",
+  "spousePalace": "夫妻宫",
+  "siblingsPalace": "兄弟宫",
+  "majorStars": "主星",
+  "minorStars": "副星"
+}

@@ -61,6 +61,7 @@ function InternalAuthProvider({ children }: { children: React.ReactNode }) {
     linkWallet: privyLinkWallet,
     unlinkWallet: privyUnlinkWallet,
     signMessage: privySignMessage,
+    getAccessToken,
   } = usePrivy();
   
   const { wallets, ready: walletsReady } = useWallets();
@@ -90,9 +91,9 @@ function InternalAuthProvider({ children }: { children: React.ReactNode }) {
   const syncUserWithSupabase = async (privyUser: PrivyUser) => {
     try {
       setIsLoadingUser(true);
-      
+
       // Get Privy access token
-      const privyToken = await privyUser.getAccessToken();
+      const privyToken = await getAccessToken();
       
       // Call our API to verify and create/update user in Supabase
       const response = await fetch('/api/auth/privy', {

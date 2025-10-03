@@ -7,5 +7,20 @@
   "back": "Back",
   "next": "Next",
   "submit": "Submit",
-  "close": "Close"
+  "close": "Close",
+  "calculate": "Calculate",
+  "save": "Save",
+  "clear": "Clear",
+  "success": "Success",
+  "reset": "Reset",
+  "search": "Search",
+  "filter": "Filter",
+  "refresh": "Refresh",
+  "edit": "Edit",
+  "delete": "Delete",
+  "add": "Add",
+  "create": "Create",
+  "menu": "Menu",
+  "all": "All",
+  "or": "or"
 }

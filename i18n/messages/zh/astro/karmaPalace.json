@@ -1,0 +1,27 @@
+{
+  "title": "宿世因缘",
+  "whatIsKarmaPalace": "什么是来因宫？",
+  "whatIsKarmaPalaceDesc": "来因宫在紫微斗数中扮演着至关重要的角色，它不仅反映了个人的内在动机和潜在能力，还揭示了与他人、事务和物质世界的关系。来因宫的配置能够影响个人的命运走向、事业发展和人际关系。",
+  "importanceOfKarmaPalace": "来因宫的重要性",
+  "importanceOfKarmaPalaceDesc": "通过分析来因宫在不同宫位的表现，能够洞察到个体在生活中如何应对挑战、利用资源和实现自我价值。它强调了个人的主动性和责任感，提醒我们在追求目标的过程中，如何平衡自身需求与外部环境的互动。",
+  "yourKarmaPalaceIn": "您的来因宫在",
+  "peopleAspect": "人",
+  "mattersAspect": "事",
+  "materialAspect": "物",
+  "palaceReference": "十二宫位参考",
+  "palaceReferenceDesc": "因此，来因宫的解析对于理解一个人的命格、性格以及未来的发展方向具有重要意义。",
+  "palaceNames": {
+    "self": "命宫",
+    "siblings": "兄弟",
+    "spouse": "夫妻",
+    "children": "子女",
+    "wealth": "财帛",
+    "health": "疾厄",
+    "travel": "迁移",
+    "friends": "交友",
+    "career": "官禄",
+    "property": "田宅",
+    "fortune": "福德",
+    "parents": "父母"
+  }
+}

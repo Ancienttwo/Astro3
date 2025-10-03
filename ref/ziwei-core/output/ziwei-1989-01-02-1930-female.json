@@ -1,0 +1,915 @@
+{
+  "testInfo": {
+    "description": "紫微斗数完整测试案例 - Complete ZiWei Test Case",
+    "inputData": {
+      "year": 1989,
+      "month": 1,
+      "day": 2,
+      "hour": 19,
+      "gender": "female",
+      "isLunar": false,
+      "isLeapMonth": false,
+      "timezone": "Asia/Shanghai"
+    },
+    "generatedAt": "2025-09-04T16:14:59.163Z",
+    "version": "1.0.0"
+  },
+  "chart": {
+    "birthInfo": {
+      "solar": {
+        "year": 1989,
+        "month": 1,
+        "day": 2,
+        "hour": 19,
+        "gender": "female",
+        "isLunar": false
+      },
+      "lunar": {
+        "yearStem": "戊",
+        "yearBranch": "辰",
+        "yearGanzhi": "戊辰",
+        "monthLunar": 11,
+        "dayLunar": 25,
+        "hourBranch": "戌",
+        "isLunar": false,
+        "isLeapMonth": false
+      }
+    },
+    "bazi": "戊辰甲子壬戌庚戌",
+    "baziQiyun": "8年10个月",
+    "baziDayun": "9-18岁: 癸亥, 19-28岁: 壬戌, 29-38岁: 辛酉, 39-48岁: 庚申, 49-58岁: 己未, 59-68岁: 戊午, 69-78岁: 丁巳, 79-88岁: 丙辰",
+    "lifePalace": "命宫",
+    "bodyPalace": "财帛",
+    "laiyinPalace": "官禄",
+    "lifeMaster": "禄存",
+    "bodyMaster": "文昌",
+    "doujun": "子",
+    "fiveElementsBureau": {
+      "name": "水二局",
+      "number": "2"
+    },
+    "palaces": {
+      "子": {
+        "branch": "子",
+        "branchIndex": 0,
+        "stem": "甲",
+        "palaceName": "夫妻",
+        "mainStars": [
+          {
+            "name": "天机",
+            "bright": "旺",
+            "sihua": "D",
+            "self_sihua": "iD"
+          }
+        ],
+        "auxiliaryStars": [
+          {
+            "name": "右弼",
+            "bright": "利",
+            "sihua": "C",
+            "self_sihua": "iC"
+          },
+          {
+            "name": "火星",
+            "bright": "平"
+          }
+        ],
+        "minorStars": [
+          {
+            "name": "八座",
+            "bright": "平"
+          },
+          {
+            "name": "封诰",
+            "bright": "平"
+          },
+          {
+            "name": "截空",
+            "bright": "平"
+          }
+        ],
+        "fleetingYears": [
+          9,
+          21,
+          33,
+          45,
+          57,
+          69,
+          81,
+          93,
+          105,
+          117
+        ],
+        "majorPeriod": {
+          "period": 3,
+          "startAge": 26,
+          "endAge": 35,
+          "startYear": 2014,
+          "endYear": 2023
+        },
+        "minorPeriod": [
+          11,
+          23,
+          35,
+          47,
+          59,
+          71,
+          83,
+          95,
+          107,
+          119
+        ],
+        "palaceStatus": {
+          "isEmpty": false,
+          "isBorrowingStars": false,
+          "strength": "normal",
+          "conflictLevel": 0
+        }
+      },
+      "丑": {
+        "branch": "丑",
+        "branchIndex": 1,
+        "stem": "乙",
+        "palaceName": "兄弟",
+        "mainStars": [
+          {
+            "name": "紫微",
+            "bright": "庙",
+            "self_sihua": "xC"
+          },
+          {
+            "name": "破军",
+            "bright": "旺"
+          }
+        ],
+        "auxiliaryStars": [
+          {
+            "name": "天魁",
+            "bright": "平"
+          },
+          {
+            "name": "地空",
+            "bright": "旺"
+          }
+        ],
+        "minorStars": [
+          {
+            "name": "寡宿",
+            "bright": "平"
+          },
+          {
+            "name": "截空",
+            "bright": "平"
+          },
+          {
+            "name": "破碎",
+            "bright": "平"
+          },
+          {
+            "name": "天德",
+            "bright": "平"
+          }
+        ],
+        "fleetingYears": [
+          10,
+          22,
+          34,
+          46,
+          58,
+          70,
+          82,
+          94,
+          106,
+          118
+        ],
+        "majorPeriod": {
+          "period": 2,
+          "startAge": 16,
+          "endAge": 25,
+          "startYear": 2004,
+          "endYear": 2013
+        },
+        "minorPeriod": [
+          10,
+          22,
+          34,
+          46,
+          58,
+          70,
+          82,
+          94,
+          106,
+          118
+        ],
+        "palaceStatus": {
+          "isEmpty": false,
+          "isBorrowingStars": false,
+          "strength": "normal",
+          "conflictLevel": 0
+        }
+      },
+      "寅": {
+        "branch": "寅",
+        "branchIndex": 2,
+        "stem": "甲",
+        "palaceName": "命宫",
+        "mainStars": [],
+        "auxiliaryStars": [
+          {
+            "name": "文曲",
+            "bright": "平"
+          },
+          {
+            "name": "左辅",
+            "bright": "不"
+          },
+          {
+            "name": "天马",
+            "bright": "平"
+          }
+        ],
+        "minorStars": [
+          {
+            "name": "三台",
+            "bright": "平"
+          },
+          {
+            "name": "天哭",
+            "bright": "平"
+          },
+          {
+            "name": "天寿",
+            "bright": "平"
+          }
+        ],
+        "fleetingYears": [
+          11,
+          23,
+          35,
+          47,
+          59,
+          71,
+          83,
+          95,
+          107,
+          119
+        ],
+        "majorPeriod": {
+          "period": 1,
+          "startAge": 6,
+          "endAge": 15,
+          "startYear": 1994,
+          "endYear": 2003
+        },
+        "minorPeriod": [
+          9,
+          21,
+          33,
+          45,
+          57,
+          69,
+          81,
+          93,
+          105,
+          117
+        ],
+        "palaceStatus": {
+          "isEmpty": true,
+          "isBorrowingStars": false,
+          "strength": "weak",
+          "conflictLevel": 0
+        }
+      },
+      "卯": {
+        "branch": "卯",
+        "branchIndex": 3,
+        "stem": "乙",
+        "palaceName": "父母",
+        "mainStars": [
+          {
+            "name": "天府",
+            "bright": "得"
+          }
+        ],
+        "auxiliaryStars": [],
+        "minorStars": [
+          {
+            "name": "天贵",
+            "bright": "平"
+          },
+          {
+            "name": "天官",
+            "bright": "平"
+          },
+          {
+            "name": "天福",
+            "bright": "平"
+          },
+          {
+            "name": "天巫",
+            "bright": "平"
+          },
+          {
+            "name": "息神",
+            "bright": "平"
+          },
+          {
+            "name": "月德",
+            "bright": "平"
+          }
+        ],
+        "fleetingYears": [
+          12,
+          24,
+          36,
+          48,
+          60,
+          72,
+          84,
+          96,
+          108,
+          120
+        ],
+        "majorPeriod": {
+          "period": 12,
+          "startAge": 116,
+          "endAge": 125,
+          "startYear": 2104,
+          "endYear": 2113
+        },
+        "minorPeriod": [
+          8,
+          20,
+          32,
+          44,
+          56,
+          68,
+          80,
+          92,
+          104,
+          116
+        ],
+        "palaceStatus": {
+          "isEmpty": false,
+          "isBorrowingStars": false,
+          "strength": "normal",
+          "conflictLevel": 0
+        }
+      },
+      "辰": {
+        "branch": "辰",
+        "branchIndex": 4,
+        "stem": "丙",
+        "palaceName": "福德",
+        "mainStars": [
+          {
+            "name": "太阴",
+            "bright": "平",
+            "sihua": "B"
+          }
+        ],
+        "auxiliaryStars": [
+          {
+            "name": "陀罗",
+            "bright": "庙"
+          }
+        ],
+        "minorStars": [
+          {
+            "name": "台辅",
+            "bright": "平"
+          },
+          {
+            "name": "华盖",
+            "bright": "平"
+          },
+          {
+            "name": "天月",
+            "bright": "平"
+          }
+        ],
+        "fleetingYears": [
+          1,
+          13,
+          25,
+          37,
+          49,
+          61,
+          73,
+          85,
+          97,
+          109
+        ],
+        "majorPeriod": {
+          "period": 11,
+          "startAge": 106,
+          "endAge": 115,
+          "startYear": 2094,
+          "endYear": 2103
+        },
+        "minorPeriod": [
+          7,
+          19,
+          31,
+          43,
+          55,
+          67,
+          79,
+          91,
+          103,
+          115
+        ],
+        "palaceStatus": {
+          "isEmpty": false,
+          "isBorrowingStars": false,
+          "strength": "normal",
+          "conflictLevel": 0
+        }
+      },
+      "巳": {
+        "branch": "巳",
+        "branchIndex": 5,
+        "stem": "丁",
+        "palaceName": "田宅",
+        "mainStars": [
+          {
+            "name": "廉贞",
+            "bright": "平"
+          },
+          {
+            "name": "贪狼",
+            "bright": "平",
+            "sihua": "A",
+            "self_sihua": "iD"
+          }
+        ],
+        "auxiliaryStars": [
+          {
+            "name": "禄存",
+            "bright": "旺"
+          }
+        ],
+        "minorStars": [
+          {
+            "name": "孤辰",
+            "bright": "平"
+          },
+          {
+            "name": "天空",
+            "bright": "平"
+          },
+          {
+            "name": "劫煞",
+            "bright": "平"
+          }
+        ],
+        "fleetingYears": [
+          2,
+          14,
+          26,
+          38,
+          50,
+          62,
+          74,
+          86,
+          98,
+          110
+        ],
+        "majorPeriod": {
+          "period": 10,
+          "startAge": 96,
+          "endAge": 105,
+          "startYear": 2084,
+          "endYear": 2093
+        },
+        "minorPeriod": [
+          6,
+          18,
+          30,
+          42,
+          54,
+          66,
+          78,
+          90,
+          102,
+          114
+        ],
+        "palaceStatus": {
+          "isEmpty": false,
+          "isBorrowingStars": false,
+          "strength": "normal",
+          "conflictLevel": 0
+        }
+      },
+      "午": {
+        "branch": "午",
+        "branchIndex": 6,
+        "stem": "戊",
+        "palaceName": "官禄",
+        "mainStars": [
+          {
+            "name": "巨门",
+            "bright": "旺"
+          }
+        ],
+        "auxiliaryStars": [
+          {
+            "name": "擎羊",
+            "bright": "旺"
+          }
+        ],
+        "minorStars": [
+          {
+            "name": "凤阁",
+            "bright": "平"
+          },
+          {
+            "name": "解神",
+            "bright": "平"
+          },
+          {
+            "name": "天才",
+            "bright": "平"
+          },
+          {
+            "name": "阴煞",
+            "bright": "平"
+          }
+        ],
+        "fleetingYears": [
+          3,
+          15,
+          27,
+          39,
+          51,
+          63,
+          75,
+          87,
+          99,
+          111
+        ],
+        "majorPeriod": {
+          "period": 9,
+          "startAge": 86,
+          "endAge": 95,
+          "startYear": 2074,
+          "endYear": 2083
+        },
+        "minorPeriod": [
+          5,
+          17,
+          29,
+          41,
+          53,
+          65,
+          77,
+          89,
+          101,
+          113
+        ],
+        "palaceStatus": {
+          "isEmpty": false,
+          "isBorrowingStars": false,
+          "strength": "normal",
+          "conflictLevel": 0
+        }
+      },
+      "未": {
+        "branch": "未",
+        "branchIndex": 7,
+        "stem": "己",
+        "palaceName": "交友",
+        "mainStars": [
+          {
+            "name": "天相",
+            "bright": "庙"
+          }
+        ],
+        "auxiliaryStars": [
+          {
+            "name": "天钺",
+            "bright": "平"
+          },
+          {
+            "name": "天刑",
+            "bright": "平"
+          }
+        ],
+        "minorStars": [
+          {
+            "name": "天伤",
+            "bright": "平"
+          },
+          {
+            "name": "天煞",
+            "bright": "平"
+          }
+        ],
+        "fleetingYears": [
+          4,
+          16,
+          28,
+          40,
+          52,
+          64,
+          76,
+          88,
+          100,
+          112
+        ],
+        "majorPeriod": {
+          "period": 8,
+          "startAge": 76,
+          "endAge": 85,
+          "startYear": 2064,
+          "endYear": 2073
+        },
+        "minorPeriod": [
+          4,
+          16,
+          28,
+          40,
+          52,
+          64,
+          76,
+          88,
+          100,
+          112
+        ],
+        "palaceStatus": {
+          "isEmpty": false,
+          "isBorrowingStars": false,
+          "strength": "normal",
+          "conflictLevel": 0
+        }
+      },
+      "申": {
+        "branch": "申",
+        "branchIndex": 8,
+        "stem": "庚",
+        "palaceName": "迁移",
+        "mainStars": [
+          {
+            "name": "天同",
+            "bright": "得",
+            "self_sihua": "xD"
+          },
+          {
+            "name": "天梁",
+            "bright": "庙"
+          }
+        ],
+        "auxiliaryStars": [
+          {
+            "name": "文昌",
+            "bright": "得"
+          },
+          {
+            "name": "铃星",
+            "bright": "利"
+          }
+        ],
+        "minorStars": [
+          {
+            "name": "恩光",
+            "bright": "平"
+          },
+          {
+            "name": "龙池",
+            "bright": "平"
+          },
+          {
+            "name": "天厨",
+            "bright": "平"
+          }
+        ],
+        "fleetingYears": [
+          5,
+          17,
+          29,
+          41,
+          53,
+          65,
+          77,
+          89,
+          101,
+          113
+        ],
+        "majorPeriod": {
+          "period": 7,
+          "startAge": 66,
+          "endAge": 75,
+          "startYear": 2054,
+          "endYear": 2063
+        },
+        "minorPeriod": [
+          3,
+          15,
+          27,
+          39,
+          51,
+          63,
+          75,
+          87,
+          99,
+          111
+        ],
+        "palaceStatus": {
+          "isEmpty": false,
+          "isBorrowingStars": false,
+          "strength": "normal",
+          "conflictLevel": 0
+        }
+      },
+      "酉": {
+        "branch": "酉",
+        "branchIndex": 9,
+        "stem": "辛",
+        "palaceName": "疾厄",
+        "mainStars": [
+          {
+            "name": "武曲",
+            "bright": "利"
+          },
+          {
+            "name": "七杀",
+            "bright": "平"
+          }
+        ],
+        "auxiliaryStars": [
+          {
+            "name": "地劫",
+            "bright": "得"
+          }
+        ],
+        "minorStars": [
+          {
+            "name": "天使",
+            "bright": "平"
+          }
+        ],
+        "fleetingYears": [
+          6,
+          18,
+          30,
+          42,
+          54,
+          66,
+          78,
+          90,
+          102,
+          114
+        ],
+        "majorPeriod": {
+          "period": 6,
+          "startAge": 56,
+          "endAge": 65,
+          "startYear": 2044,
+          "endYear": 2053
+        },
+        "minorPeriod": [
+          2,
+          14,
+          26,
+          38,
+          50,
+          62,
+          74,
+          86,
+          98,
+          110
+        ],
+        "palaceStatus": {
+          "isEmpty": false,
+          "isBorrowingStars": false,
+          "strength": "normal",
+          "conflictLevel": 0
+        }
+      },
+      "戌": {
+        "branch": "戌",
+        "branchIndex": 10,
+        "stem": "壬",
+        "palaceName": "财帛",
+        "mainStars": [
+          {
+            "name": "太阳",
+            "bright": "平"
+          }
+        ],
+        "auxiliaryStars": [],
+        "minorStars": [
+          {
+            "name": "天虚",
+            "bright": "平"
+          },
+          {
+            "name": "旬空",
+            "bright": "平"
+          }
+        ],
+        "fleetingYears": [
+          7,
+          19,
+          31,
+          43,
+          55,
+          67,
+          79,
+          91,
+          103,
+          115
+        ],
+        "majorPeriod": {
+          "period": 5,
+          "startAge": 46,
+          "endAge": 55,
+          "startYear": 2034,
+          "endYear": 2043
+        },
+        "minorPeriod": [
+          1,
+          13,
+          25,
+          37,
+          49,
+          61,
+          73,
+          85,
+          97,
+          109
+        ],
+        "palaceStatus": {
+          "isEmpty": false,
+          "isBorrowingStars": false,
+          "strength": "normal",
+          "conflictLevel": 0
+        }
+      },
+      "亥": {
+        "branch": "亥",
+        "branchIndex": 11,
+        "stem": "癸",
+        "palaceName": "子女",
+        "mainStars": [],
+        "auxiliaryStars": [],
+        "minorStars": [
+          {
+            "name": "旬空",
+            "bright": "平"
+          }
+        ],
+        "fleetingYears": [
+          8,
+          20,
+          32,
+          44,
+          56,
+          68,
+          80,
+          92,
+          104,
+          116
+        ],
+        "majorPeriod": {
+          "period": 4,
+          "startAge": 36,
+          "endAge": 45,
+          "startYear": 2024,
+          "endYear": 2033
+        },
+        "minorPeriod": [
+          12,
+          24,
+          36,
+          48,
+          60,
+          72,
+          84,
+          96,
+          108,
+          120
+        ],
+        "palaceStatus": {
+          "isEmpty": true,
+          "isBorrowingStars": false,
+          "strength": "weak",
+          "conflictLevel": 0
+        }
+      }
+    },
+    "sihuaAnalysis": {
+      "birthYearSihua": {
+        "stem": "戊",
+        "transformations": {
+          "lu": "贪狼",
+          "quan": "太阴",
+          "ke": "右弼",
+          "ji": "天机"
+        }
+      }
+    },
+    "generatedAt": "2025-09-04T16:14:59.162Z",
+    "version": "1.0.0"
+  }
+}

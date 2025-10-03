@@ -1,0 +1,30 @@
+{
+  "bazi": {
+    "title": "BaZi Chart",
+    "subtitle": "Traditional Four Pillars Analysis"
+  },
+  "ziwei": {
+    "title": "Ziwei Doushu",
+    "subtitle": "Purple Star Astrology Chart"
+  },
+  "auth": {
+    "title": "Web3 Wallet Login",
+    "subtitle": "Connect your wallet to access all AstroZi features"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Personal Settings and Preferences"
+  },
+  "charts": {
+    "title": "Chart Records",
+    "subtitle": "My Chart Archive"
+  },
+  "createChart": {
+    "title": "Create Chart",
+    "subtitle": "Enter birth information to generate chart"
+  },
+  "wiki": {
+    "title": "Knowledge Base",
+    "subtitle": "Astrology Reference Library"
+  }
+}

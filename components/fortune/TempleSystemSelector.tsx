@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useFortuneI18n, useLocalizedField } from '@/lib/modules/fortune/i18n/useFortuneI18n';
+import { useFortuneTranslations } from '@/lib/i18n/useFortuneTranslations';
 
 interface TempleSystem {
   id: string;
@@ -51,9 +51,8 @@ export default function TempleSystemSelector({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Use fortune i18n system
-  const { t, locale } = useFortuneI18n();
-  const getLocalizedField = useLocalizedField();
+  // Use fortune i18n system with next-intl
+  const { t, locale, getLocalizedField } = useFortuneTranslations();
 
   const selectedTemple = temples.find(temple => temple.temple_code === selectedTempleCode);
 
@@ -69,10 +68,10 @@ export default function TempleSystemSelector({
         if (data.success) {
           setTemples(data.data);
         } else {
-          setError(data.error || t('fortune.error.loadFailed'));
+          setError(data.error || 'Failed to load temples');
         }
       } catch (err) {
-        setError(t('fortune.error.networkError'));
+        setError('Network error');
         console.error('Failed to fetch temples:', err);
       } finally {
         setLoading(false);
@@ -115,12 +114,12 @@ export default function TempleSystemSelector({
       <Building2 className="w-5 h-5 mr-3 text-amber-600 dark:text-amber-400" />
       <div className="flex flex-col items-start">
         <span className="font-medium dark:text-amber-400">
-          {selectedTemple ? getLocalizedField(selectedTemple, 'temple_name') : t('fortune.temple.selectTemple')}
+          {selectedTemple ? getLocalizedField(selectedTemple, 'temple_name') : t('temple.selectTemple')}
         </span>
         <span className="text-xs text-muted-foreground dark:text-slate-300">
-          {selectedTemple ? 
-            `${selectedTemple.total_slips}${t('fortune.slip.title')} · ${selectedTemple.location}` : 
-            t('fortune.temple.selectTemple')
+          {selectedTemple ?
+            `${selectedTemple.total_slips}${t('slip.title')} · ${selectedTemple.location}` :
+            t('temple.selectTemple')
           }
         </span>
       </div>
@@ -136,14 +135,14 @@ export default function TempleSystemSelector({
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2 dark:text-amber-400">
             <Building2 className="w-5 h-5 text-amber-600 dark:text-amber-400" />
-            <span>{t('fortune.temple.title')}</span>
+            <span>{t('temple.title')}</span>
           </DialogTitle>
         </DialogHeader>
-        
+
         {loading && (
           <div className="flex items-center justify-center py-8">
             <Loader2 className="w-8 h-8 animate-spin text-amber-600 dark:text-amber-400" />
-            <span className="ml-2 text-muted-foreground">{t('fortune.temple.loadingTemples')}</span>
+            <span className="ml-2 text-muted-foreground">{t('temple.loadingTemples')}</span>
           </div>
         )}
 
@@ -188,27 +187,27 @@ export default function TempleSystemSelector({
                     </div>
                     <div className="text-right">
                       <Badge variant="outline" className="mb-1">
-                        {temple.total_slips}{t('fortune.slip.title')}
+                        {temple.total_slips}{t('slip.title')}
                       </Badge>
                       <div className="flex items-center text-xs text-muted-foreground">
                         <Calendar className="w-3 h-3 mr-1" />
-                        {temple.established_year}{t('common.year', { year: temple.established_year })}
+                        {temple.established_year}
                       </div>
                     </div>
                   </div>
                 </CardHeader>
-                
+
                 <CardContent className="pt-0">
                   <p className="text-sm text-muted-foreground mb-3 leading-relaxed">
                     {getLocalizedField(temple, 'description')}
                   </p>
-                  
+
                   <div className="mb-3">
-                    <p className="text-xs font-medium mb-2 text-muted-foreground">{t('fortune.temple.deity')}:</p>
-                    <Badge 
-                      variant="secondary" 
+                    <p className="text-xs font-medium mb-2 text-muted-foreground">{t('temple.deity')}:</p>
+                    <Badge
+                      variant="secondary"
                       className="mr-2"
-                      style={{ 
+                      style={{
                         backgroundColor: temple.secondary_color + '20',
                         color: temple.primary_color,
                         borderColor: temple.primary_color + '30'
@@ -220,7 +219,7 @@ export default function TempleSystemSelector({
                   </div>
 
                   <div>
-                    <p className="text-xs font-medium mb-2 text-muted-foreground">{t('fortune.temple.specialization')}:</p>
+                    <p className="text-xs font-medium mb-2 text-muted-foreground">{t('temple.specialization')}:</p>
                     <div className="flex flex-wrap gap-1">
                       {temple.specialization.map((spec, index) => (
                         <Badge 
@@ -250,7 +249,7 @@ export default function TempleSystemSelector({
         {!loading && !error && temples.length === 0 && (
           <div className="text-center py-8">
             <Building2 className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-            <p className="text-muted-foreground">{t('fortune.temple.noTemplesAvailable')}</p>
+            <p className="text-muted-foreground">{t('temple.noTemplesAvailable')}</p>
           </div>
         )}
       </DialogContent>

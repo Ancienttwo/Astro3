@@ -8,7 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import TempleSystemSelector from '@/components/fortune/TempleSystemSelector';
-import { useFortuneI18n, useLocalizedField } from '@/lib/modules/fortune/i18n/useFortuneI18n';
+import { useFortuneTranslations } from '@/lib/i18n/useFortuneTranslations';
+import { useTranslations } from 'next-intl';
 
 interface TempleSystem {
   id: string;
@@ -65,12 +66,12 @@ export default function FortunePage() {
   const [error, setError] = useState<string | null>(null);
   const [showAIInterpretation, setShowAIInterpretation] = useState(false);
 
-  const { t, locale } = useFortuneI18n();
-  const getLocalizedField = useLocalizedField();
+  const { t: tFortune, locale, getLocalizedField } = useFortuneTranslations();
+  const tCommon = useTranslations('common');
 
   const handleRandomSlip = async () => {
     if (!selectedTemple) {
-      setError('请先选择庙宇');
+      setError(tFortune('temple.selectTemple'));
       return;
     }
 
@@ -95,10 +96,10 @@ export default function FortunePage() {
         setSlipNumber(data.data.slip_number.toString());
         await fetchFortuneSlip(selectedTemple.temple_code, data.data.slip_number);
       } else {
-        setError(data.error || '获取随机签文失败');
+        setError(data.error || tFortune('slip.randomSlip') + ' failed');
       }
     } catch (err) {
-      setError('网络错误，请重试');
+      setError(tCommon('error'));
       console.error('Random slip error:', err);
     } finally {
       setLoading(false);
@@ -116,10 +117,10 @@ export default function FortunePage() {
       if (data.success) {
         setFortuneSlip(data.data);
       } else {
-        setError(data.error || '获取签文失败');
+        setError(data.error || tFortune('slip.title') + ' not found');
       }
     } catch (err) {
-      setError('网络错误，请重试');
+      setError(tCommon('error'));
       console.error('Fetch slip error:', err);
     } finally {
       setLoading(false);
@@ -128,13 +129,13 @@ export default function FortunePage() {
 
   const handleManualSlip = async () => {
     if (!selectedTemple || !slipNumber) {
-      setError('请选择庙宇并输入签号');
+      setError(tFortune('slip.inputPlaceholder'));
       return;
     }
 
     const slipNum = parseInt(slipNumber);
     if (isNaN(slipNum) || slipNum < 1 || slipNum > selectedTemple.total_slips) {
-      setError(`签号必须在1-${selectedTemple.total_slips}之间`);
+      setError(`${tFortune('slip.number')} 1-${selectedTemple.total_slips}`);
       return;
     }
 
@@ -143,11 +144,11 @@ export default function FortunePage() {
 
   const getFortuneLevel = (level: string) => {
     const levels = {
-      excellent: { label: '上上签', color: 'bg-green-100 text-green-800 border-green-200' },
-      good: { label: '上签', color: 'bg-blue-100 text-blue-800 border-blue-200' },
-      average: { label: '中签', color: 'bg-yellow-100 text-yellow-800 border-yellow-200' },
-      caution: { label: '下签', color: 'bg-orange-100 text-orange-800 border-orange-200' },
-      warning: { label: '凶签', color: 'bg-red-100 text-red-800 border-red-200' }
+      excellent: { label: tFortune('fortuneLevel.excellent'), color: 'bg-green-100 text-green-800 border-green-200' },
+      good: { label: tFortune('fortuneLevel.good'), color: 'bg-blue-100 text-blue-800 border-blue-200' },
+      average: { label: tFortune('fortuneLevel.average'), color: 'bg-yellow-100 text-yellow-800 border-yellow-200' },
+      caution: { label: tFortune('fortuneLevel.caution'), color: 'bg-orange-100 text-orange-800 border-orange-200' },
+      warning: { label: tFortune('fortuneLevel.warning'), color: 'bg-red-100 text-red-800 border-red-200' }
     };
     return levels[level as keyof typeof levels] || levels.average;
   };
@@ -159,10 +160,10 @@ export default function FortunePage() {
         <div className="container mx-auto px-4">
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-bold text-[#FBCB0A] mb-4">
-              解签问运 · 庙宇神算
+              {tFortune('title')}
             </h1>
             <p className="text-xl text-gray-200 max-w-2xl mx-auto">
-              传承千年智慧，连接三大香港名庙，为您提供正宗的签文解读服务
+              {tFortune('subtitle')}
             </p>
           </div>
         </div>
@@ -177,10 +178,10 @@ export default function FortunePage() {
               <CardHeader className="bg-gradient-to-r from-[#3D0B5B]/5 to-[#FBCB0A]/5">
                 <CardTitle className="flex items-center text-[#3D0B5B]">
                   <Building2 className="w-5 h-5 mr-2 text-[#FBCB0A]" />
-                  选择庙宇
+                  {tFortune('temple.selectTemple')}
                 </CardTitle>
                 <CardDescription>
-                  选择您要求签的庙宇系统
+                  {tFortune('temple.description')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="pt-6">
@@ -196,14 +197,14 @@ export default function FortunePage() {
                       <span className="font-medium text-[#3D0B5B]">
                         {getLocalizedField(selectedTemple, 'temple_name')}
                       </span>
-                      <Badge 
-                        variant="outline" 
-                        style={{ 
+                      <Badge
+                        variant="outline"
+                        style={{
                           borderColor: selectedTemple.primary_color,
-                          color: selectedTemple.primary_color 
+                          color: selectedTemple.primary_color
                         }}
                       >
-                        {selectedTemple.total_slips}签
+                        {selectedTemple.total_slips}{tFortune('slip.title')}
                       </Badge>
                     </div>
                     <p className="text-sm text-gray-600">
@@ -219,21 +220,21 @@ export default function FortunePage() {
               <CardHeader className="bg-gradient-to-r from-[#3D0B5B]/5 to-[#FBCB0A]/5">
                 <CardTitle className="flex items-center text-[#3D0B5B]">
                   <Search className="w-5 h-5 mr-2 text-[#FBCB0A]" />
-                  求签方式
+                  {tFortune('slip.drawSlip')}
                 </CardTitle>
                 <CardDescription>
-                  手动输入签号或随机抽签
+                  {tFortune('slip.inputLabel')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="pt-6 space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-[#3D0B5B] mb-2">
-                    签号 {selectedTemple && `(1-${selectedTemple.total_slips})`}
+                    {tFortune('slip.number')} {selectedTemple && `(1-${selectedTemple.total_slips})`}
                   </label>
                   <div className="flex gap-2">
                     <Input
                       type="number"
-                      placeholder="输入签号"
+                      placeholder={tFortune('slip.inputPlaceholder')}
                       value={slipNumber}
                       onChange={(e) => setSlipNumber(e.target.value)}
                       min="1"
@@ -255,7 +256,7 @@ export default function FortunePage() {
                     <Separator className="w-full" />
                   </div>
                   <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-white px-2 text-gray-500">或者</span>
+                    <span className="bg-white px-2 text-gray-500">{tCommon('or')}</span>
                   </div>
                 </div>
 
@@ -265,7 +266,7 @@ export default function FortunePage() {
                   className="w-full bg-[#FBCB0A] hover:bg-[#FBCB0A]/90 text-[#3D0B5B] font-bold py-3"
                 >
                   <Shuffle className="w-4 h-4 mr-2" />
-                  {loading ? '抽签中...' : '随机抽签'}
+                  {loading ? tCommon('loading') : tFortune('slip.randomSlip')}
                 </Button>
               </CardContent>
             </Card>
@@ -294,7 +295,7 @@ export default function FortunePage() {
                     <div className="flex items-center justify-between">
                       <div>
                         <CardTitle className="text-2xl">
-                          {fortuneSlip.temple_name} 第{fortuneSlip.slip_number}签
+                          {fortuneSlip.temple_name} {tFortune('slip.number')}{fortuneSlip.slip_number}
                         </CardTitle>
                         <CardDescription className="text-white/80 text-lg">
                           {fortuneSlip.display_title}
@@ -313,7 +314,7 @@ export default function FortunePage() {
                     {/* Categories */}
                     {fortuneSlip.categories.length > 0 && (
                       <div>
-                        <h4 className="font-semibold text-[#3D0B5B] mb-2">适用范围：</h4>
+                        <h4 className="font-semibold text-[#3D0B5B] mb-2">{tFortune('slip.categories')}：</h4>
                         <div className="flex flex-wrap gap-2">
                           {fortuneSlip.categories.map((category, index) => (
                             <Badge key={index} variant="outline" className="border-[#FBCB0A] text-[#3D0B5B]">
@@ -329,7 +330,7 @@ export default function FortunePage() {
                       <div>
                         <h4 className="font-semibold text-[#3D0B5B] mb-2 flex items-center">
                           <BookOpen className="w-4 h-4 mr-2" />
-                          签文内容：
+                          {tFortune('slip.content')}：
                         </h4>
                         <div className="bg-gray-50 p-4 rounded-lg border-l-4 border-[#FBCB0A]">
                           <p className="text-lg leading-relaxed text-gray-800 font-medium">
@@ -341,7 +342,7 @@ export default function FortunePage() {
 
                     {/* Basic Interpretation */}
                     <div>
-                      <h4 className="font-semibold text-[#3D0B5B] mb-2">基础解读：</h4>
+                      <h4 className="font-semibold text-[#3D0B5B] mb-2">{tFortune('slip.interpretation')}：</h4>
                       <div className="bg-gradient-to-r from-[#3D0B5B]/5 to-[#FBCB0A]/5 p-4 rounded-lg">
                         <p className="text-gray-700 leading-relaxed">
                           {fortuneSlip.display_basic_interpretation}
@@ -355,23 +356,23 @@ export default function FortunePage() {
                         <CardContent className="pt-6">
                           <div className="text-center">
                             <Sparkles className="w-8 h-8 mx-auto text-[#FBCB0A] mb-2" />
-                            <h4 className="font-bold text-[#3D0B5B] mb-2">解锁详细AI解读</h4>
+                            <h4 className="font-bold text-[#3D0B5B] mb-2">{tFortune('ai.title')}</h4>
                             <p className="text-gray-600 mb-4">
-                              登录后可获得个性化详细解读、历史记录保存等高级功能
+                              {tFortune('ai.loginRequired')}
                             </p>
                             <div className="flex gap-2 justify-center">
-                              <Button 
+                              <Button
                                 className="bg-[#3D0B5B] hover:bg-[#420868] text-white"
                                 onClick={() => window.location.href = '/auth'}
                               >
-                                立即登录
+                                {tFortune('auth.login')}
                               </Button>
-                              <Button 
-                                variant="outline" 
+                              <Button
+                                variant="outline"
                                 className="border-[#FBCB0A] text-[#3D0B5B]"
                                 onClick={() => window.location.href = '/auth'}
                               >
-                                注册账号
+                                {tFortune('auth.register')}
                               </Button>
                             </div>
                           </div>
@@ -387,10 +388,10 @@ export default function FortunePage() {
                   <div className="text-center py-12">
                     <Building2 className="w-16 h-16 mx-auto text-gray-400 mb-4" />
                     <h3 className="text-xl font-semibold text-gray-600 mb-2">
-                      开始您的解签之旅
+                      {tFortune('message.welcome')}
                     </h3>
                     <p className="text-gray-500">
-                      请先选择庙宇，然后输入签号或随机抽签
+                      {tFortune('slip.drawSlip')}
                     </p>
                   </div>
                 </CardContent>

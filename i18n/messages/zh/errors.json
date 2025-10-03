@@ -1,0 +1,9 @@
+{
+  "invalidInput": "输入无效",
+  "networkError": "网络错误",
+  "authRequired": "需要登录",
+  "notFound": "未找到",
+  "serverError": "服务器错误",
+  "unauthorized": "未授权",
+  "forbidden": "禁止访问"
+}

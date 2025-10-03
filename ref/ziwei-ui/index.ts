@@ -1,0 +1,5 @@
+export * from './types'
+export { ZiweiBottomBar as ZiweiBottomBarLegacy } from './ZiweiBottomBar'
+export { ZiweiSelectors as ZiweiSelectorsLegacy } from './ZiweiSelectors'
+export { ZiweiChart as ZiweiChartLegacy } from './ZiweiChart'
+export * from './mockData'

@@ -1,0 +1,18 @@
+{
+  "title": "八字算命",
+  "subtitle": "四柱推命",
+  "calculate": "八字を計算",
+  "result": "八字命盤結果",
+  "fourPillars": "四柱",
+  "yearPillar": "年柱",
+  "monthPillar": "月柱",
+  "dayPillar": "日柱",
+  "hourPillar": "時柱",
+  "heavenlyStem": "天干",
+  "earthlyBranch": "地支",
+  "tenGods": "十神",
+  "hiddenStems": "蔵干",
+  "dayMaster": "日主",
+  "strength": "強弱",
+  "elementBalance": "五行バランス"
+}

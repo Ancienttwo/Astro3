@@ -1,0 +1,9 @@
+{
+  "invalidInput": "無効な入力",
+  "networkError": "ネットワークエラー",
+  "authRequired": "認証が必要",
+  "notFound": "見つかりません",
+  "serverError": "サーバーエラー",
+  "unauthorized": "未承認",
+  "forbidden": "アクセス禁止"
+}

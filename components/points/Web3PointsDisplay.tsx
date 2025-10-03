@@ -1,12 +1,15 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Coins, Gift, TrendingUp, Calendar, ExternalLink, RefreshCw } from 'lucide-react';
+import { Coins, Gift, TrendingUp, Calendar, ExternalLink } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNamespaceTranslations } from '@/lib/i18n/useI18n';
+import { PricingManager } from '@/lib/pricing-manager';
+import { useLocale } from 'next-intl';
+import { useRouter } from 'next/navigation';
 
 interface Web3PointsData {
   chain_points_balance: number;
@@ -40,6 +43,7 @@ export default function Web3PointsDisplay({ walletAddress, onPointsUpdate }: Web
   const [pointsData, setPointsData] = useState<Web3PointsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [canCheckin, setCanCheckin] = useState(false);
+  const [bnbUsdRate, setBnbUsdRate] = useState<number>(() => PricingManager.getCurrentPricing().bnbPriceUSD);
   const { toast } = useToast();
   const t = useNamespaceTranslations('web3/auth');
   const tp = (path: string, values?: Record<string, unknown>) => t(`points.${path}`, values);
@@ -48,6 +52,31 @@ export default function Web3PointsDisplay({ walletAddress, onPointsUpdate }: Web
   const ts = (path: string, values?: Record<string, unknown>) => t(`integration.stats.${path}`, values);
   const ta = (path: string, values?: Record<string, unknown>) => t(`integration.actions.${path}`, values);
   const terr = (path: string, values?: Record<string, unknown>) => t(`integration.errors.${path}`, values);
+  const locale = useLocale();
+  const router = useRouter();
+
+  const localizedPointsShopHref = useMemo(() => (locale === 'zh' ? '/points/shop' : `/${locale}/points/shop`), [locale]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const refreshPrice = async () => {
+      try {
+        const updated = await PricingManager.updateBNBPrice();
+        if (isMounted && updated?.bnbPriceUSD) {
+          setBnbUsdRate(updated.bnbPriceUSD);
+        }
+      } catch (error) {
+        console.error('Failed to refresh BNB price', error);
+      }
+    };
+
+    refreshPrice();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (walletAddress) {
@@ -137,6 +166,15 @@ export default function Web3PointsDisplay({ walletAddress, onPointsUpdate }: Web
     if (days < 60) return { target: 60, reward: '4x' };
     if (days < 100) return { target: 100, reward: '5x' };
     return { target: 0, reward: 'MAX' };
+  };
+
+  const formatCurrency = (amount: number): string => {
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(amount);
   };
 
   if (loading) {
@@ -233,8 +271,10 @@ export default function Web3PointsDisplay({ walletAddress, onPointsUpdate }: Web
               </div>
               <TrendingUp className="h-8 w-8 text-orange-500" />
             </div>
-            <p className="text-xs text-orange-500 mt-1">
-              {tp('totalSpendSuffix', { usd: (pointsData.total_bnb_spent * 500).toFixed(2) })}
+                <p className="text-xs text-orange-500 mt-1">
+              {tp('totalSpendSuffix', {
+                usd: bnbUsdRate ? formatCurrency(pointsData.total_bnb_spent * bnbUsdRate) : '—'
+              })}
             </p>
           </CardContent>
         </Card>
@@ -359,7 +399,7 @@ export default function Web3PointsDisplay({ walletAddress, onPointsUpdate }: Web
         )}
         <Button
           variant="outline"
-          onClick={() => window.location.href = '/points/shop'}
+          onClick={() => router.push(localizedPointsShopHref)}
           className="flex-1"
         >
           {tp('pointsShop')}

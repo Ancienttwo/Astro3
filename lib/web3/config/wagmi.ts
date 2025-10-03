@@ -4,7 +4,7 @@
 
 import { createConfig, http } from "wagmi";
 import { bsc, bscTestnet, mainnet, polygon } from "wagmi/chains";
-import { walletConnect, injected } from "wagmi/connectors";
+import { injected } from "wagmi/connectors";
 
 const resolveAppUrl = () =>
   typeof window !== "undefined"
@@ -14,21 +14,32 @@ const resolveAppUrl = () =>
 export const createWagmiConfig = () => {
   const appUrl = resolveAppUrl();
 
+  // Clear corrupted WalletConnect storage on initialization
+  if (typeof window !== 'undefined') {
+    try {
+      const wcKeys = Object.keys(localStorage).filter(key =>
+        key.startsWith('wc@2') || key.startsWith('@walletconnect')
+      );
+      wcKeys.forEach(key => {
+        try {
+          const value = localStorage.getItem(key);
+          if (value === '{}' || value === 'null' || value === '') {
+            localStorage.removeItem(key);
+          }
+        } catch (e) {
+          // Ignore individual key errors
+        }
+      });
+    } catch (e) {
+      // Ignore storage errors
+    }
+  }
+
   return createConfig({
     chains: [bsc, bscTestnet, mainnet, polygon],
     connectors: [
+      // Only use injected connector - Privy handles WalletConnect
       injected(),
-      walletConnect({
-        projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "demo", // ensure defined in env
-        metadata: {
-          name: "AstroZi",
-          description: "AI Life Engineering Platform",
-          url: appUrl,
-          icons: [
-            `${appUrl}/icon-192.svg`,
-          ],
-        },
-      }),
     ],
     transports: {
       [bsc.id]: http("https://bsc-dataseed.binance.org/"),

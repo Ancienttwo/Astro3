@@ -8,6 +8,7 @@ import { Coins, Calendar, TrendingUp, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useChainId, useReadContract } from 'wagmi';
 import { useNamespaceTranslations } from '@/lib/i18n/useI18n';
+import { useLocale } from 'next-intl';
 
 const CONTRACT_ADDRESS = '0x3b016F5A7C462Fe51B691Ef18559DE720D9B452F';
 const CONTRACT_ABI = [
@@ -27,6 +28,9 @@ export default function Web3PointsDisplaySimple({ walletAddress, onPointsUpdate 
   const { toast } = useToast();
   const t = useNamespaceTranslations('web3/auth');
   const tp = (path: string, values?: Record<string, unknown>) => t(`points.${path}`, values);
+  const locale = useLocale();
+  const compactFormatter = useMemo(() => new Intl.NumberFormat(locale, { notation: 'compact', maximumFractionDigits: 1 }), [locale]);
+  const integerFormatter = useMemo(() => new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }), [locale]);
 
   const { data: userStatsData, refetch: refetchStats, isFetching: f1 } = useReadContract({
     address: CONTRACT_ADDRESS as `0x${string}`,
@@ -44,10 +48,12 @@ export default function Web3PointsDisplaySimple({ walletAddress, onPointsUpdate 
   });
 
   const formatNumber = (num: bigint) => {
-    const n = Number(num);
-    if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-    if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
-    return n.toLocaleString();
+    const value = Number(num);
+    if (!Number.isFinite(value)) return '0';
+    if (Math.abs(value) >= 1000) {
+      return compactFormatter.format(value);
+    }
+    return integerFormatter.format(value);
   };
 
   const getConsecutiveDaysLabelKey = (days: number) => {
@@ -167,8 +173,8 @@ export default function Web3PointsDisplaySimple({ walletAddress, onPointsUpdate 
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-purple-600">Total Check-ins</p>
-                <p className="text-2xl font-bold text-purple-900">{totalCheckins.toLocaleString()}</p>
+                <p className="text-sm font-medium text-purple-600">{tp('totalCheckins')}</p>
+                <p className="text-2xl font-bold text-purple-900">{integerFormatter.format(totalCheckins)}</p>
               </div>
               <TrendingUp className="h-8 w-8 text-purple-500" />
             </div>

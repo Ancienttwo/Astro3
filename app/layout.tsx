@@ -114,7 +114,7 @@ export default function RootLayout({
             <NextIntlClientProvider locale={'zh'} messages={zhDict as any}>
               <ThemeProvider
                 attribute="class"
-                defaultTheme="light"
+                defaultTheme="dark"
                 enableSystem
                 disableTransitionOnChange
               >

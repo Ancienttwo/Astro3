@@ -1,0 +1,18 @@
+{
+  "title": "BaZi Calculator",
+  "subtitle": "Chinese Four Pillars of Destiny",
+  "calculate": "Calculate BaZi",
+  "result": "BaZi Chart Result",
+  "fourPillars": "Four Pillars",
+  "yearPillar": "Year Pillar",
+  "monthPillar": "Month Pillar",
+  "dayPillar": "Day Pillar",
+  "hourPillar": "Hour Pillar",
+  "heavenlyStem": "Heavenly Stem",
+  "earthlyBranch": "Earthly Branch",
+  "tenGods": "Ten Gods",
+  "hiddenStems": "Hidden Stems",
+  "dayMaster": "Day Master",
+  "strength": "Strength",
+  "elementBalance": "Element Balance"
+}

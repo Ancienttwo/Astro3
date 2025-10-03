@@ -1,0 +1,27 @@
+{
+  "title": "Karmic Connections",
+  "whatIsKarmaPalace": "What is the Karma Palace?",
+  "whatIsKarmaPalaceDesc": "The Karma Palace plays a crucial role in Ziwei Doushu astrology. It not only reflects personal inner motivations and potential abilities but also reveals relationships with others, affairs, and the material world. The configuration of the Karma Palace can influence personal destiny, career development, and interpersonal relationships.",
+  "importanceOfKarmaPalace": "The Importance of the Karma Palace",
+  "importanceOfKarmaPalaceDesc": "By analyzing the performance of the Karma Palace in different palace positions, we can gain insight into how individuals cope with challenges, utilize resources, and achieve self-worth in life. It emphasizes personal initiative and responsibility, reminding us how to balance our own needs with external environmental interactions in the pursuit of goals.",
+  "yourKarmaPalaceIn": "Your Karma Palace is in",
+  "peopleAspect": "People",
+  "mattersAspect": "Matters",
+  "materialAspect": "Material",
+  "palaceReference": "Twelve Palaces Reference",
+  "palaceReferenceDesc": "Therefore, the analysis of the Karma Palace is of great significance for understanding a person's destiny, personality, and future development direction.",
+  "palaceNames": {
+    "self": "Self",
+    "siblings": "Siblings",
+    "spouse": "Spouse",
+    "children": "Children",
+    "wealth": "Wealth",
+    "health": "Health",
+    "travel": "Travel",
+    "friends": "Friends",
+    "career": "Career",
+    "property": "Property",
+    "fortune": "Fortune",
+    "parents": "Parents"
+  }
+}

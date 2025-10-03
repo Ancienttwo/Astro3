@@ -7,5 +7,20 @@
   "back": "返回",
   "next": "下一步",
   "submit": "提交",
-  "close": "关闭"
+  "close": "关闭",
+  "calculate": "排盘",
+  "save": "保存",
+  "clear": "清空",
+  "success": "成功",
+  "reset": "重置",
+  "search": "搜索",
+  "filter": "筛选",
+  "refresh": "刷新",
+  "edit": "编辑",
+  "delete": "删除",
+  "add": "添加",
+  "create": "创建",
+  "menu": "菜单",
+  "all": "全部",
+  "or": "或者"
 }

@@ -21,7 +21,8 @@ import {
 import Logo from '@/components/Logo';
 import Link from 'next/link';
 import LanguageSelector from '@/components/i18n/LanguageSelector';
-import { useTranslations, useLanguageStore } from '@/lib/i18n/language-manager';
+import { useFortuneTranslations } from '@/lib/i18n/useFortuneTranslations';
+import { useTranslations, useLocale } from 'next-intl';
 import GuandiFortuneSlipLayout from '@/components/fortune/GuandiFortuneSlipLayout';
 import JiaobeiComponent from '@/components/fortune/JiaobeiComponent';
 import { useWeb3User } from '@/hooks/useWeb3User';
@@ -97,15 +98,17 @@ const GuandiOracle: React.FC = () => {
   const [dailyDrawStatus, setDailyDrawStatus] = useState<any>(null);
 
   // 使用新的语言系统和Web3状态
-  const { t } = useTranslations();
-  const { currentLanguage } = useLanguageStore();
+  const { t: tFortune, locale, getLocalizedField } = useFortuneTranslations();
+  const tCommon = useTranslations('common');
+  const tNav = useTranslations('navigation');
+  const currentLanguage = locale; // 'zh', 'en', 'ja'
   const { user: web3User, isConnected: isWeb3Connected } = useWeb3User();
-  
+
   // 调试语言状态
   useEffect(() => {
     console.log('🔍 当前语言状态变化:', currentLanguage);
-    console.log('🔍 翻译对象:', t);
-  }, [currentLanguage, t]);
+    console.log('🔍 翻译对象:', tFortune);
+  }, [currentLanguage, tFortune]);
 
   // 检查Web3用户的每日抽签状态
   useEffect(() => {
@@ -191,11 +194,7 @@ const GuandiOracle: React.FC = () => {
       if (isWeb3Connected && web3User?.walletAddress) {
         // 检查每日限制
         if (dailyDrawStatus && !dailyDrawStatus.canDrawToday) {
-          alert(
-            currentLanguage === 'en-US' ? 'You have already drawn today. Please come back tomorrow.' :
-            currentLanguage === 'zh-CN' ? '您今天已经抽过签了，请明天再来。' :
-            '您今天已經抽過籤了，請明天再來。'
-          );
+          alert(tFortune('message.alreadyDrawnToday'));
           return;
         }
 
@@ -216,17 +215,11 @@ const GuandiOracle: React.FC = () => {
             slipData = drawData.fortuneSlip;
             setPendingDrawId(drawData.drawId);
           } else {
-            alert(data.error || (
-              currentLanguage === 'en-US' ? 'Failed to draw fortune slip, please try again' :
-              currentLanguage === 'zh-CN' ? '抽签失败，请重试' : '抽籤失敗，請重試'
-            ));
+            alert(data.error || tFortune('message.drawFailed'));
             return;
           }
         } else {
-          alert(
-            currentLanguage === 'en-US' ? 'Failed to draw fortune slip, please try again' :
-            currentLanguage === 'zh-CN' ? '抽签失败，请重试' : '抽籤失敗，請重試'
-          );
+          alert(tFortune('message.drawFailed'));
           return;
         }
       } else {
@@ -250,16 +243,16 @@ const GuandiOracle: React.FC = () => {
               if (slipResponseData.success) {
                 slipData = slipResponseData.data;
               } else {
-                alert('獲取籤文失敗，請重試');
+                alert(tFortune('message.slipNotFound'));
                 return;
               }
             }
           } else {
-            alert(data.error || '搖籤失敗，請重試');
+            alert(data.error || tFortune('message.drawFailed'));
             return;
           }
         } else {
-          alert('搖籤失敗，請重試');
+          alert(tFortune('message.drawFailed'));
           return;
         }
       }
@@ -275,10 +268,7 @@ const GuandiOracle: React.FC = () => {
 
     } catch (error) {
       console.error('摇签错误:', error);
-      alert(
-        currentLanguage === 'en-US' ? 'Failed to draw fortune, please try again' :
-        currentLanguage === 'zh-CN' ? '摇签失败，请重试' : '搖籤失敗，請重試'
-      );
+      alert(tFortune('message.drawFailed'));
     } finally {
       setIsShaking(false);
       setLoading(false);
@@ -289,7 +279,7 @@ const GuandiOracle: React.FC = () => {
   const handleManualQuery = async () => {
     const slipNum = parseInt(manualSlipNumber);
     if (!slipNum || slipNum < 1 || slipNum > 100) {
-      alert('請輸入1-100之間的籤號');
+      alert(tFortune('message.invalidSlipNumber'));
       return;
     }
 
@@ -304,14 +294,14 @@ const GuandiOracle: React.FC = () => {
           setShowJiaobei(true);
           setManualSlipNumber(''); // 清空输入
         } else {
-          alert(data.error || '未找到該籤文');
+          alert(data.error || tFortune('message.slipNotFound'));
         }
       } else {
-        alert('未找到該籤文');
+        alert(tFortune('message.slipNotFound'));
       }
     } catch (error) {
       console.error('查询错误:', error);
-      alert('查詢失敗，請重試');
+      alert(tFortune('message.queryFailed'));
     } finally {
       setLoading(false);
     }
@@ -328,13 +318,9 @@ const GuandiOracle: React.FC = () => {
     if (gameData && isWeb3Connected) {
       // 显示获得的奖励
       if (gameData.pointsEarned > 0) {
-        alert(
-          currentLanguage === 'en-US' ? `Congratulations! You earned ${gameData.pointsEarned} points!` :
-          currentLanguage === 'zh-CN' ? `恭喜！获得 ${gameData.pointsEarned} 积分！` :
-          `恭喜！獲得 ${gameData.pointsEarned} 積分！`
-        );
+        alert(tFortune('message.congratsPoints', { points: gameData.pointsEarned }));
       }
-      
+
       // 更新每日抽签状态
       checkDailyDrawStatus();
     }
@@ -345,18 +331,14 @@ const GuandiOracle: React.FC = () => {
     setShowJiaobei(false);
     setPendingSlip(null);
     setPendingDrawId(null);
-    
+
     // 更新每日抽签状态
     if (isWeb3Connected && web3User?.walletAddress) {
       checkDailyDrawStatus();
     }
-    
+
     // 显示明天再来的提示
-    alert(
-      currentLanguage === 'en-US' ? 'The deity has declined. Please come back tomorrow.' :
-      currentLanguage === 'zh-CN' ? '神明不许，请明天再来求签。' :
-      '神明不許，請明天再來求籤。'
-    );
+    alert(tFortune('message.deityDeclined'));
   };
 
   // 筊杯要求重新抽签回调
@@ -364,13 +346,9 @@ const GuandiOracle: React.FC = () => {
     setShowJiaobei(false);
     setPendingSlip(null);
     setPendingDrawId(null);
-    
+
     // 显示重新抽签的提示
-    alert(
-      currentLanguage === 'en-US' ? 'The deity suggests drawing a new fortune slip.' :
-      currentLanguage === 'zh-CN' ? '神明示意重新抽签。' :
-      '神明示意重新抽籤。'
-    );
+    alert(tFortune('message.deityRedraw'));
   };
 
   // 获取吉凶等级的显示样式
@@ -409,7 +387,7 @@ const GuandiOracle: React.FC = () => {
         
         {/* 中间：标题（绝对居中） */}
         <div className="absolute left-1/2 transform -translate-x-1/2">
-          <h1 className="text-lg font-bold text-gray-900">{t.guandi.templeName}</h1>
+          <h1 className="text-lg font-bold text-gray-900">{tFortune('temple.guandi')}</h1>
         </div>
         
         {/* 右侧：语言选择和菜单 */}
@@ -471,39 +449,25 @@ const GuandiOracle: React.FC = () => {
         <div className="text-center py-8 px-4">
           <div className="max-w-4xl mx-auto">
             <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              {t.guandi.templeName}
+              {tFortune('guandi.templeName')}
             </h1>
-            
+
             <p className="text-yellow-300 text-lg md:text-xl mb-6">
-              {currentLanguage === 'en-US' 
-                ? 'Lord Guandi Protects · Divine Guidance · Life Direction'
-                : currentLanguage === 'zh-TW'
-                ? '關帝護佑 · 靈驗如神 · 指點迷津'
-                : '关帝护佑 · 灵验如神 · 指点迷津'
-              }
+              {tFortune('guandi.subtitle')}
             </p>
             
             <div className="flex flex-row items-center justify-center space-x-3 md:space-x-6 text-red-200 text-xs md:text-base">
               <div className="flex items-center">
                 <Flame className="w-4 h-4 mr-1 text-yellow-400" />
-                <span>
-                  {currentLanguage === 'en-US' ? 'Loyalty & Courage' : 
-                   currentLanguage === 'zh-TW' ? '忠義仁勇' : '忠义仁勇'}
-                </span>
+                <span>{tFortune('guandi.loyalty')}</span>
               </div>
               <div className="flex items-center">
                 <Star className="w-4 h-4 mr-1 text-yellow-400" />
-                <span>
-                  {currentLanguage === 'en-US' ? 'God of War & Wealth' : 
-                   currentLanguage === 'zh-TW' ? '武財神' : '武财神'}
-                </span>
+                <span>{tFortune('guandi.godOfWarWealth')}</span>
               </div>
               <div className="flex items-center">
                 <Sparkles className="w-4 h-4 mr-1 text-yellow-400" />
-                <span>
-                  {currentLanguage === 'en-US' ? 'Dharma Protector' : 
-                   currentLanguage === 'zh-TW' ? '護法神' : '护法神'}
-                </span>
+                <span>{tFortune('guandi.dharmaProtector')}</span>
               </div>
             </div>
           </div>
@@ -521,8 +485,7 @@ const GuandiOracle: React.FC = () => {
                     <div className="flex items-center space-x-2">
                       <Sparkles className="w-5 h-5 text-yellow-600" />
                       <span className="text-sm font-medium text-gray-700">
-                        {currentLanguage === 'en-US' ? 'Web3 Fortune Drawer' :
-                         currentLanguage === 'zh-CN' ? 'Web3求签者' : 'Web3求籤者'}
+                        {tFortune('guandi.web3Drawer')}
                       </span>
                     </div>
                     <Badge variant="outline" className="border-yellow-500 text-yellow-700">
@@ -534,21 +497,21 @@ const GuandiOracle: React.FC = () => {
                     <div className="flex items-center space-x-1">
                       <Coins className="w-4 h-4 text-yellow-600" />
                       <span className="text-gray-700">
-                        {dailyDrawStatus.userStats?.chainPointsBalance || 0} 積分
+                        {dailyDrawStatus.userStats?.chainPointsBalance || 0} {tFortune('guandi.points')}
                       </span>
                     </div>
-                    
+
                     <div className="flex items-center space-x-1">
                       <Flame className="w-4 h-4 text-red-500" />
                       <span className="text-gray-700">
-                        連續 {dailyDrawStatus.userStats?.consecutiveStreak || 0} 天
+                        {dailyDrawStatus.userStats?.consecutiveStreak || 0} {tFortune('guandi.consecutiveDays')}
                       </span>
                     </div>
-                    
+
                     <div className="flex items-center space-x-1">
                       <Crown className="w-4 h-4 text-purple-600" />
                       <span className="text-gray-700">
-                        抽籤 {dailyDrawStatus.userStats?.guangdiDrawsCount || 0} 次
+                        {dailyDrawStatus.userStats?.guangdiDrawsCount || 0} {tFortune('guandi.totalDraws')}
                       </span>
                     </div>
                   </div>
@@ -560,16 +523,14 @@ const GuandiOracle: React.FC = () => {
                     <div className="flex items-center space-x-2 text-green-700">
                       <CheckCircle className="w-4 h-4" />
                       <span className="text-sm">
-                        {currentLanguage === 'en-US' ? 'Ready to draw today\'s fortune!' :
-                         currentLanguage === 'zh-CN' ? '今日可以求签！' : '今日可以求籤！'}
+                        {tFortune('guandi.canDrawToday')}
                       </span>
                     </div>
                   ) : (
                     <div className="flex items-center space-x-2 text-amber-700">
                       <Calendar className="w-4 h-4" />
                       <span className="text-sm">
-                        {currentLanguage === 'en-US' ? 'Today\'s fortune completed. Come back tomorrow!' :
-                         currentLanguage === 'zh-CN' ? '今日求签已完成，明天再来！' : '今日求籤已完成，明天再來！'}
+                        {tFortune('guandi.completedToday')}
                       </span>
                     </div>
                   )}
@@ -583,11 +544,11 @@ const GuandiOracle: React.FC = () => {
           <TabsList className="grid w-full grid-cols-2 mb-6">
             <TabsTrigger value="random" className="flex items-center space-x-2">
               <Shuffle className="w-4 h-4" />
-              <span>{t.fortune.drawFortune}</span>
+              <span>{tFortune('slip.randomSlip')}</span>
             </TabsTrigger>
             <TabsTrigger value="manual" className="flex items-center space-x-2">
               <Search className="w-4 h-4" />
-              <span>{t.fortune.manualQuery}</span>
+              <span>{tNav('query')}</span>
             </TabsTrigger>
           </TabsList>
 
@@ -596,7 +557,7 @@ const GuandiOracle: React.FC = () => {
             <Card className="border-2 border-yellow-400 bg-yellow-50 shadow-lg">
               <CardHeader className="bg-yellow-400 text-center py-4">
                 <CardTitle className="text-red-800 text-lg md:text-xl font-bold">
-                  {t.guandi.devotionalMeditation}
+                  {tFortune('guandi.devotionalMeditation')}
                 </CardTitle>
               </CardHeader>
               
@@ -604,9 +565,9 @@ const GuandiOracle: React.FC = () => {
                 <div className="bg-white p-6 rounded-lg border border-yellow-300">
                   <div className="text-center space-y-4">
                     <div className="text-red-900 space-y-3 text-base md:text-lg">
-                      <p className="font-semibold">弟子（姓名）誠心祈求關聖帝君</p>
-                      <p>今年（年齡）歲，懇請帝君指點</p>
-                      <p>所求之事：（心中默念您的問題）</p>
+                      <p className="font-semibold">{tFortune('guandi.prayerIntro')}</p>
+                      <p>{tFortune('guandi.prayerAge')}</p>
+                      <p>{tFortune('guandi.prayerQuestion')}</p>
                     </div>
                     
                     <div className="mt-6 pt-4 border-t border-red-200">
@@ -628,10 +589,10 @@ const GuandiOracle: React.FC = () => {
                         {loading ? (
                           <span className="flex items-center justify-center space-x-2">
                             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-700"></div>
-                            <span>{isShaking ? '搖籤中...' : '查詢中...'}</span>
+                            <span>{isShaking ? tFortune('message.drawingSlip') : tFortune('message.querying')}</span>
                           </span>
                         ) : (
-                          '點擊搖籤'
+                          tFortune('message.clickToDraw')
                         )}
                       </p>
                     </div>
@@ -647,13 +608,10 @@ const GuandiOracle: React.FC = () => {
             <Card className="border-2 border-yellow-400 bg-yellow-50 shadow-lg">
               <CardHeader className="bg-yellow-400 text-center py-4">
                 <CardTitle className="text-red-800 text-lg md:text-xl font-bold">
-                  {t.fortune.manualQuery}
+                  {tNav('query')}
                 </CardTitle>
                 <p className="text-red-700 text-xs md:text-sm mt-1">
-                  {currentLanguage === 'en-US' 
-                    ? 'If you have already drawn a fortune slip offline, please enter the slip number to view detailed interpretation'
-                    : '如果您已在線下求得籤文，請輸入籤號查看詳細解籤'
-                  }
+                  {tFortune('guandi.manualQueryDesc')}
                 </p>
               </CardHeader>
               <CardContent className="p-6">
@@ -661,14 +619,14 @@ const GuandiOracle: React.FC = () => {
                   <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
                     <div className="flex-1">
                       <label htmlFor="slipNumber" className="block text-sm font-medium text-red-800 mb-2">
-                        {currentLanguage === 'en-US' ? 'Slip Number (1-100)' : '籤號 (1-100)'}
+                        {tFortune('guandi.slipNumberLabel')}
                       </label>
                       <Input
-                        id="slipNumber" 
+                        id="slipNumber"
                         type="number"
                         min="1"
                         max="100"
-                        placeholder={currentLanguage === 'en-US' ? 'Enter slip number' : '請輸入籤號'}
+                        placeholder={tFortune('guandi.enterSlipNumber')}
                         value={manualSlipNumber}
                         onChange={(e) => setManualSlipNumber(e.target.value)}
                         className="border-red-200 focus:border-red-400"
@@ -680,7 +638,7 @@ const GuandiOracle: React.FC = () => {
                         disabled={loading}
                         className="w-full md:w-auto bg-red-600 hover:bg-red-700 text-white px-6"
                       >
-                        {loading ? t.fortune.querying : t.fortune.query}
+                        {loading ? tFortune('message.querying') : tNav('query')}
                       </Button>
                     </div>
                   </div>
@@ -755,7 +713,7 @@ const GuandiOracle: React.FC = () => {
                 variant="outline"
                 className="border-red-600 text-red-600 hover:bg-red-50 px-8 py-3 text-lg"
               >
-                🎲 重新求籤
+                🎲 {tFortune('guandi.redrawSlip')}
               </Button>
             </div>
           </div>

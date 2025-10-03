@@ -1,0 +1,25 @@
+# Build outputs
+dist/
+coverage/
+*.d.ts
+*.js.map
+
+# Dependencies
+node_modules/
+
+# Generated files
+*.json
+*.md
+*.txt
+
+# Debug and test output files
+debug-*.ts
+test-*.ts
+generate-*.ts
+ziwei-chart-*.json
+complete-output.json
+
+# Temporary files
+*.tmp
+*.temp
+.tsbuildinfo

@@ -1,0 +1,30 @@
+{
+  "bazi": {
+    "title": "八字排盘",
+    "subtitle": "传统八字命理分析"
+  },
+  "ziwei": {
+    "title": "紫微斗数",
+    "subtitle": "紫微斗数命盘分析"
+  },
+  "auth": {
+    "title": "Web3 钱包登录",
+    "subtitle": "连接钱包后即可使用 AstroZi 全部功能"
+  },
+  "settings": {
+    "title": "设置",
+    "subtitle": "个人设置和偏好"
+  },
+  "charts": {
+    "title": "命盘记录",
+    "subtitle": "我的命盘档案"
+  },
+  "createChart": {
+    "title": "创建命盘",
+    "subtitle": "输入出生信息生成命盘"
+  },
+  "wiki": {
+    "title": "知识百科",
+    "subtitle": "命理知识库"
+  }
+}

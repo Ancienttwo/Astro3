@@ -1,0 +1,16 @@
+{
+  "title": "My Charts",
+  "subtitle": "Saved astrology charts",
+  "createNew": "Create New Chart",
+  "viewChart": "View Chart",
+  "editChart": "Edit Chart",
+  "deleteChart": "Delete Chart",
+  "chartName": "Chart Name",
+  "chartType": "Chart Type",
+  "createdAt": "Created At",
+  "updatedAt": "Updated At",
+  "noCharts": "No saved charts yet",
+  "confirmDelete": "Confirm delete this chart?",
+  "deleteSuccess": "Chart deleted successfully",
+  "saveSuccess": "Chart saved successfully"
+}

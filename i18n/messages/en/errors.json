@@ -1,0 +1,9 @@
+{
+  "invalidInput": "Invalid input",
+  "networkError": "Network error",
+  "authRequired": "Authentication required",
+  "notFound": "Not found",
+  "serverError": "Server error",
+  "unauthorized": "Unauthorized",
+  "forbidden": "Forbidden access"
+}

@@ -1,0 +1,27 @@
+{
+  "title": "来因宮",
+  "whatIsKarmaPalace": "来因宮とは",
+  "whatIsKarmaPalaceDesc": "来因宮は過去世からの因縁を示す重要な宮位です",
+  "importanceOfKarmaPalace": "来因宮の重要性",
+  "importanceOfKarmaPalaceDesc": "この宮位は人生の根本的なカルマと運命を理解する鍵となります",
+  "yourKarmaPalaceIn": "あなたの来因宮は",
+  "peopleAspect": "人的側面",
+  "mattersAspect": "事的側面",
+  "materialAspect": "物的側面",
+  "palaceReference": "宮位参照",
+  "palaceReferenceDesc": "各宮位の意味と影響",
+  "palaceNames": {
+    "self": "自分",
+    "siblings": "兄弟",
+    "spouse": "配偶者",
+    "children": "子女",
+    "wealth": "財運",
+    "health": "健康",
+    "travel": "移動",
+    "friends": "友人",
+    "career": "職業",
+    "property": "不動産",
+    "fortune": "福徳",
+    "parents": "両親"
+  }
+}

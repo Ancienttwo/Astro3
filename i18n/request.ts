@@ -1,18 +1,21 @@
 import {getRequestConfig} from 'next-intl/server';
 
 import {coerceLocale, getNamespacesForPath, loadNamespaces, deepMerge} from './loader';
+import {zhDict, enDict, jaDict} from '@/lib/i18n/dictionaries';
 
-export default getRequestConfig(async ({locale, request}) => {
+export default getRequestConfig(async ({requestLocale, request}) => {
+  const locale = await requestLocale;
   const normalizedLocale = coerceLocale(locale);
 
-  const dicts = await import('@/lib/i18n/dictionaries');
   const legacyMessagesMap: Record<'zh' | 'en' | 'ja', Record<string, unknown>> = {
-    zh: (dicts as any).zhDict,
-    en: (dicts as any).enDict,
-    ja: (dicts as any).jaDict
+    zh: zhDict as Record<string, unknown>,
+    en: enDict as Record<string, unknown>,
+    ja: jaDict as Record<string, unknown>
   };
 
-  const namespaces = getNamespacesForPath(request.nextUrl.pathname);
+  // 修复：处理 request 为 undefined 的情况
+  const pathname = request?.nextUrl?.pathname || '/';
+  const namespaces = getNamespacesForPath(pathname);
   const modularMessages = await loadNamespaces(normalizedLocale, namespaces);
 
   const legacyMessages = legacyMessagesMap[normalizedLocale] ?? legacyMessagesMap.zh;

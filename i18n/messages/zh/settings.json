@@ -1,0 +1,19 @@
+{
+  "title": "设置",
+  "subtitle": "应用偏好设置",
+  "general": "通用",
+  "language": "语言",
+  "theme": "主题",
+  "notifications": "通知",
+  "account": "账户",
+  "profile": "个人资料",
+  "privacy": "隐私",
+  "security": "安全",
+  "about": "关于",
+  "version": "版本",
+  "lightMode": "浅色模式",
+  "darkMode": "深色模式",
+  "systemDefault": "跟随系统",
+  "saveChanges": "保存更改",
+  "resetToDefault": "恢复默认"
+}

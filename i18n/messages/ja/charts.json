@@ -1,0 +1,16 @@
+{
+  "title": "マイチャート",
+  "subtitle": "保存された命盤",
+  "createNew": "新規チャート作成",
+  "viewChart": "チャートを表示",
+  "editChart": "チャートを編集",
+  "deleteChart": "チャートを削除",
+  "chartName": "チャート名",
+  "chartType": "チャートタイプ",
+  "createdAt": "作成日時",
+  "updatedAt": "更新日時",
+  "noCharts": "保存されたチャートはありません",
+  "confirmDelete": "このチャートを削除しますか？",
+  "deleteSuccess": "チャートが削除されました",
+  "saveSuccess": "チャートが保存されました"
+}

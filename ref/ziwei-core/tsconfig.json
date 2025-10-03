@@ -1,0 +1,69 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ES2020",
+    "lib": ["ES2020", "DOM"],
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "exactOptionalPropertyTypes": false,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "incremental": true,
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
+    "baseUrl": "./src",
+    "paths": {
+      "@/*": ["./*"],
+      "@/types/*": ["./types/*"],
+      "@/utils/*": ["./utils/*"],
+      "@/calculations/*": ["./calculations/*"],
+      "@/constants/*": ["./constants/*"]
+    }
+  },
+  "include": [
+    "src/**/*",
+    "types/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "coverage",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "examples",
+    "src/examples/**",
+    "debug-*.ts",
+    "test-*.ts",
+    "generate-*.ts",
+    "src/calculations-old.ts",
+    
+    "src/index-new.ts",
+    
+    "src/migration/**",
+    "src/system/**",
+    "src/adapters/**",
+    "src/facade/**",
+    "src/hooks/**",
+    "src/enhanced-calculator.ts",
+    "src/hooks-adapter.ts",
+    "src/api-format-converter.ts",
+    "src/test-complete-chart.ts",
+    "types/enhanced-types.ts"
+  ],
+  "ts-node": {
+    "esm": true
+  }
+}

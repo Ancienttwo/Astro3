@@ -30,39 +30,59 @@ export function deepMerge<T extends Record<string, unknown>>(...objects: Array<P
 const ROUTE_NAMESPACE_MAP: Array<{ pattern: RegExp; namespaces: Namespace[] }> = [
   {
     pattern: /^\/(auth|login|wallet-auth|privy-auth)(?:\/|$)/,
-    namespaces: ['common', 'navigation', 'web3/layout', 'web3/auth']
+    namespaces: ['common', 'navigation', 'pages', 'form', 'errors', 'web3/layout', 'web3/auth']
   },
   {
     pattern: /^\/$/,
-    namespaces: ['common', 'navigation']
+    namespaces: ['common', 'navigation', 'pages']
+  },
+  {
+    pattern: /^\/bazi(?:\/|$)/,
+    namespaces: ['common', 'navigation', 'pages', 'instructions', 'form', 'errors', 'bazi', 'categories']
+  },
+  {
+    pattern: /^\/ziwei(?:\/|$)/,
+    namespaces: ['common', 'navigation', 'pages', 'instructions', 'form', 'errors', 'ziwei', 'categories', 'astro/karmaPalace']
+  },
+  {
+    pattern: /^\/charts(?:\/|$)/,
+    namespaces: ['common', 'navigation', 'pages', 'charts', 'errors']
+  },
+  {
+    pattern: /^\/settings(?:\/|$)/,
+    namespaces: ['common', 'navigation', 'pages', 'settings', 'form', 'errors']
+  },
+  {
+    pattern: /^\/wiki(?:\/|$)/,
+    namespaces: ['common', 'navigation', 'pages', 'wiki']
   },
   {
     pattern: /^\/web3(?:\/|$)/,
-    namespaces: ['common', 'navigation', 'web3/layout', 'web3/dashboard']
+    namespaces: ['common', 'navigation', 'pages', 'web3/layout', 'web3/dashboard', 'errors']
   },
   {
     pattern: /^\/web3-rewards(?:\/|$)/,
-    namespaces: ['common', 'navigation', 'web3/layout', 'web3/dashboard']
+    namespaces: ['common', 'navigation', 'pages', 'web3/layout', 'web3/dashboard']
   },
   {
     pattern: /^\/web3-profile(?:\/|$)/,
-    namespaces: ['common', 'navigation', 'web3/layout', 'web3/dashboard']
+    namespaces: ['common', 'navigation', 'pages', 'web3/layout', 'web3/dashboard']
   },
   {
     pattern: /^\/leaderboard(?:\/|$)/,
-    namespaces: ['common', 'navigation', 'web3/layout', 'web3/dashboard']
+    namespaces: ['common', 'navigation', 'pages', 'web3/layout', 'web3/dashboard']
   },
   {
     pattern: /^\/tasks(?:\/|$)/,
-    namespaces: ['common', 'navigation', 'web3/layout', 'web3/dashboard', 'web3/tasks']
+    namespaces: ['common', 'navigation', 'pages', 'web3/layout', 'web3/dashboard', 'web3/tasks']
   },
   {
     pattern: /^\/wallet-(?:auth|guide)(?:\/|$)/,
-    namespaces: ['common', 'navigation', 'web3/layout']
+    namespaces: ['common', 'navigation', 'pages', 'web3/layout']
   },
   {
-    pattern: /^\/fortune(?:\/|$)/,
-    namespaces: ['common', 'navigation', 'astro/fortune']
+    pattern: /^\/(fortune|guandi)(?:\/|$)/,
+    namespaces: ['common', 'navigation', 'pages', 'astro/fortune', 'categories', 'errors']
   }
 ];
 

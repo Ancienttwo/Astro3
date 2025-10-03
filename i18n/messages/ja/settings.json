@@ -1,0 +1,19 @@
+{
+  "title": "設定",
+  "subtitle": "アプリケーション設定",
+  "general": "一般",
+  "language": "言語",
+  "theme": "テーマ",
+  "notifications": "通知",
+  "account": "アカウント",
+  "profile": "プロフィール",
+  "privacy": "プライバシー",
+  "security": "セキュリティ",
+  "about": "について",
+  "version": "バージョン",
+  "lightMode": "ライトモード",
+  "darkMode": "ダークモード",
+  "systemDefault": "システム設定",
+  "saveChanges": "変更を保存",
+  "resetToDefault": "デフォルトに戻す"
+}

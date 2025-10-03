@@ -1,0 +1,18 @@
+{
+  "title": "八字排盘",
+  "subtitle": "四柱命理学",
+  "calculate": "开始排盘",
+  "result": "八字命盘结果",
+  "fourPillars": "四柱",
+  "yearPillar": "年柱",
+  "monthPillar": "月柱",
+  "dayPillar": "日柱",
+  "hourPillar": "时柱",
+  "heavenlyStem": "天干",
+  "earthlyBranch": "地支",
+  "tenGods": "十神",
+  "hiddenStems": "藏干",
+  "dayMaster": "日主",
+  "strength": "强弱",
+  "elementBalance": "五行平衡"
+}

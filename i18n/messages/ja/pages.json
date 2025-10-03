@@ -1,0 +1,30 @@
+{
+  "bazi": {
+    "title": "八字盤",
+    "subtitle": "伝統的な四柱推命分析"
+  },
+  "ziwei": {
+    "title": "紫微斗数",
+    "subtitle": "紫微星命理盤分析"
+  },
+  "auth": {
+    "title": "Web3ウォレットログイン",
+    "subtitle": "ウォレットを接続してAstroZiの全機能を利用"
+  },
+  "settings": {
+    "title": "設定",
+    "subtitle": "個人設定と環境設定"
+  },
+  "charts": {
+    "title": "命盤記録",
+    "subtitle": "私の命盤アーカイブ"
+  },
+  "createChart": {
+    "title": "命盤作成",
+    "subtitle": "生年月日情報を入力して命盤を生成"
+  },
+  "wiki": {
+    "title": "知識ベース",
+    "subtitle": "命理学リファレンスライブラリ"
+  }
+}

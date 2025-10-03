@@ -1,0 +1,19 @@
+{
+  "title": "Settings",
+  "subtitle": "Application preferences",
+  "general": "General",
+  "language": "Language",
+  "theme": "Theme",
+  "notifications": "Notifications",
+  "account": "Account",
+  "profile": "Profile",
+  "privacy": "Privacy",
+  "security": "Security",
+  "about": "About",
+  "version": "Version",
+  "lightMode": "Light Mode",
+  "darkMode": "Dark Mode",
+  "systemDefault": "System Default",
+  "saveChanges": "Save Changes",
+  "resetToDefault": "Reset to Default"
+}

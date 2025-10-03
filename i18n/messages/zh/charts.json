@@ -1,0 +1,16 @@
+{
+  "title": "我的命盘",
+  "subtitle": "已保存的命理图表",
+  "createNew": "创建新命盘",
+  "viewChart": "查看命盘",
+  "editChart": "编辑命盘",
+  "deleteChart": "删除命盘",
+  "chartName": "命盘名称",
+  "chartType": "命盘类型",
+  "createdAt": "创建时间",
+  "updatedAt": "更新时间",
+  "noCharts": "还没有保存的命盘",
+  "confirmDelete": "确认删除此命盘？",
+  "deleteSuccess": "命盘删除成功",
+  "saveSuccess": "命盘保存成功"
+}

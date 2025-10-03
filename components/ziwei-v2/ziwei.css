@@ -1,0 +1,514 @@
+/**
+ * 紫微斗数 Web 版本样式 - 100% 还原
+ * 基于 ref/ziwei-ui/ZiweiChart/PalaceCard.tsx 的 StyleSheet
+ */
+
+/* ==================== 宫位卡片容器 ==================== */
+
+.palace-card {
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  padding: 4px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.palace-card:hover {
+  background-color: #f9fafb;
+}
+
+.palace-active {
+  border-color: #8b5cf6 !important;
+  border-width: 2px !important;
+  background-color: #faf5ff !important;
+}
+
+/* ==================== 星曜容器 ==================== */
+
+.palace-stars {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0 8px;
+  align-content: flex-start;
+}
+
+/* 单颗星曜 */
+.star {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 14px;
+  margin-bottom: 4px;
+}
+
+/* 星曜名称（竖排）*/
+.star-vertical-name {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.star-char {
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 12px;
+  font-family: 'PingFang SC', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* 亮度标记 */
+.star-brightness-line {
+  font-size: 9px;
+  color: #9ca3af;
+  margin-top: 1px;
+  font-family: 'PingFang SC', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* 四化标记容器 */
+.star-sihua-line {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  margin-top: 1px;
+}
+
+/* 四化徽章（生年四化）*/
+.star-sihua {
+  font-size: 8px;
+  color: white;
+  font-weight: bold;
+  padding: 1px 2px;
+  border-radius: 2px;
+  font-family: 'PingFang SC', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* 四化徽章（向心/离心 - 虚线边框）*/
+.star-sihua-muted {
+  font-size: 8px;
+  color: #6b7280;
+  font-weight: 600;
+  padding: 0 1px;
+  border-radius: 0;
+  background-color: transparent;
+  border-width: 1px;
+  border-style: dashed;
+  font-family: 'PingFang SC', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* 四化颜色类 */
+.sihua-A {
+  background-color: #10b981; /* 禄 - 绿 */
+}
+
+.sihua-B {
+  background-color: #8b5cf6; /* 权 - 紫 */
+}
+
+.sihua-C {
+  background-color: #3b82f6; /* 科 - 蓝 */
+}
+
+.sihua-D {
+  background-color: #ef4444; /* 忌 - 红 */
+}
+
+/* ==================== 宫位底部信息 ==================== */
+
+.palace-bottom {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding-top: 2px;
+  margin-top: auto;
+}
+
+.palace-stem-branch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.palace-stem,
+.palace-branch {
+  font-size: 9px;
+  color: #374151;
+  font-family: 'PingFang SC', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.palace-name {
+  font-size: 10px;
+  font-weight: 600;
+  color: #111827;
+  font-family: 'PingFang SC', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* ==================== 大运/流年/流月标签 ==================== */
+
+/* 大运激活：年 与 岁 */
+.palace-year-age {
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  font-size: 10px;
+  color: #3b82f6;
+  font-weight: 500;
+}
+
+.year-age-text {
+  font-family: 'PingFang SC', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* 流年激活：流月标签 */
+.palace-month {
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  font-size: 10px;
+  color: #10b981;
+  font-weight: 500;
+}
+
+.palace-month-text {
+  font-family: 'PingFang SC', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* 大运宫位名（在宫名上方）*/
+.palace-major-label {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 4px;
+  border-radius: 2px;
+  background-color: #e5e7eb;
+  color: #6b7280;
+}
+
+.palace-major-label.highlight {
+  background-color: #fbbf24;
+  color: #78350f;
+}
+
+.major-label-text {
+  font-family: 'PingFang SC', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* 固定大运区间（底部置中）*/
+.palace-dayun-fixed {
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  color: #6b7280;
+}
+
+.palace-dayun-fixed.year-label {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 4px;
+  border-radius: 2px;
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.palace-dayun-fixed.year-label.highlight {
+  background-color: #ef4444;
+  color: white;
+}
+
+.palace-dayun-fixed-text {
+  white-space: nowrap;
+  font-family: 'PingFang SC', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* 小限标签（流年标签上方）*/
+.palace-minor-label {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 4px;
+  border-radius: 2px;
+  background-color: #e9d5ff;
+  color: #6b21a8;
+}
+
+.palace-minor-label.highlight {
+  background-color: #8b5cf6;
+  color: white;
+}
+
+.minor-label-text {
+  font-family: 'PingFang SC', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* 流年信息 */
+.palace-liunian {
+  position: absolute;
+  top: 32px;
+  right: 4px;
+  font-size: 9px;
+  color: #3b82f6;
+  background-color: #eff6ff;
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
+/* 流月信息 */
+.palace-liuyue {
+  position: absolute;
+  top: 48px;
+  right: 4px;
+  font-size: 9px;
+  color: #10b981;
+  background-color: #f0fdf4;
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
+/* ==================== 特殊标记（身宫、来因宫）==================== */
+
+.palace-marker {
+  position: absolute;
+  right: 2px;
+  bottom: 12px;
+  padding: 1px 3px;
+  border-radius: 2px;
+  font-size: 9px;
+  font-weight: bold;
+  color: #78350f;
+  font-family: 'PingFang SC', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.body-palace {
+  background-color: #fcd34d;
+  bottom: 38px;
+}
+
+/* 同时有身宫和来因宫时，身宫上移 */
+.has-both-markers .body-palace {
+  bottom: 58px;
+}
+
+.laiyin-palace {
+  background-color: #ef4444;
+  color: white;
+  bottom: 38px;
+}
+
+/* ==================== 紫微图表容器 ==================== */
+
+.ziwei-chart-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  width: 100%;
+  height: 100%;
+  border: 2px solid #9ca3af;
+  background-color: white;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* 宫位位置映射（CSS Grid）*/
+.palace-巳 {
+  grid-column: 1;
+  grid-row: 1;
+}
+.palace-午 {
+  grid-column: 2;
+  grid-row: 1;
+}
+.palace-未 {
+  grid-column: 3;
+  grid-row: 1;
+}
+.palace-申 {
+  grid-column: 4;
+  grid-row: 1;
+}
+.palace-辰 {
+  grid-column: 1;
+  grid-row: 2;
+}
+.palace-酉 {
+  grid-column: 4;
+  grid-row: 2;
+}
+.palace-卯 {
+  grid-column: 1;
+  grid-row: 3;
+}
+.palace-戌 {
+  grid-column: 4;
+  grid-row: 3;
+}
+.palace-寅 {
+  grid-column: 1;
+  grid-row: 4;
+}
+.palace-丑 {
+  grid-column: 2;
+  grid-row: 4;
+}
+.palace-子 {
+  grid-column: 3;
+  grid-row: 4;
+}
+.palace-亥 {
+  grid-column: 4;
+  grid-row: 4;
+}
+
+/* 中宫区域（2×2）*/
+.center-grid-merged {
+  grid-column: 2 / 4;
+  grid-row: 2 / 4;
+  border: 1px solid #d1d5db;
+  background-color: #fef3c7;
+  padding: 8px;
+  overflow-y: auto;
+  font-family: 'PingFang SC', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.center-toggle-btn {
+  width: 100%;
+  padding: 4px 8px;
+  background-color: #8b5cf6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 8px;
+  transition: background-color 0.2s;
+}
+
+.center-toggle-btn:hover {
+  background-color: #7c3aed;
+}
+
+.center-info-block {
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.info-line {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.info-label {
+  font-weight: 600;
+  color: #78350f;
+  margin-right: 4px;
+}
+
+.info-value {
+  color: #374151;
+  margin-right: 8px;
+}
+
+.center-bazi-section {
+  margin-top: 8px;
+  padding: 8px;
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 4px;
+}
+
+.bazi-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bazi-line {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  text-align: center;
+  font-size: 12px;
+}
+
+.bazi-line--label {
+  font-weight: 700;
+  color: #111827;
+}
+
+.bazi-line--ten-god {
+  font-size: 10px;
+  color: #6b7280;
+}
+
+.bazi-line--stem {
+  font-weight: 600;
+  color: #dc2626;
+}
+
+.bazi-line--branch {
+  font-weight: 600;
+  color: #1e40af;
+}
+
+.bazi-line--ten-god-branch {
+  font-size: 10px;
+  color: #6b7280;
+}
+
+.center-start-luck {
+  margin-top: 8px;
+  text-align: center;
+  font-size: 11px;
+}
+
+.center-dayun-8 {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.dayun-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 10px;
+}
+
+.dayun-tg-stem,
+.dayun-tg-branch {
+  color: #6b7280;
+  font-size: 9px;
+}
+
+.dayun-gan {
+  font-weight: 600;
+  color: #dc2626;
+}
+
+.dayun-zhi {
+  font-weight: 600;
+  color: #1e40af;
+}
+
+.dayun-start-age {
+  color: #374151;
+  font-size: 9px;
+}
+
+/* 紫微图表容器 */
+.ziwei-chart-container {
+  width: 100%;
+  height: 100%;
+}

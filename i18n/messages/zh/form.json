@@ -1,0 +1,19 @@
+{
+  "name": "姓名",
+  "birthYear": "出生年",
+  "birthMonth": "出生月",
+  "birthDay": "出生日",
+  "birthHour": "出生时",
+  "gender": "性别",
+  "male": "男",
+  "female": "女",
+  "category": "分类",
+  "email": "电子邮箱",
+  "password": "密码",
+  "year": "年",
+  "month": "月",
+  "day": "日",
+  "hour": "时",
+  "currentSelection": "当前选择",
+  "birthTimeRange": "出生时间范围"
+}

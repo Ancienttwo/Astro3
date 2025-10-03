@@ -1,0 +1,19 @@
+{
+  "name": "Name",
+  "birthYear": "Birth Year",
+  "birthMonth": "Birth Month",
+  "birthDay": "Birth Day",
+  "birthHour": "Birth Hour",
+  "gender": "Gender",
+  "male": "Male",
+  "female": "Female",
+  "category": "Category",
+  "email": "Email",
+  "password": "Password",
+  "year": "Year",
+  "month": "Month",
+  "day": "Day",
+  "hour": "Hour",
+  "currentSelection": "Current Selection",
+  "birthTimeRange": "Birth Time Range"
+}

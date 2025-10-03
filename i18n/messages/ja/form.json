@@ -1,0 +1,19 @@
+{
+  "name": "名前",
+  "birthYear": "生年",
+  "birthMonth": "生月",
+  "birthDay": "生日",
+  "birthHour": "生時",
+  "gender": "性別",
+  "male": "男性",
+  "female": "女性",
+  "category": "カテゴリー",
+  "email": "メールアドレス",
+  "password": "パスワード",
+  "year": "年",
+  "month": "月",
+  "day": "日",
+  "hour": "時",
+  "currentSelection": "現在の選択",
+  "birthTimeRange": "出生時間帯"
+}
