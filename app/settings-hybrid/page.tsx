@@ -22,9 +22,11 @@ import {
 } from 'lucide-react';
 import AuthGuard from '@/components/AuthGuard';
 import HybridLanguageLayout from '@/components/layout/HybridLanguageLayout';
-import { useTranslations } from '@/lib/i18n/language-manager';
+import { useLocale } from 'next-intl';
 import { supabase } from '@/lib/supabase';
 import { apiClient } from '@/lib/api-client';
+
+type SupportedLanguage = 'zh' | 'en' | 'ja';
 
 // 🎯 类型定义
 interface SettingsItem {
@@ -50,14 +52,14 @@ interface UserInfo {
 
 export default function HybridSettingsPage() {
   const router = useRouter();
-  const { t, currentLanguage } = useTranslations();
+  const currentLocale = useLocale() as SupportedLanguage;
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [loggingOut, setLoggingOut] = useState(false);
 
   // 🎨 设置项配置 - 多语言支持
   const getSettingsCategories = () => {
-    const isEnglish = currentLanguage === 'en-US';
+    const isEnglish = currentLocale === 'en';
     
     return [
       {
@@ -182,16 +184,14 @@ export default function HybridSettingsPage() {
     } else if (item.href.startsWith('#')) {
       console.log('处理锚点:', item.href);
     } else {
-      // 为混合架构的页面添加语言参数
-      const url = new URL(item.href, window.location.origin);
-      url.searchParams.set('lang', currentLanguage);
-      router.push(url.pathname + url.search);
+      // next-intl handles routing automatically
+      router.push(item.href);
     }
   };
 
   // 🚪 登出处理
   const handleLogout = async () => {
-    const isEnglish = currentLanguage === 'en-US';
+    const isEnglish = currentLocale === 'en';
     const confirmMessage = isEnglish ? 'Are you sure you want to sign out?' : '确定要退出登录吗？';
     
     if (!window.confirm(confirmMessage)) return;
@@ -220,9 +220,9 @@ export default function HybridSettingsPage() {
     const loadingText = 'Loading...';
     return (
       <AuthGuard>
-        <HybridLanguageLayout 
-          title={currentLanguage === 'en-US' ? 'Settings' : '设置'}
-          description={currentLanguage === 'en-US' ? 'Manage your account and preferences' : '管理您的账户和偏好设置'}
+        <HybridLanguageLayout
+          title={currentLocale === 'en' ? 'Settings' : '设置'}
+          description={currentLocale === 'en' ? 'Manage your account and preferences' : '管理您的账户和偏好设置'}
         >
           <div className="flex items-center justify-center min-h-96">
             <div className="text-center">
@@ -235,7 +235,7 @@ export default function HybridSettingsPage() {
     );
   }
 
-  const isEnglish = currentLanguage === 'en-US';
+  const isEnglish = currentLocale === 'en';
   const settingsCategories = getSettingsCategories();
 
   return (
@@ -315,12 +315,11 @@ export default function HybridSettingsPage() {
                   ? 'Your profile is incomplete. Complete your profile for more accurate analysis.'
                   : '您的档案尚未完善，完善档案信息后可享受更精准的分析服务。'
                 }
-                <Button 
-                  variant="link" 
+                <Button
+                  variant="link"
                   className="p-0 h-auto ml-1 text-amber-700 dark:text-amber-300 underline"
                   onClick={() => {
-                    const url = `/settings-hybrid/profile?lang=${currentLanguage}`;
-                    router.push(url);
+                    router.push('/settings-hybrid/profile');
                   }}
                 >
                   {isEnglish ? 'Complete Profile' : '完善档案'}
@@ -399,12 +398,11 @@ export default function HybridSettingsPage() {
           <div className="mt-8 text-center">
             <p className="text-xs text-gray-500 dark:text-gray-400">
               {isEnglish ? 'AstroZi v1.0.0' : '星玺命理 v1.0.0'} | 
-              <Button 
-                variant="link" 
+              <Button
+                variant="link"
                 className="p-0 h-auto text-xs text-gray-500 dark:text-gray-400 ml-1"
                 onClick={() => {
-                  const url = `/help-center-hybrid?lang=${currentLanguage}`;
-                  router.push(url);
+                  router.push('/help-center-hybrid');
                 }}
               >
                 {isEnglish ? 'Contact Support' : '联系客服'}

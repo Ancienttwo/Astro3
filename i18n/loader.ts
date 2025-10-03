@@ -57,6 +57,10 @@ const ROUTE_NAMESPACE_MAP: Array<{ pattern: RegExp; namespaces: Namespace[] }> =
     namespaces: ['common', 'navigation', 'pages', 'wiki']
   },
   {
+    pattern: /^\/dashboard(?:\/|$)/,
+    namespaces: ['common', 'navigation', 'pages', 'dashboard', 'errors']
+  },
+  {
     pattern: /^\/web3(?:\/|$)/,
     namespaces: ['common', 'navigation', 'pages', 'web3/layout', 'web3/dashboard', 'errors']
   },
@@ -83,6 +87,22 @@ const ROUTE_NAMESPACE_MAP: Array<{ pattern: RegExp; namespaces: Namespace[] }> =
   {
     pattern: /^\/(fortune|guandi)(?:\/|$)/,
     namespaces: ['common', 'navigation', 'pages', 'astro/fortune', 'categories', 'errors']
+  },
+  {
+    pattern: /^\/(profile|myprofile)(?:\/|$)/,
+    namespaces: ['common', 'navigation', 'pages', 'form', 'errors', 'user/profile']
+  },
+  {
+    pattern: /^\/(membership|mymembership)(?:\/|$)/,
+    namespaces: ['common', 'navigation', 'pages', 'errors', 'user/membership']
+  },
+  {
+    pattern: /^\/subscription(?:\/|$)/,
+    namespaces: ['common', 'navigation', 'pages', 'user/subscription']
+  },
+  {
+    pattern: /^\/preferences(?:\/|$)/,
+    namespaces: ['common', 'navigation', 'pages', 'user/preferences']
   }
 ];
 

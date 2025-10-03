@@ -1,0 +1,20 @@
+{
+  "title": "偏好设置",
+  "subtitle": "个性化您的使用体验",
+  "themeSettings": "主题设置",
+  "themeSettingsDesc": "选择您偏好的颜色主题",
+  "languageSettings": "语言设置",
+  "languageSettingsDesc": "选择您偏好的显示语言",
+  "lightMode": "浅色模式",
+  "darkMode": "深色模式",
+  "systemMode": "跟随系统",
+  "chinese": "中文",
+  "english": "English",
+  "japanese": "日本語",
+  "comingSoon": "即将推出",
+  "comingSoonDesc": "该语言版本即将推出，敬请期待！",
+  "currentTheme": "当前主题",
+  "currentLanguage": "当前语言",
+  "available": "可用",
+  "notAvailable": "不可用"
+}

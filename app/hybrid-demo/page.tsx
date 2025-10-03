@@ -17,14 +17,15 @@ import {
 } from 'lucide-react';
 import HybridLanguageLayout from '@/components/layout/HybridLanguageLayout';
 import { LanguageSwitcher } from '@/components/ui/language-switcher';
-import { useUrlLanguage, useTranslations } from '@/lib/i18n/language-manager';
+import { useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
+
+type SupportedLanguage = 'zh' | 'en' | 'ja';
 
 export default function HybridArchitectureDemo() {
   const router = useRouter();
-  const { currentLanguage } = useUrlLanguage();
-  const { t } = useTranslations();
-  const isEnglish = currentLanguage === 'en-US';
+  const currentLocale = useLocale() as SupportedLanguage;
+  const isEnglish = currentLocale === 'en';
 
   const architectureFeatures = [
     {
@@ -72,16 +73,16 @@ export default function HybridArchitectureDemo() {
     },
     {
       name: isEnglish ? 'BaZi Analysis (Path-based)' : '八字分析（路径）',
-      route: currentLanguage === 'en-US' ? '/en/bazi' : '/bazi',
-      description: isEnglish 
+      route: currentLocale === 'en' ? '/en/bazi' : currentLocale === 'ja' ? '/ja/bazi' : '/bazi',
+      description: isEnglish
         ? 'Professional feature with dedicated path structure'
         : '专业功能，使用独立路径结构',
       type: 'path'
     },
     {
       name: isEnglish ? 'Chatbot (Path-based)' : '聊天机器人（路径）',
-      route: currentLanguage === 'en-US' ? '/en/chatbot' : '/chatbot',
-      description: isEnglish 
+      route: currentLocale === 'en' ? '/en/chatbot' : currentLocale === 'ja' ? '/ja/chatbot' : '/chatbot',
+      description: isEnglish
         ? 'AI chatbot with path-based internationalization'
         : 'AI聊天机器人，使用路径国际化',
       type: 'path'
@@ -89,14 +90,8 @@ export default function HybridArchitectureDemo() {
   ];
 
   const handleNavigate = (route: string, type: 'hybrid' | 'path') => {
-    if (type === 'hybrid') {
-      // 为混合架构页面添加语言参数
-      const url = `${route}?lang=${currentLanguage}`;
-      router.push(url);
-    } else {
-      // 路径架构页面直接跳转
-      router.push(route);
-    }
+    // next-intl handles routing automatically via middleware
+    router.push(route);
   };
 
   return (
@@ -126,9 +121,9 @@ export default function HybridArchitectureDemo() {
             <Alert>
               <Info className="h-4 w-4" />
               <AlertDescription>
-                <strong>{isEnglish ? 'Current Language:' : '当前语言：'}</strong> {currentLanguage}
+                <strong>{isEnglish ? 'Current Language:' : '当前语言：'}</strong> {currentLocale}
                 {' | '}
-                <strong>{isEnglish ? 'URL:' : 'URL：'}</strong> 
+                <strong>{isEnglish ? 'URL:' : 'URL：'}</strong>
                 <code className="bg-muted px-1 py-0.5 rounded text-xs ml-1">
                   {typeof window !== 'undefined' ? window.location.href : 'loading...'}
                 </code>

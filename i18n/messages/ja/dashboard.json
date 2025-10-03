@@ -1,0 +1,172 @@
+{
+  "header": {
+    "title": "ダッシュボード",
+    "subtitle": "AstroZiへようこそ",
+    "search": "検索...",
+    "notifications": "通知",
+    "settings": "設定",
+    "profile": "プロフィール"
+  },
+  "sidebar": {
+    "home": "ホーム",
+    "dashboard": "ダッシュボード",
+    "charts": "命盤",
+    "wiki": "百科事典",
+    "tasks": "タスク",
+    "leaderboard": "ランキング",
+    "rewards": "Web3報酬",
+    "points": "ポイント",
+    "wallet": "ウォレット",
+    "settings": "設定",
+    "expandSidebar": "サイドバーを展開",
+    "collapseSidebar": "サイドバーを折りたたむ"
+  },
+  "welcome": {
+    "greeting": {
+      "morning": "おはようございます",
+      "afternoon": "こんにちは",
+      "evening": "こんばんは",
+      "night": "深夜お疲れ様です"
+    },
+    "message": "東洋の神秘を探求し、あなたの運命を発見しましょう",
+    "createChart": "命盤を作成",
+    "signIn": "ログイン",
+    "connectWallet": "ウォレット接続"
+  },
+  "metrics": {
+    "points": {
+      "title": "総ポイント",
+      "subtitle": "本日獲得",
+      "loading": "読み込み中...",
+      "error": "ポイントを読み込めません"
+    },
+    "streak": {
+      "title": "連続チェックイン",
+      "subtitle": "日",
+      "checkIn": "今すぐチェックイン",
+      "checkedIn": "チェックイン済み",
+      "loading": "読み込み中...",
+      "error": "チェックイン記録を読み込めません"
+    },
+    "rank": {
+      "title": "ランク",
+      "subtitle": "上位 {percent}%",
+      "loading": "読み込み中...",
+      "error": "ランクを読み込めません"
+    },
+    "tasks": {
+      "title": "アクティブタスク",
+      "subtitle": "完了",
+      "loading": "読み込み中...",
+      "error": "タスクを読み込めません"
+    }
+  },
+  "quickActions": {
+    "title": "クイックアクション",
+    "createChart": "命盤作成",
+    "viewCharts": "命盤閲覧",
+    "exploreWiki": "百科事典",
+    "dailyFortune": "今日の運勢"
+  },
+  "tasks": {
+    "title": "アクティブタスク",
+    "viewAll": "すべて表示",
+    "empty": "アクティブなタスクはありません。明日また来てください！",
+    "progress": "進捗",
+    "reward": "{points} ポイント",
+    "loading": "読み込み中..."
+  },
+  "leaderboard": {
+    "title": "ランキング",
+    "viewFull": "完全なランキングを表示",
+    "rank": "順位",
+    "user": "ユーザー",
+    "points": "ポイント",
+    "you": "あなた",
+    "top5": "トップ5",
+    "loading": "読み込み中...",
+    "empty": "ランキングデータがありません"
+  },
+  "web3": {
+    "status": {
+      "title": "Web3機能を解放",
+      "description": "ウォレットを接続して、毎日の報酬、ポイント、限定NFTバッジにアクセス",
+      "connect": "ウォレット接続",
+      "benefits": {
+        "rewards": "毎日のチェックイン報酬",
+        "points": "ポイントシステム",
+        "nft": "NFTバッジコレクション",
+        "leaderboard": "グローバルランキング"
+      }
+    },
+    "metrics": {
+      "title": "Web3資産",
+      "balance": "残高",
+      "rewards": "保留中の報酬",
+      "nfts": "NFT数",
+      "connect": "ウォレットを接続して表示"
+    },
+    "nft": {
+      "title": "NFTバッジコレクション",
+      "description": "タスクと実績を完了して限定NFTバッジを解除",
+      "rarity": {
+        "common": "コモン",
+        "rare": "レア",
+        "epic": "エピック",
+        "legendary": "レジェンダリー"
+      },
+      "empty": "NFTバッジはまだありません",
+      "loading": "読み込み中..."
+    }
+  },
+  "educational": {
+    "calendar": {
+      "title": "万年暦",
+      "description": "旧暦の日付、節気、吉凶などの情報を照会"
+    },
+    "comparison": {
+      "title": "紫微斗数 vs 八字命理",
+      "description": "2つの主要な命理体系の違いと応用を理解"
+    },
+    "fiveElements": {
+      "title": "五行百科事典",
+      "description": "金木水火土の神秘を探求"
+    },
+    "stars": {
+      "title": "紫微十四主星",
+      "description": "紫微斗数のコア星曜を認識"
+    },
+    "expand": "展開",
+    "collapse": "折りたたむ"
+  },
+  "activity": {
+    "title": "最近のアクティビティ",
+    "empty": "アクティビティ記録がありません",
+    "types": {
+      "chart_created": "命盤を作成しました",
+      "task_completed": "タスクを完了しました",
+      "check_in": "毎日のチェックイン",
+      "reward_claimed": "報酬を受け取りました"
+    },
+    "loading": "読み込み中...",
+    "error": "最近のアクティビティを読み込めません"
+  },
+  "loading": {
+    "dashboard": "ダッシュボードを読み込み中...",
+    "data": "データを読み込み中...",
+    "chart": "チャートを生成中..."
+  },
+  "errors": {
+    "loadFailed": "読み込み失敗",
+    "retry": "再試行",
+    "networkError": "ネットワーク接続に失敗しました。ネットワーク設定を確認してください",
+    "serverError": "サーバーが一時的に応答できません。しばらくしてから再試行してください",
+    "unknownError": "不明なエラーが発生しました"
+  },
+  "checkIn": {
+    "success": "チェックイン成功！",
+    "message": "+{points} ポイント獲得。明日また来てください！",
+    "streak": "{days}日連続チェックイン",
+    "failed": "チェックインに失敗しました。再試行してください"
+  }
+}

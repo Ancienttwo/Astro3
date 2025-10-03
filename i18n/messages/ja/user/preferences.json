@@ -1,0 +1,20 @@
+{
+  "title": "環境設定",
+  "subtitle": "使用体験をカスタマイズ",
+  "themeSettings": "テーマ設定",
+  "themeSettingsDesc": "お好みのカラーテーマを選択",
+  "languageSettings": "言語設定",
+  "languageSettingsDesc": "お好みの表示言語を選択",
+  "lightMode": "ライトモード",
+  "darkMode": "ダークモード",
+  "systemMode": "システムモード",
+  "chinese": "中国語",
+  "english": "英語",
+  "japanese": "日本語",
+  "comingSoon": "近日公開",
+  "comingSoonDesc": "この言語版は近日公開予定です！",
+  "currentTheme": "現在のテーマ",
+  "currentLanguage": "現在の言語",
+  "available": "利用可能",
+  "notAvailable": "利用不可"
+}

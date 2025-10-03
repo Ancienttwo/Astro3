@@ -1,0 +1,172 @@
+{
+  "header": {
+    "title": "仪表盘",
+    "subtitle": "欢迎回到 AstroZi",
+    "search": "搜索...",
+    "notifications": "通知",
+    "settings": "设置",
+    "profile": "个人资料"
+  },
+  "sidebar": {
+    "home": "首页",
+    "dashboard": "仪表盘",
+    "charts": "命盘",
+    "wiki": "百科",
+    "tasks": "任务",
+    "leaderboard": "排行榜",
+    "rewards": "Web3奖励",
+    "points": "积分",
+    "wallet": "钱包",
+    "settings": "设置",
+    "expandSidebar": "展开侧边栏",
+    "collapseSidebar": "收起侧边栏"
+  },
+  "welcome": {
+    "greeting": {
+      "morning": "早安",
+      "afternoon": "下午好",
+      "evening": "晚上好",
+      "night": "深夜好"
+    },
+    "message": "探索东方命理的奥秘，了解您的命运",
+    "createChart": "创建命盘",
+    "signIn": "登录",
+    "connectWallet": "连接钱包"
+  },
+  "metrics": {
+    "points": {
+      "title": "总积分",
+      "subtitle": "今日获得",
+      "loading": "加载中...",
+      "error": "无法加载积分"
+    },
+    "streak": {
+      "title": "连续签到",
+      "subtitle": "天",
+      "checkIn": "立即签到",
+      "checkedIn": "已签到",
+      "loading": "加载中...",
+      "error": "无法加载签到记录"
+    },
+    "rank": {
+      "title": "排名",
+      "subtitle": "前 {percent}%",
+      "loading": "加载中...",
+      "error": "无法加载排名"
+    },
+    "tasks": {
+      "title": "活跃任务",
+      "subtitle": "已完成",
+      "loading": "加载中...",
+      "error": "无法加载任务"
+    }
+  },
+  "quickActions": {
+    "title": "快速操作",
+    "createChart": "创建命盘",
+    "viewCharts": "查看命盘",
+    "exploreWiki": "探索百科",
+    "dailyFortune": "每日运势"
+  },
+  "tasks": {
+    "title": "活跃任务",
+    "viewAll": "查看全部",
+    "empty": "暂无活跃任务。明天再来看看吧！",
+    "progress": "进度",
+    "reward": "{points} 积分",
+    "loading": "加载中..."
+  },
+  "leaderboard": {
+    "title": "排行榜",
+    "viewFull": "查看完整排行榜",
+    "rank": "排名",
+    "user": "用户",
+    "points": "积分",
+    "you": "你",
+    "top5": "前5名",
+    "loading": "加载中...",
+    "empty": "排行榜暂无数据"
+  },
+  "web3": {
+    "status": {
+      "title": "解锁Web3功能",
+      "description": "连接钱包获取每日奖励、积分和专属NFT徽章",
+      "connect": "连接钱包",
+      "benefits": {
+        "rewards": "每日签到奖励",
+        "points": "积分系统",
+        "nft": "NFT徽章收藏",
+        "leaderboard": "全球排行榜"
+      }
+    },
+    "metrics": {
+      "title": "Web3资产",
+      "balance": "余额",
+      "rewards": "待领取奖励",
+      "nfts": "NFT数量",
+      "connect": "连接钱包查看"
+    },
+    "nft": {
+      "title": "NFT 徽章收藏",
+      "description": "完成任务和成就解锁专属NFT徽章",
+      "rarity": {
+        "common": "普通",
+        "rare": "稀有",
+        "epic": "史诗",
+        "legendary": "传说"
+      },
+      "empty": "暂无NFT徽章",
+      "loading": "加载中..."
+    }
+  },
+  "educational": {
+    "calendar": {
+      "title": "万年历",
+      "description": "查询农历日期、节气、宜忌等信息"
+    },
+    "comparison": {
+      "title": "紫微斗数 vs 八字命理",
+      "description": "了解两大命理体系的区别与应用"
+    },
+    "fiveElements": {
+      "title": "五行百科",
+      "description": "探索金木水火土的奥秘"
+    },
+    "stars": {
+      "title": "紫微十四主星",
+      "description": "认识紫微斗数的核心星曜"
+    },
+    "expand": "展开",
+    "collapse": "收起"
+  },
+  "activity": {
+    "title": "最近活动",
+    "empty": "暂无活动记录",
+    "types": {
+      "chart_created": "创建了命盘",
+      "task_completed": "完成了任务",
+      "check_in": "每日签到",
+      "reward_claimed": "领取了奖励"
+    },
+    "loading": "加载中...",
+    "error": "无法加载最近活动"
+  },
+  "loading": {
+    "dashboard": "加载仪表盘...",
+    "data": "加载数据...",
+    "chart": "生成图表..."
+  },
+  "errors": {
+    "loadFailed": "加载失败",
+    "retry": "重试",
+    "networkError": "网络连接失败，请检查网络设置",
+    "serverError": "服务器暂时无法响应，请稍后重试",
+    "unknownError": "发生未知错误"
+  },
+  "checkIn": {
+    "success": "签到成功！",
+    "message": "获得 +{points} 积分。明天再来！",
+    "streak": "已连续签到 {days} 天",
+    "failed": "签到失败，请重试"
+  }
+}

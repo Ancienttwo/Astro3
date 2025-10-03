@@ -5,7 +5,7 @@ import MainLayout from "@/components/MainLayout"
 import PricingSection from "@/components/PricingSection"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Bot, Zap, TrendingUp, Users, Lock, Rocket, Target, Sun, Moon } from "lucide-react"
+import { Bot, Zap, TrendingUp, Users, Lock, Rocket, Target, Sun, Moon, Stars, Sparkles, Gift, Calendar, Coins, Trophy, CheckCircle, Wallet, Link, Mail } from "lucide-react"
 import { 
   FadeUp, 
   FadeLeft, 
@@ -137,27 +137,27 @@ export default function LandingPage() {
       ],
       engineeringTitle: "Life Engineering Applications",
       engineeringLabels: {
-        solar: "🌞 Solar Analysis",
-        lunar: "🌙 Lunar Analysis", 
-        solution: "🎯 Engineering Solution"
+        solar: "Solar Analysis",
+        lunar: "Lunar Analysis",
+        solution: "Engineering Solution"
       },
       engineeringCases: [
         {
-          title: "💼 Career Engineering",
+          title: "Career Engineering",
           solar: "Your Capacity Ceiling: Executive Level",
           lunar: "Promotion Opportunity: March 2025",
           combined: "Develop 6-month executive transition strategic positioning protocol",
           icon: Target
         },
         {
-          title: "💕 Relationship Engineering", 
+          title: "Relationship Engineering",
           solar: "Compatibility Framework: Optimized with Analytical Personalities",
           lunar: "Meeting Probability Peak: October 2024 Professional Networking",
           combined: "Attend 3-5 professional networking events in Q4 2024 for optimal relationship engineering",
           icon: Users
         },
         {
-          title: "🏥 Health Engineering",
+          title: "Health Engineering",
           solar: "Constitution Analysis: Cardiovascular System Optimization Required",
           lunar: "Critical Intervention Period: Ages 42-44",
           combined: "Implement cardiovascular optimization protocol starting age 40 with quarterly monitoring",
@@ -187,300 +187,337 @@ export default function LandingPage() {
 
   return (
     <MainLayout language={language} setLanguage={setLanguage} t={t}>
-      <div className="flex flex-col min-h-screen bg-transparent">
-        {/* Header */}
-        <header className="py-6 bg-transparent text-center px-page-inline">
-          <StaggerContainer>
-            <StaggerItem>
-              <h1 className="text-5xl font-extrabold text-yellow-400 font-rajdhani">
-                ASTROZI <span className="text-yellow-400">{language === 'zh' ? '生命工程' : 'Life Engineering'}</span>
-              </h1>
-            </StaggerItem>
-            <StaggerItem>
-              <p className="mt-2 text-lg text-gray-200 dark:text-gray-200">
-                {language === 'zh' ? 
-                  '科学优化人生轨迹 • AI + 古老智慧' : 
-                  'Life Engineering Platform • AI + Ancient Wisdom'
-                }
-              </p>
-            </StaggerItem>
-          </StaggerContainer>
-        </header>
+      <div className="flex flex-col min-h-screen overflow-x-hidden">
 
-        {/* Main Content */}
-        <main className="flex-grow mx-auto flex w-full max-w-page flex-col items-center justify-center gap-section-stack px-page-inline py-section-stack">
-          {/* Hero Section */}
-          <div className="grid w-full items-center gap-8 md:grid-cols-2 md:gap-12">
-            {/* Left Content */}
-            <FadeRight delay={0.2}>
-              <div className="space-y-6 text-center md:text-left">
-                <h2 className="text-3xl md:text-4xl font-bold text-yellow-400">
-                  {t.hero.title}
-                </h2>
-                <p className="text-gray-200 dark:text-gray-200 text-base md:text-lg leading-relaxed">
-                  {t.hero.subtitle}
+        {/* Main Content - Modern Clean Design */}
+        <main className="flex-grow w-full overflow-x-hidden">
+          {/* Hero Section - Modern Centered Layout */}
+          <section id="home" className="relative px-4 sm:px-6 lg:px-8 pt-20 sm:pt-28 md:pt-32 pb-16 sm:pb-20 md:pb-24">
+            <div className="max-w-4xl mx-auto text-center">
+              <FadeUp>
+                {/* Badge */}
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-400/10 border border-yellow-400/30 mb-8">
+                  <Sparkles className="w-4 h-4 text-yellow-400" />
+                  <span className="text-sm font-medium text-yellow-400">
+                    World's First AI Life Engineering Platform
+                  </span>
+                </div>
+
+                {/* Main Heading */}
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold font-rajdhani text-white mb-4 sm:mb-6 leading-tight px-2">
+                  Life Engineering<br/><span className="text-yellow-400">Scientifically Optimized</span>
+                </h1>
+
+                {/* Subtitle */}
+                <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-200 mb-8 sm:mb-12 max-w-2xl mx-auto leading-relaxed px-4">
+                  Fusing ancient Eastern wisdom with modern AI technology through dual-system analysis
                 </p>
-              
-              <Card className="border border-yellow-500/30 bg-gradient-to-r from-yellow-500/20 to-purple-500/20 p-card-padding shadow-soft backdrop-blur-sm">
-                <p className="text-center text-sm font-semibold text-yellow-400 whitespace-pre-line">
-                  {t.hero.highlight}
-                </p>
-              </Card>
-              
-              <Alert className="bg-purple-900/30 border-purple-500/30 backdrop-blur-sm">
-                <Rocket className="h-5 w-5 text-yellow-400" />
-                <AlertTitle className="font-semibold text-yellow-400">
-                  {language === 'zh' ? '生命工程精度' : 'Life Engineering Precision'}
-                </AlertTitle>
-                <AlertDescription className="text-gray-200 dark:text-gray-200">
-                  {language === 'zh' ? 
-                    '精确的出生时间是生命工程算法的关键输入参数，影响双系统分析的准确性。' :
-                    'Precise birth time is crucial for life engineering algorithm accuracy and dual-system analysis.'
-                  }
-                </AlertDescription>
-              </Alert>
-              </div>
-            </FadeRight>
 
-            {/* Right CTA Card */}
-            <FadeLeft delay={0.4}>
-              <Card className="w-full max-w-md shadow-2xl bg-white/10 backdrop-blur-md border border-white/20">
-                <CardHeader>
-                  <CardTitle className="text-2xl text-center text-yellow-400">
-                    {language === 'zh' ? '开始您的生命工程项目' : 'Start Your Life Engineering Project'}
-                  </CardTitle>
-                  <CardDescription className="text-center text-gray-200 dark:text-gray-200">
-                    {language === 'zh' ? 
-                      '体验 AI 驱动的双系统生命工程分析，优化您的人生轨迹' :
-                      'Experience AI-driven dual-system life engineering analysis to optimize your life trajectory'
-                    }
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="flex justify-center">
-                    <a href="/auth" className="w-full">
-                      <button className="relative w-full bg-gradient-to-r from-purple-900 to-indigo-900 hover:from-purple-800 hover:to-indigo-800 py-5 px-6 text-xl font-bold rounded-lg shadow-2xl transform hover:scale-105 transition-all duration-300 overflow-hidden group border-2 border-yellow-400 hover:border-yellow-300">
-                        <span className="absolute top-0 right-0 px-3 py-1 text-xs font-bold bg-red-500 text-white rounded-bl-lg shadow-lg animate-pulse">
-                          {language === 'zh' ? '限时免费' : 'FREE'}
-                        </span>
-                        <span className="text-yellow-400 group-hover:text-yellow-300 transition-colors duration-300 flex items-center justify-center gap-2">
-                          <span className="text-2xl">🎁</span>
-                          {t.hero.cta}
-                        </span>
-                      </button>
-                    </a>
-                  </div>
-                  
-                  <div className="text-center">
-                    <p className="text-sm text-gray-300 dark:text-gray-300">
-                      {language === 'zh' ? 
-                        '免费体验 • AI智能分析 • 区块链验证 • 社区互助' :
-                        'Free Trial • AI Analysis • Blockchain Verification • Community Support'
-                      }
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </FadeLeft>
-          </div>
-
-          {/* Dual-System Engineering Section */}
-          <div className="w-full">
-            <FadeUp>
-              <div className="text-center mb-12">
-                <h2 className="text-3xl md:text-4xl font-bold text-yellow-400 mb-6">{t.systemsTitle}</h2>
-                <p className="text-lg text-gray-200 dark:text-gray-200 leading-relaxed max-w-4xl mx-auto">{t.systemsSubtitle}</p>
-              </div>
-            </FadeUp>
-
-            {/* Systems Comparison */}
-            <StaggerContainer className="grid md:grid-cols-2 gap-8 mb-12">
-              {t.systems.map((system, index) => (
-                <StaggerItem key={index}>
-                  <Card className="border border-white/20 bg-white/10 backdrop-blur-md transition-all duration-300 hover:bg-white/15">
-                    <CardContent className="space-y-6 p-card-padding">
-                    <div className="flex items-center gap-4">
-                      <div className={`w-16 h-16 rounded-full bg-gradient-to-r ${system.color} flex items-center justify-center`}>
-                        <system.icon className="w-8 h-8 text-white" />
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-bold text-white">{system.title}</h3>
-                        <p className="text-yellow-400 font-semibold">{system.system}</p>
-                      </div>
-                    </div>
-                    <p className="text-gray-200 dark:text-gray-200 leading-relaxed">{system.description}</p>
-                    <div className="space-y-2">
-                      {system.features.map((feature, idx) => (
-                        <div key={idx} className="flex items-center space-x-2">
-                          <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-                          <span className="text-gray-200 dark:text-gray-200 text-sm">{feature}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </StaggerItem>
-              ))}
-            </StaggerContainer>
-          </div>
-
-          {/* Engineering Applications */}
-          <div className="w-full">
-            <FadeUp>
-              <div className="text-center mb-12">
-                <h2 className="text-3xl md:text-4xl font-bold text-yellow-400 mb-6">{t.engineeringTitle}</h2>
-              </div>
-            </FadeUp>
-
-            <StaggerContainer className="grid md:grid-cols-3 gap-6">
-              {t.engineeringCases.map((case_, index) => (
-                <StaggerItem key={index}>
-                  <Card
-                    className="bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/15 transition-all duration-300"
-                  >
-                  <CardContent className="space-y-3 p-card-padding">
-                    <div className="flex items-center space-x-3 mb-4">
-                      <case_.icon className="w-8 h-8 text-yellow-400" />
-                      <h3 className="text-lg font-bold text-white">{case_.title}</h3>
-                    </div>
-                    
-                      <div className="space-y-3 text-sm">
-                      <Card className="border-l-4 border-l-yellow-500 bg-yellow-500/20 p-card-padding shadow-soft">
-                        <p className="text-yellow-400 font-semibold">{t.engineeringLabels.solar}</p>
-                        <p className="text-gray-200 dark:text-gray-200">{case_.solar}</p>
-                      </Card>
-                      
-                      <Card className="border-l-4 border-l-purple-500 bg-purple-500/20 p-card-padding shadow-soft">
-                        <p className="text-purple-400 font-semibold">{t.engineeringLabels.lunar}</p>
-                        <p className="text-gray-200 dark:text-gray-200">{case_.lunar}</p>
-                      </Card>
-                      
-                      <Card className="border-l-4 border-l-green-500 bg-green-500/20 p-card-padding shadow-soft">
-                        <p className="text-green-400 font-semibold">{t.engineeringLabels.solution}</p>
-                        <p className="text-gray-200 dark:text-gray-200">{case_.combined}</p>
-                      </Card>
-                      </div>
-                  </CardContent>
-                </Card>
-              </StaggerItem>
-              ))}
-            </StaggerContainer>
-          </div>
-
-          {/* Revolution Section */}
-          <div className="w-full">
-            <FadeUp>
-              <div className="text-center mb-12">
-                <h2 className="text-3xl md:text-4xl font-bold mb-4 text-yellow-400">
-                  {t.revolutionTitle}
-                </h2>
-                <p className="text-xl text-gray-200 dark:text-gray-200 max-w-3xl mx-auto mb-8">
-                  {t.revolutionSubtitle}
-                </p>
-                
-                <ScrollReveal direction="fade" delay={0.3}>
-                  <Card className="border border-white/20 bg-gradient-to-r from-red-500/20 to-green-500/20 p-card-padding shadow-soft backdrop-blur-sm">
-                    <p className="mb-2 text-2xl font-bold text-white">{t.revolutionHighlight.title}</p>
-                    <p className="text-gray-200 dark:text-gray-200">{t.revolutionHighlight.description}</p>
-                  </Card>
-                </ScrollReveal>
-              </div>
-            </FadeUp>
-            
-            <StaggerContainer className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {t.advantages.map((advantage, index) => (
-                <StaggerItem key={index}>
-                  <Card className="border border-white/20 bg-white/10 backdrop-blur-md transition-all duration-300 hover:bg-white/15">
-                    <CardContent className="p-card-padding text-center">
-                    <advantage.icon className="w-12 h-12 mx-auto mb-4 text-yellow-400" />
-                    <h3 className="text-xl font-semibold mb-3 text-white">{advantage.title}</h3>
-                    <p className="text-gray-200 dark:text-gray-200 leading-relaxed text-sm">{advantage.description}</p>
-                  </CardContent>
-                </Card>
-              </StaggerItem>
-              ))}
-            </StaggerContainer>
-          </div>
-
-          {/* Pricing Section */}
-          <FadeUp>
-            <div className="w-full max-w-5xl mb-16">
-              <div className="text-center mb-12">
-                <h2 className="text-3xl md:text-4xl font-bold mb-4 text-yellow-400">
-                  {t.pricingTitle}
-                </h2>
-                <p className="text-xl text-gray-200 dark:text-gray-200 max-w-2xl mx-auto">
-                  {t.pricingSubtitle}
-                </p>
-              </div>
-              <PricingSection language={language} />
-            </div>
-          </FadeUp>
-
-          {/* Final CTA */}
-          <FadeUp delay={0.2}>
-            <div className="w-full max-w-3xl text-center">
-              <Card className="border border-white/20 bg-white/10 backdrop-blur-md transition-all duration-300 hover:bg-white/15">
-                <CardContent className="space-y-6 p-card-padding">
-                  <h2 className="text-3xl font-bold mb-4 text-yellow-400">
-                    {language === 'zh' ? '1天体验 - 限购一次' : '1-Day Trial - One-time Only'}
-                  </h2>
-                  
-                  <p className="text-xl text-gray-200 dark:text-gray-200 mb-6 leading-relaxed">
-                    {language === 'zh' ? 
-                      '首次用户专享1天完整体验，深度感受AI驱动的生命工程分析' :
-                      'First-time users exclusive 1-day full experience, deep dive into AI-driven life engineering analysis'
-                    }
-                  </p>
-                  
-                  <Card className="mb-6 border border-yellow-500/30 bg-gradient-to-r from-yellow-500/20 to-purple-500/20 p-card-padding shadow-soft backdrop-blur-sm">
-                    <div className="text-center space-y-3">
-                      <div className="text-4xl font-bold text-yellow-400 mb-3">
-                        {language === 'zh' ? '¥9.9' : 'FREE'}
-                      </div>
-                      <div className="text-sm text-white space-y-1">
-                        {language === 'zh' ? (
-                          <>
-                            <p>• 体验完整AI命理分析功能</p>
-                            <p>• 包含详细报告和专业解读</p>
-                            <p>• 仅限首次用户购买</p>
-                            <p>• 一次性付费，无月费</p>
-                          </>
-                        ) : (
-                          <>
-                            <p>• Connect your wallet securely</p>
-                            <p>• Access AI-powered BaZi & ZiWei analysis</p>
-                            <p>• Educational Chinese astrology content</p>
-                            <p>• Web3 authentication - no passwords needed</p>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  </Card>
-                  
-                  <a href={language === 'zh' ? "/subscription" : "/auth"}>
-                    <button className="relative bg-gradient-to-r from-purple-900 to-indigo-900 hover:from-purple-800 hover:to-indigo-800 px-12 py-6 text-2xl font-bold rounded-lg shadow-2xl transform hover:scale-105 transition-all duration-300 overflow-hidden group border-2 border-yellow-400 hover:border-yellow-300">
-                      <span className="absolute top-0 right-0 px-4 py-2 text-sm font-bold bg-red-500 text-white rounded-bl-lg shadow-lg animate-pulse">
-                        {language === 'zh' ? '限购一次' : 'ONE-TIME'}
-                      </span>
-                      <span className="text-yellow-400 group-hover:text-yellow-300 transition-colors duration-300 flex items-center justify-center gap-3">
-                        <span className="text-3xl">⚡</span>
-                        {language === 'zh' ? '立即体验 ¥9.9' : 'Get Started'}
-                        <span className="text-3xl">⚡</span>
+                {/* CTA Buttons */}
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-12 sm:mb-16 w-full px-4 sm:px-0">
+                  <a href="/en/login" className="w-full sm:w-auto">
+                    <button className="group relative w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-yellow-400 text-purple-900 rounded-lg font-semibold text-base sm:text-lg transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgba(251,203,10,0.4)] flex items-center justify-center gap-2">
+                      <Rocket className="w-4 h-4 sm:w-5 sm:h-5" />
+                      Get Started
+                      <span className="absolute -top-2 -right-2 px-2 py-0.5 bg-red-500 text-white text-xs rounded-full">
+                        FREE
                       </span>
                     </button>
                   </a>
-                  
-                  <p className="mt-4 text-sm text-gray-300 dark:text-gray-300">
-                    {language === 'zh' ? 
-                      '⚡ 首次用户专享 • 🎯 完整功能体验 • 🔒 限购一次 • 💎 超值价格' :
-                      '⚡ First-time Users Only • 🎯 Full Feature Experience • 🔒 One-time Purchase • 💎 Great Value'
-                    }
-                  </p>
-                </CardContent>
-              </Card>
+                  <a href="#features" className="w-full sm:w-auto">
+                    <button className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-transparent border-2 border-yellow-400/30 text-white rounded-lg font-semibold text-base sm:text-lg transition-all duration-300 hover:border-yellow-400/60 hover:bg-yellow-400/5">
+                      Learn More
+                    </button>
+                  </a>
+                </div>
+
+                {/* Feature Pills */}
+                <div className="flex flex-wrap justify-center gap-3 text-sm text-gray-300">
+                  <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-yellow-400/20">
+                    <Sun className="w-4 h-4 text-yellow-400" />
+                    <span>BaZi System</span>
+                  </div>
+                  <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-yellow-400/20">
+                    <Moon className="w-4 h-4 text-yellow-400" />
+                    <span>ZiWei System</span>
+                  </div>
+                  <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-yellow-400/20">
+                    <Bot className="w-4 h-4 text-yellow-400" />
+                    <span>AI Analysis</span>
+                  </div>
+                </div>
+              </FadeUp>
             </div>
-          </FadeUp>
+          </section>
+
+          {/* Dual-System Engineering Section - Modern Redesign */}
+          <section id="features" className="px-4 sm:px-6 lg:px-8 py-16 sm:py-20 md:py-24 bg-gradient-to-b from-transparent to-yellow-400/5">
+            <div className="max-w-6xl mx-auto">
+              <FadeUp>
+                <div className="text-center mb-16">
+                  <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-yellow-400" style={{ textShadow: '0 0 20px rgba(251,203,10,0.3)' }}>
+                    {t.systemsTitle}
+                  </h2>
+                  <p className="text-lg sm:text-xl text-gray-200 max-w-3xl mx-auto">
+                    {t.systemsSubtitle}
+                  </p>
+                </div>
+              </FadeUp>
+
+              {/* Systems Grid - Simplified Design */}
+              <div className="grid md:grid-cols-2 gap-8">
+                {t.systems.map((system, index) => (
+                  <FadeUp key={index} delay={index * 0.1}>
+                    <div className="group relative p-8 rounded-2xl border border-yellow-400/20 bg-black/20 backdrop-blur-sm hover:border-yellow-400/40 transition-all duration-300 hover:shadow-lg h-full">
+                      {/* Icon */}
+                      <div className="mb-6">
+                        <div className="inline-flex p-3 rounded-xl bg-yellow-400/10">
+                          <system.icon className="w-8 h-8 text-yellow-400" />
+                        </div>
+                      </div>
+
+                      {/* Title & System */}
+                      <h3 className="text-2xl font-bold mb-2 text-white">
+                        {system.title}
+                      </h3>
+                      <p className="text-yellow-400 font-semibold mb-4">
+                        {system.system}
+                      </p>
+
+                      {/* Description */}
+                      <p className="text-gray-200 mb-6 leading-relaxed">
+                        {system.description}
+                      </p>
+
+                      {/* Features List */}
+                      <ul className="space-y-2">
+                        {system.features.map((feature, idx) => (
+                          <li key={idx} className="flex items-start gap-2 text-gray-300">
+                            <div className="w-1.5 h-1.5 rounded-full bg-yellow-400 mt-2 flex-shrink-0" />
+                            <span className="text-sm">{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </FadeUp>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* Engineering Applications - Modern Cards */}
+          <section className="px-4 sm:px-6 lg:px-8 py-16 sm:py-20 md:py-24">
+            <div className="max-w-6xl mx-auto">
+              <FadeUp>
+                <div className="text-center mb-16">
+                  <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-yellow-400" style={{ textShadow: '0 0 20px rgba(251,203,10,0.3)' }}>
+                    {t.engineeringTitle}
+                  </h2>
+                </div>
+              </FadeUp>
+
+              <div className="grid md:grid-cols-3 gap-6">
+                {t.engineeringCases.map((case_, index) => (
+                  <FadeUp key={index} delay={index * 0.1}>
+                    <div className="p-6 rounded-xl border border-yellow-400/20 bg-black/20 backdrop-blur-sm hover:border-yellow-400/40 transition-all duration-300 h-full">
+                      {/* Title with Icon */}
+                      <div className="flex items-center gap-3 mb-6">
+                        <case_.icon className="w-6 h-6 text-yellow-400" />
+                        <h3 className="text-xl font-bold text-white">
+                          {case_.title}
+                        </h3>
+                      </div>
+
+                      {/* Analysis Cards */}
+                      <div className="space-y-3">
+                        {/* Solar Analysis */}
+                        <div className="p-3 rounded-lg bg-yellow-400/5 border-l-2 border-yellow-400">
+                          <p className="text-xs font-semibold text-yellow-400 mb-1">
+                            {t.engineeringLabels.solar}
+                          </p>
+                          <p className="text-sm text-gray-200">
+                            {case_.solar}
+                          </p>
+                        </div>
+
+                        {/* Lunar Analysis */}
+                        <div className="p-3 rounded-lg bg-purple-500/5 border-l-2 border-purple-400">
+                          <p className="text-xs font-semibold text-purple-400 mb-1">
+                            {t.engineeringLabels.lunar}
+                          </p>
+                          <p className="text-sm text-gray-200">
+                            {case_.lunar}
+                          </p>
+                        </div>
+
+                        {/* Solution */}
+                        <div className="p-3 rounded-lg bg-green-500/5 border-l-2 border-green-400">
+                          <p className="text-xs font-semibold text-green-400 mb-1">
+                            {t.engineeringLabels.solution}
+                          </p>
+                          <p className="text-sm text-gray-200">
+                            {case_.combined}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </FadeUp>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* Revolution Section - Modern Design */}
+          <section className="px-4 sm:px-6 lg:px-8 py-16 sm:py-20 md:py-24 bg-gradient-to-b from-transparent to-yellow-400/5">
+            <div className="max-w-6xl mx-auto">
+              <FadeUp>
+                <div className="text-center mb-16">
+                  <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-yellow-400" style={{ textShadow: '0 0 20px rgba(251,203,10,0.3)' }}>
+                    {t.revolutionTitle}
+                  </h2>
+                  <p className="text-lg sm:text-xl text-gray-200 max-w-3xl mx-auto mb-8">
+                    {t.revolutionSubtitle}
+                  </p>
+
+                  {/* Highlight Card */}
+                  <div className="inline-block p-6 rounded-2xl bg-gradient-to-r from-red-500/10 to-green-500/10 border border-yellow-400/20 backdrop-blur-sm mb-12">
+                    <p className="text-xl font-bold text-white mb-2">
+                      {t.revolutionHighlight.title}
+                    </p>
+                    <p className="text-gray-200">
+                      {t.revolutionHighlight.description}
+                    </p>
+                  </div>
+                </div>
+              </FadeUp>
+
+              {/* Advantages Grid */}
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {t.advantages.map((advantage, index) => (
+                  <FadeUp key={index} delay={index * 0.1}>
+                    <div className="p-6 rounded-xl border border-yellow-400/20 bg-black/20 backdrop-blur-sm hover:border-yellow-400/40 transition-all duration-300 text-center h-full">
+                      <advantage.icon className="w-10 h-10 mx-auto mb-4 text-yellow-400" />
+                      <h3 className="text-lg font-bold mb-2 text-white">
+                        {advantage.title}
+                      </h3>
+                      <p className="text-sm text-gray-300 leading-relaxed">
+                        {advantage.description}
+                      </p>
+                    </div>
+                  </FadeUp>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* Pricing Section */}
+          <section className="px-4 sm:px-6 lg:px-8 py-16 sm:py-20 md:py-24">
+            <div className="max-w-5xl mx-auto">
+              <FadeUp>
+                <div className="text-center mb-16">
+                  <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-yellow-400" style={{ textShadow: '0 0 20px rgba(251,203,10,0.3)' }}>
+                    {t.pricingTitle}
+                  </h2>
+                  <p className="text-lg sm:text-xl text-gray-200 max-w-2xl mx-auto">
+                    {t.pricingSubtitle}
+                  </p>
+                </div>
+                <PricingSection language={language} />
+              </FadeUp>
+            </div>
+          </section>
+
+          {/* Final CTA - Modern Design */}
+          <section className="px-4 sm:px-6 lg:px-8 py-16 sm:py-20 md:py-24">
+            <div className="max-w-4xl mx-auto">
+              <FadeUp>
+                <div className="relative p-8 sm:p-12 rounded-3xl border-2 border-yellow-400/40 bg-gradient-to-br from-purple-900/60 via-black/50 to-purple-900/60 backdrop-blur-lg overflow-hidden shadow-2xl">
+                  {/* Decorative Elements */}
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-400/10 rounded-full blur-3xl" />
+                  <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl" />
+
+                  <div className="relative z-10">
+                    {/* Header */}
+                    <div className="text-center mb-10">
+                      <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-red-500/30 border-2 border-red-400/50 mb-6 shadow-lg">
+                        <Gift className="w-4 h-4 text-red-300" />
+                        <span className="text-sm font-bold text-red-200 uppercase tracking-wider">Limited Time Offer</span>
+                      </div>
+
+                      <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 text-white">
+                        Start Your Journey Today
+                      </h2>
+
+                      <p className="text-xl sm:text-2xl text-gray-100 max-w-2xl mx-auto leading-relaxed">
+                        Experience the world's first AI-powered life engineering platform
+                      </p>
+                    </div>
+
+                    {/* Price & Features Grid */}
+                    <div className="grid md:grid-cols-2 gap-8 mb-10">
+                      {/* Price Card */}
+                      <div className="p-8 rounded-2xl bg-gradient-to-br from-yellow-400/20 to-yellow-400/10 border-2 border-yellow-400/40 shadow-xl">
+                        <div className="flex items-baseline justify-center gap-2 mb-4">
+                          <span className="text-7xl sm:text-8xl font-bold text-yellow-400 drop-shadow-lg">FREE</span>
+                        </div>
+                        <p className="text-center text-base font-medium text-gray-200">
+                          First-time users only • One-time offer
+                        </p>
+                      </div>
+
+                      {/* Features List */}
+                      <div className="space-y-4">
+                        <div className="flex items-start gap-4 p-4 rounded-xl bg-white/10 border border-white/20 backdrop-blur-sm">
+                          <CheckCircle className="w-6 h-6 text-green-400 flex-shrink-0 mt-0.5" />
+                          <div>
+                            <p className="text-white font-bold text-base mb-1">AI-Powered Analysis</p>
+                            <p className="text-gray-200 text-sm">BaZi & ZiWei dual-system insights</p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-start gap-4 p-4 rounded-xl bg-white/10 border border-white/20 backdrop-blur-sm">
+                          <CheckCircle className="w-6 h-6 text-green-400 flex-shrink-0 mt-0.5" />
+                          <div>
+                            <p className="text-white font-bold text-base mb-1">Web3 Authentication</p>
+                            <p className="text-gray-200 text-sm">Secure wallet connection, no passwords</p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-start gap-4 p-4 rounded-xl bg-white/10 border border-white/20 backdrop-blur-sm">
+                          <CheckCircle className="w-6 h-6 text-green-400 flex-shrink-0 mt-0.5" />
+                          <div>
+                            <p className="text-white font-bold text-base mb-1">Full Platform Access</p>
+                            <p className="text-gray-200 text-sm">Explore all features and tools</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* CTA Button */}
+                    <div className="text-center">
+                      <a href="/auth">
+                        <button className="group relative inline-flex items-center gap-4 px-14 py-6 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-400 text-purple-900 rounded-2xl font-bold text-2xl transition-all duration-300 hover:scale-105 hover:shadow-[0_0_60px_rgba(251,203,10,0.7)] overflow-hidden shadow-2xl">
+                          <span className="absolute -top-3 -right-3 px-4 py-1.5 bg-red-500 text-white text-sm font-bold rounded-full animate-pulse shadow-lg border-2 border-white">
+                            ONE-TIME
+                          </span>
+
+                          <Rocket className="w-7 h-7" />
+                          <span>Get Started Now</span>
+                          <Sparkles className="w-7 h-7" />
+
+                          <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        </button>
+                      </a>
+
+                      <p className="mt-6 text-base text-gray-200 font-medium">
+                        No credit card required • Instant access • Limited availability
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </FadeUp>
+            </div>
+          </section>
         </main>
       </div>
     </MainLayout>

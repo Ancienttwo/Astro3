@@ -1,18 +1,30 @@
 // 多语言选择器组件
 // 创建日期: 2025-01-31
 // 功能: 语言切换UI组件，支持紧凑和完整两种模式
+// 迁移: 2025-10-03 - 从 language-manager 迁移到 next-intl
 
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Globe, ChevronDown, Check } from 'lucide-react';
-import { 
-  useLanguageStore, 
-  getSupportedLanguages, 
-  useTranslations,
-  type SupportedLanguage 
-} from '@/lib/i18n/language-manager';
+import { useRouter, usePathname } from 'next/navigation';
+import { useLocale, useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
+
+type SupportedLanguage = 'zh' | 'en' | 'ja';
+
+interface LanguageConfig {
+  code: SupportedLanguage;
+  name: string;
+  nativeName: string;
+  flag: string;
+}
+
+const SUPPORTED_LANGUAGES: LanguageConfig[] = [
+  { code: 'zh', name: 'Chinese', nativeName: '简体中文', flag: '🇨🇳' },
+  { code: 'en', name: 'English', nativeName: 'English', flag: '🇺🇸' },
+  { code: 'ja', name: 'Japanese', nativeName: '日本語', flag: '🇯🇵' }
+];
 
 interface LanguageSelectorProps {
   /** 紧凑模式：只显示地球图标 */
@@ -37,18 +49,19 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  
-  const { currentLanguage, setLanguage } = useLanguageStore();
-  const { t } = useTranslations();
-  const supportedLanguages = getSupportedLanguages();
-  
+
+  const router = useRouter();
+  const pathname = usePathname();
+  const currentLocale = useLocale() as SupportedLanguage;
+  const tNav = useTranslations('navigation');
+
   // 获取当前语言配置
-  const currentConfig = supportedLanguages.find(lang => lang.code === currentLanguage);
+  const currentConfig = SUPPORTED_LANGUAGES.find(lang => lang.code === currentLocale);
 
   // 点击外部关闭下拉菜单
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && 
+      if (dropdownRef.current &&
           !dropdownRef.current.contains(event.target as Node) &&
           !buttonRef.current?.contains(event.target as Node)) {
         setShowDropdown(false);
@@ -78,32 +91,48 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
 
   // 处理语言切换
   const handleLanguageSelect = async (languageCode: SupportedLanguage) => {
-    if (languageCode === currentLanguage) {
+    if (languageCode === currentLocale) {
       setShowDropdown(false);
       return;
     }
 
     try {
-      // 更新语言状态
-      setLanguage(languageCode);
-      
+      // 构建新的路径
+      // pathname 可能是 /about 或 /en/about 或 /ja/about
+      let newPathname = pathname;
+
+      // 移除当前语言前缀（如果有）
+      if (currentLocale !== 'zh') {
+        newPathname = pathname.replace(`/${currentLocale}`, '');
+      }
+
+      // 添加新语言前缀（如果不是中文）
+      if (languageCode !== 'zh') {
+        newPathname = `/${languageCode}${newPathname || '/'}`;
+      } else {
+        newPathname = newPathname || '/';
+      }
+
       // 调用外部回调
       onLanguageChange?.(languageCode);
-      
+
       // 关闭下拉菜单
       setShowDropdown(false);
-      
+
       // 记录语言切换事件（用于分析）
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('languageSwitch', {
           detail: {
-            from: currentLanguage,
+            from: currentLocale,
             to: languageCode,
             timestamp: new Date().toISOString()
           }
         }));
       }
-      
+
+      // 导航到新路径
+      router.push(newPathname);
+
     } catch (error) {
       console.error('Language switch failed:', error);
     }
@@ -112,7 +141,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   // 键盘导航支持
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (disabled) return;
-    
+
     switch (event.key) {
       case 'Enter':
       case ' ':
@@ -142,7 +171,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
           disabled && "opacity-50 cursor-not-allowed",
           compact ? "space-x-0" : "space-x-2"
         )}
-        aria-label={compact ? t.navigation.language : undefined}
+        aria-label={compact ? tNav('language') : undefined}
         aria-expanded={showDropdown}
         aria-haspopup="listbox"
       >
@@ -156,11 +185,11 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
             <span className="text-sm text-gray-600">
               {currentConfig?.nativeName || '简体'}
             </span>
-            <ChevronDown 
+            <ChevronDown
               className={cn(
                 "w-3 h-3 text-gray-600 transition-transform",
                 showDropdown && "rotate-180"
-              )} 
+              )}
             />
           </>
         )}
@@ -176,11 +205,11 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
             align === 'right' ? 'right-0' : 'left-0'
           )}
           role="listbox"
-          aria-label={t.navigation.language}
+          aria-label={tNav('language')}
         >
-          {supportedLanguages.map((language) => {
-            const isSelected = language.code === currentLanguage;
-            
+          {SUPPORTED_LANGUAGES.map((language) => {
+            const isSelected = language.code === currentLocale;
+
             return (
               <button
                 key={language.code}
@@ -202,7 +231,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
                     {language.nativeName}
                   </span>
                 </div>
-                
+
                 {isSelected && (
                   <Check className="w-4 h-4 text-blue-600 flex-shrink-0" />
                 )}
@@ -226,7 +255,7 @@ export const LanguageSelectorWithLoading: React.FC<LanguageSelectorProps & {
       </div>
     );
   }
-  
+
   return <LanguageSelector {...props} />;
 };
 

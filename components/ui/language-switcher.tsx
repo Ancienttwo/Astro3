@@ -4,7 +4,10 @@ import React from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Globe, Languages } from 'lucide-react';
-import { useUrlLanguage, SupportedLanguage } from '@/lib/i18n/language-manager';
+import { useRouter, usePathname } from 'next/navigation';
+import { useLocale } from 'next-intl';
+
+type SupportedLanguage = 'zh' | 'en' | 'ja';
 
 export interface LanguageSwitcherProps {
   variant?: 'select' | 'buttons';
@@ -14,25 +17,49 @@ export interface LanguageSwitcherProps {
 }
 
 const LANGUAGE_OPTIONS = [
-  { value: 'zh-CN', label: '简体中文', flag: '🇨🇳' },
-  { value: 'zh-TW', label: '繁體中文', flag: '🇹🇼' },
-  { value: 'en-US', label: 'English', flag: '🇺🇸' },
+  { value: 'zh' as const, label: '简体中文', flag: '🇨🇳' },
+  { value: 'en' as const, label: 'English', flag: '🇺🇸' },
+  { value: 'ja' as const, label: '日本語', flag: '🇯🇵' },
 ] as const;
 
-export function LanguageSwitcher({ 
-  variant = 'select', 
-  size = 'md', 
+export function LanguageSwitcher({
+  variant = 'select',
+  size = 'md',
   showIcon = true,
-  className = '' 
+  className = ''
 }: LanguageSwitcherProps) {
-  const { currentLanguage, setLanguage } = useUrlLanguage();
+  const router = useRouter();
+  const pathname = usePathname();
+  const currentLocale = useLocale() as SupportedLanguage;
 
-  const handleLanguageChange = (language: string) => {
-    setLanguage(language as SupportedLanguage);
+  const handleLanguageChange = (languageCode: SupportedLanguage) => {
+    if (languageCode === currentLocale) return;
+
+    try {
+      // 构建新的路径
+      let newPathname = pathname;
+
+      // 移除当前语言前缀（如果有）
+      if (currentLocale !== 'zh') {
+        newPathname = pathname.replace(`/${currentLocale}`, '');
+      }
+
+      // 添加新语言前缀（如果不是中文）
+      if (languageCode !== 'zh') {
+        newPathname = `/${languageCode}${newPathname || '/'}`;
+      } else {
+        newPathname = newPathname || '/';
+      }
+
+      // 导航到新路径
+      router.push(newPathname);
+    } catch (error) {
+      console.error('Language switch failed:', error);
+    }
   };
 
   const getCurrentOption = () => {
-    return LANGUAGE_OPTIONS.find(opt => opt.value === currentLanguage) || LANGUAGE_OPTIONS[0];
+    return LANGUAGE_OPTIONS.find(opt => opt.value === currentLocale) || LANGUAGE_OPTIONS[0];
   };
 
   if (variant === 'buttons') {
@@ -43,11 +70,11 @@ export function LanguageSwitcher({
           {LANGUAGE_OPTIONS.map((option) => (
             <Button
               key={option.value}
-              variant={currentLanguage === option.value ? 'default' : 'ghost'}
+              variant={currentLocale === option.value ? 'default' : 'ghost'}
               size={size}
               onClick={() => handleLanguageChange(option.value)}
               className={`rounded-none border-0 ${
-                size === 'sm' ? 'px-2 py-1 text-xs' : 
+                size === 'sm' ? 'px-2 py-1 text-xs' :
                 size === 'lg' ? 'px-4 py-2' : 'px-3 py-1.5 text-sm'
               }`}
             >
@@ -63,9 +90,9 @@ export function LanguageSwitcher({
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       {showIcon && <Globe className="w-4 h-4 text-muted-foreground" />}
-      <Select value={currentLanguage} onValueChange={handleLanguageChange}>
+      <Select value={currentLocale} onValueChange={(val) => handleLanguageChange(val as SupportedLanguage)}>
         <SelectTrigger className={`
-          ${size === 'sm' ? 'w-24 h-8 text-xs' : 
+          ${size === 'sm' ? 'w-24 h-8 text-xs' :
             size === 'lg' ? 'w-40 h-12' : 'w-32 h-10'}
         `}>
           <SelectValue>

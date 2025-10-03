@@ -13,8 +13,8 @@ import SEOHead from "@/components/SEOHead";
 import { generateWebsiteStructuredData, generateOrganizationStructuredData } from "@/lib/seo/structured-data";
 import { Providers } from "@/components/Providers";
 import {NextIntlClientProvider} from 'next-intl';
-import { zhDict } from '@/lib/i18n/dictionaries';
 import { unstable_setRequestLocale } from 'next-intl/server';
+import { zhDict } from '@/lib/i18n/dictionaries';
 
 // 统一配置架构导入
 import { APP_CONFIG } from "@/lib/config/app-config";
@@ -110,23 +110,21 @@ export default function RootLayout({
         
         <ErrorBoundary>
           <Providers>
-            {/* Root provides zh messages for default (no prefix) pages; locale-specific layouts override */}
-            <NextIntlClientProvider locale={'zh'} messages={zhDict as any}>
-              <ThemeProvider
-                attribute="class"
-                defaultTheme="dark"
-                enableSystem
-                disableTransitionOnChange
-              >
-                  <SettingsProvider>
-                      <CardControlProvider>
-                        <AuthGuard>
-                          {children}
-                        </AuthGuard>
-                      </CardControlProvider>
-                  </SettingsProvider>
-              </ThemeProvider>
-            </NextIntlClientProvider>
+            {/* next-intl messages handled by i18n/request.ts */}
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="dark"
+              enableSystem
+              disableTransitionOnChange
+            >
+                <SettingsProvider>
+                    <CardControlProvider>
+                      <AuthGuard>
+                        {children}
+                      </AuthGuard>
+                    </CardControlProvider>
+                </SettingsProvider>
+            </ThemeProvider>
           </Providers>
         </ErrorBoundary>
         

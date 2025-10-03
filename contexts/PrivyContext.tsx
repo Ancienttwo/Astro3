@@ -11,6 +11,7 @@ import { PrivyProvider, usePrivy, useWallets, User as PrivyUser } from '@privy-i
 import { privyConfig, PRIVY_APP_ID, formatWalletAddress } from '@/lib/privy-config';
 import { toast } from 'sonner';
 import { supabaseSessionManager } from '@/lib/services/supabase-session-manager';
+import { prefetchDashboardData } from '@/hooks/useDashboardData';
 
 // Extended user type with additional fields
 export interface ExtendedUser extends PrivyUser {
@@ -92,9 +93,31 @@ function InternalAuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setIsLoadingUser(true);
 
-      // Get Privy access token
-      const privyToken = await getAccessToken();
-      
+      // Get Privy access token with retry
+      let privyToken: string | null = null;
+      for (let i = 0; i < 3; i++) {
+        try {
+          privyToken = await getAccessToken();
+          console.log(`🔑 Attempt ${i + 1}: Got token:`, {
+            hasToken: !!privyToken,
+            tokenLength: privyToken?.length,
+            tokenPrefix: privyToken?.substring(0, 20)
+          });
+          if (privyToken) break;
+        } catch (e) {
+          console.warn(`⚠️ Attempt ${i + 1} failed:`, e);
+          if (i === 2) throw e;
+          await new Promise(r => setTimeout(r, 500));
+        }
+      }
+
+      if (!privyToken) {
+        console.warn('⚠️ No Privy token available after retries, skipping sync');
+        return;
+      }
+
+      console.log('📤 Sending sync request to /api/auth/privy');
+
       // Call our API to verify and create/update user in Supabase
       const response = await fetch('/api/auth/privy', {
         method: 'POST',
@@ -108,9 +131,11 @@ function InternalAuthProvider({ children }: { children: React.ReactNode }) {
           linkedAccounts: privyUser.linkedAccounts,
         }),
       });
-      
+
       if (!response.ok) {
-        throw new Error('Failed to sync with backend');
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Backend sync failed:', errorData);
+        throw new Error(errorData.error || 'Failed to sync with backend');
       }
       
       const data = await response.json();
@@ -312,7 +337,14 @@ function InternalAuthProvider({ children }: { children: React.ReactNode }) {
   // Sync user data when Privy user changes
   useEffect(() => {
     if (authenticated && privyUser) {
-      syncUserWithSupabase(privyUser).catch(console.error);
+      syncUserWithSupabase(privyUser)
+        .then((extendedUser) => {
+          // Prefetch dashboard data after successful auth
+          if (extendedUser?.id) {
+            prefetchDashboardData(extendedUser.id).catch(console.error);
+          }
+        })
+        .catch(console.error);
     } else {
       setUser(null);
       setSupabaseJwt(null);

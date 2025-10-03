@@ -49,7 +49,9 @@ export default function Background() {
 
         // 星星数组
         const stars: Star[] = []
-        const numStars = 80 // 减少星星数量，营造更自然的星空
+        // 响应式星星数量：移动端减少星星
+        const isMobile = window.innerWidth < 768
+        const numStars = isMobile ? 60 : 150
         
         // 流星数组
         const meteors: Meteor[] = []
@@ -72,9 +74,9 @@ export default function Background() {
                 y: Math.random() * canvas.height,
                 vx: (Math.random() - 0.5) * 0.08,
                 vy: (Math.random() - 0.5) * 0.08,
-                size: Math.random() * 2 + 1,
-                brightness: Math.random() * 0.8 + 0.2,
-                baseBrightness: Math.random() * 0.6 + 0.4,
+                size: Math.random() * 2.5 + 1.5,
+                brightness: Math.random() * 0.9 + 0.3,
+                baseBrightness: Math.random() * 0.7 + 0.5,
                 twinkleSpeed: Math.random() * 0.01 + 0.005,
                 twinklePhase: Math.random() * Math.PI * 2,
                 color: getStarColor(temperature),
@@ -90,22 +92,22 @@ export default function Background() {
         const createStar = () => {
             const side = Math.floor(Math.random() * 4)
             let x, y
-            
+
             switch(side) {
                 case 0: x = Math.random() * canvas.width; y = -20; break
                 case 1: x = canvas.width + 20; y = Math.random() * canvas.height; break
                 case 2: x = Math.random() * canvas.width; y = canvas.height + 20; break
                 default: x = -20; y = Math.random() * canvas.height
             }
-            
+
             const temperature = Math.random()
             return {
                 x, y,
                 vx: (Math.random() - 0.5) * 0.08,
                 vy: (Math.random() - 0.5) * 0.08,
-                size: Math.random() * 2 + 1,
-                brightness: Math.random() * 0.8 + 0.2,
-                baseBrightness: Math.random() * 0.6 + 0.4,
+                size: Math.random() * 2.5 + 1.5,
+                brightness: Math.random() * 0.9 + 0.3,
+                baseBrightness: Math.random() * 0.7 + 0.5,
                 twinkleSpeed: Math.random() * 0.01 + 0.005,
                 twinklePhase: Math.random() * Math.PI * 2,
                 color: getStarColor(temperature),

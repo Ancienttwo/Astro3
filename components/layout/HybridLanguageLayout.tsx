@@ -1,8 +1,10 @@
 'use client';
 
-import React, { useEffect } from 'react';
-import { useUrlLanguage, initializeLanguageWithUrl, useTranslations } from '@/lib/i18n/language-manager';
+import React from 'react';
+import { useLocale, useTranslations } from 'next-intl';
 import { LanguageSwitcher } from '@/components/ui/language-switcher';
+
+type SupportedLanguage = 'zh' | 'en' | 'ja';
 
 interface HybridLanguageLayoutProps {
   children: React.ReactNode;
@@ -13,27 +15,22 @@ interface HybridLanguageLayoutProps {
 
 /**
  * 混合多语言架构布局组件
- * 支持查询参数的多语言页面布局
+ * 使用 next-intl 进行多语言支持
  */
-export default function HybridLanguageLayout({ 
-  children, 
-  title, 
-  description, 
-  showLanguageSelector = true 
+export default function HybridLanguageLayout({
+  children,
+  title,
+  description,
+  showLanguageSelector = true
 }: HybridLanguageLayoutProps) {
-  const { currentLanguage } = useUrlLanguage();
-  const { t } = useTranslations();
+  const currentLocale = useLocale() as SupportedLanguage;
+  const t = useTranslations('common');
 
-  // 初始化URL同步
-  useEffect(() => {
-    initializeLanguageWithUrl();
-  }, []);
-
-  const getLanguageLabel = (lang: string) => {
+  const getLanguageLabel = (lang: SupportedLanguage) => {
     switch (lang) {
-      case 'zh-CN': return '简体中文';
-      case 'zh-TW': return '繁體中文';
-      case 'en-US': return 'English';
+      case 'zh': return '简体中文';
+      case 'en': return 'English';
+      case 'ja': return '日本語';
       default: return lang;
     }
   };
@@ -70,7 +67,7 @@ export default function HybridLanguageLayout({
       {/* 语言变更提示 */}
       <div className="fixed bottom-4 right-4 z-50">
         <div className="text-xs text-muted-foreground bg-card/90 backdrop-blur-sm border border-border rounded-lg px-3 py-2">
-          {t.common.loading}... {getLanguageLabel(currentLanguage)}
+          {t('loading')}... {getLanguageLabel(currentLocale)}
         </div>
       </div>
     </div>

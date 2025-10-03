@@ -272,436 +272,282 @@ export default function LandingPage() {
     <MainLayout language={language} setLanguage={setLanguage} t={t}>
       <div className="flex flex-col min-h-screen bg-[rgb(var(--bg-color))]">
 
-        {/* Header - Mobile Optimized */}
-        <header className="py-4 sm:py-6 md:py-8 bg-transparent text-center">
-          <StaggerContainer>
-            <StaggerItem>
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold font-rajdhani text-[rgb(var(--accent-color))] mb-2 sm:mb-4">
-                ASTROZI
-              </h1>
-              <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold font-rajdhani text-[rgb(var(--accent-color))] mb-2 px-4">
-                {language === 'zh' ? '生命工程' : language === 'ja' ? '生命工学' : 'The First AI Life Engineering Platform'}
-              </h2>
-            </StaggerItem>
-            <StaggerItem>
-              <p className="mt-2 sm:mt-4 text-base sm:text-lg md:text-xl lg:text-2xl text-[rgb(var(--secondary-text-color))] font-medium px-4">
-                {language === 'zh' ?
-                  '科学优化人生轨迹 • AI + 古老智慧' :
-                  language === 'ja' ?
-                  '科学的人生軌道最適化 • AI + 古代の知恵' :
-                  'Scientific Life Trajectory Optimization • AI + Ancient Wisdom'
-                }
-              </p>
-            </StaggerItem>
-          </StaggerContainer>
-        </header>
+        {/* Main Content - Modern Clean Design */}
+        <main className="flex-grow w-full">
+          {/* Hero Section - Modern Centered Layout */}
+          <section id="home" className="relative px-4 sm:px-6 lg:px-8 pt-20 sm:pt-28 md:pt-32 pb-16 sm:pb-20 md:pb-24">
+            <div className="max-w-4xl mx-auto text-center">
+              <FadeUp>
+                {/* Badge */}
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[rgb(var(--accent-color))]/10 border border-[rgb(var(--accent-color))]/20 mb-8">
+                  <Sparkles className="w-4 h-4 text-[rgb(var(--accent-color))]" />
+                  <span className="text-sm font-medium text-[rgb(var(--accent-color))]">
+                    {language === 'zh' ? '全球首个 AI 生命工程平台' : language === 'ja' ? '世界初の AI 生命工学プラットフォーム' : 'World\'s First AI Life Engineering Platform'}
+                  </span>
+                </div>
 
-        {/* Main Content - Mobile Optimized */}
-        <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-12 flex flex-col items-center justify-center">
-          {/* Hero Section - Responsive Grid */}
-          <div id="home" className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-12 items-center mb-12 sm:mb-16">
-            {/* Left Content */}
-            <FadeRight delay={0.2}>
-              <div className="space-y-4 sm:space-y-6 text-center md:text-left">
-                <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold font-rajdhani text-[rgb(var(--accent-color))] leading-tight">
-                  {t.hero.title}
-                </h2>
-                <p className="text-sm sm:text-base md:text-lg leading-relaxed text-[rgb(var(--secondary-text-color))]">
-                  {t.hero.subtitle}
+                {/* Main Heading */}
+                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold font-rajdhani text-[rgb(var(--primary-text-color))] mb-6 leading-tight">
+                  {language === 'zh' ? (
+                    <>科学优化<span className="text-[rgb(var(--accent-color))]">人生轨迹</span></>
+                  ) : language === 'ja' ? (
+                    <>科学的に<span className="text-[rgb(var(--accent-color))]">人生を最適化</span></>
+                  ) : (
+                    <>Life Engineering<br/><span className="text-[rgb(var(--accent-color))]">Scientifically Optimized</span></>
+                  )}
+                </h1>
+
+                {/* Subtitle */}
+                <p className="text-lg sm:text-xl md:text-2xl text-[rgb(var(--secondary-text-color))]/80 mb-12 max-w-2xl mx-auto leading-relaxed">
+                  {language === 'zh' ?
+                    '融合东方古老智慧与现代 AI 技术，通过双系统分析优化您的生命轨迹' :
+                    language === 'ja' ?
+                    '東洋の古代の知恵と最新のAI技術を融合し、デュアルシステム分析で人生の軌道を最適化' :
+                    'Fusing ancient Eastern wisdom with modern AI technology through dual-system analysis'
+                  }
                 </p>
 
-                <div className="p-4 sm:p-6 rounded-xl sm:rounded-2xl backdrop-blur-md bg-[rgba(var(--card-bg))] border border-[rgb(var(--accent-color))]/30 shadow-2xl">
-                  <div className="font-bold text-center text-[rgb(var(--accent-color))] text-base sm:text-lg space-y-2">
-                    <div className="flex items-center justify-center gap-2">
-                      <Sun className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
-                      <span className="text-sm sm:text-base">{language === 'zh' ? '太阳系工程(八字)' : language === 'ja' ? '太陽系工学(八字)' : 'Solar Engineering'}</span>
+                {/* CTA Buttons */}
+                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
+                  <a href={language === 'zh' ? '/login' : language === 'ja' ? '/ja/login' : '/en/login'}>
+                    <button className="group relative px-8 py-4 bg-[rgb(var(--accent-color))] text-[rgb(var(--primary-text-color))] rounded-lg font-semibold text-lg transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgba(var(--accent-color),0.4)] flex items-center gap-2">
+                      <Rocket className="w-5 h-5" />
+                      {language === 'zh' ? '开始分析' : language === 'ja' ? '分析を開始' : 'Get Started'}
+                      <span className="absolute -top-2 -right-2 px-2 py-0.5 bg-red-500 text-white text-xs rounded-full">
+                        {language === 'zh' ? 'FREE' : 'FREE'}
+                      </span>
+                    </button>
+                  </a>
+                  <a href="#features">
+                    <button className="px-8 py-4 bg-transparent border-2 border-[rgb(var(--accent-color))]/30 text-[rgb(var(--secondary-text-color))] rounded-lg font-semibold text-lg transition-all duration-300 hover:border-[rgb(var(--accent-color))]/60 hover:bg-[rgb(var(--accent-color))]/5">
+                      {language === 'zh' ? '了解更多' : language === 'ja' ? '詳細を見る' : 'Learn More'}
+                    </button>
+                  </a>
+                </div>
+
+                {/* Feature Pills */}
+                <div className="flex flex-wrap justify-center gap-3 text-sm text-[rgb(var(--secondary-text-color))]/70">
+                  <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[rgb(var(--card-bg))]/50 border border-[rgb(var(--accent-color))]/10">
+                    <Sun className="w-4 h-4 text-[rgb(var(--accent-color))]" />
+                    <span>{language === 'zh' ? '八字系统' : language === 'ja' ? '八字システム' : 'BaZi System'}</span>
+                  </div>
+                  <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[rgb(var(--card-bg))]/50 border border-[rgb(var(--accent-color))]/10">
+                    <Moon className="w-4 h-4 text-[rgb(var(--accent-color))]" />
+                    <span>{language === 'zh' ? '紫微系统' : language === 'ja' ? '紫微システム' : 'ZiWei System'}</span>
+                  </div>
+                  <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[rgb(var(--card-bg))]/50 border border-[rgb(var(--accent-color))]/10">
+                    <Bot className="w-4 h-4 text-[rgb(var(--accent-color))]" />
+                    <span>{language === 'zh' ? 'AI 智能分析' : language === 'ja' ? 'AI 分析' : 'AI Analysis'}</span>
+                  </div>
+                </div>
+              </FadeUp>
+            </div>
+          </section>
+
+          {/* Dual-System Engineering Section - Modern Redesign */}
+          <section id="features" className="px-4 sm:px-6 lg:px-8 py-16 sm:py-20 md:py-24 bg-gradient-to-b from-transparent to-[rgb(var(--accent-color))]/5">
+            <div className="max-w-6xl mx-auto">
+              <FadeUp>
+                <div className="text-center mb-16">
+                  <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-[rgb(var(--primary-text-color))]">
+                    {t.systemsTitle}
+                  </h2>
+                  <p className="text-lg sm:text-xl text-[rgb(var(--secondary-text-color))]/80 max-w-3xl mx-auto">
+                    {t.systemsSubtitle}
+                  </p>
+                </div>
+              </FadeUp>
+
+              {/* Systems Grid - Simplified Design */}
+              <div className="grid md:grid-cols-2 gap-8">
+                {t.systems.map((system, index) => (
+                  <FadeUp key={index} delay={index * 0.1}>
+                    <div className="group relative p-8 rounded-2xl border border-[rgb(var(--accent-color))]/20 bg-[rgb(var(--card-bg))]/50 backdrop-blur-sm hover:border-[rgb(var(--accent-color))]/40 transition-all duration-300 hover:shadow-lg h-full">
+                      {/* Icon */}
+                      <div className="mb-6">
+                        <div className="inline-flex p-3 rounded-xl bg-[rgb(var(--accent-color))]/10">
+                          <system.icon className="w-8 h-8 text-[rgb(var(--accent-color))]" />
+                        </div>
+                      </div>
+
+                      {/* Content */}
+                      <h3 className="text-2xl font-bold text-[rgb(var(--primary-text-color))] mb-2">
+                        {system.title}
+                      </h3>
+                      <p className="text-sm font-medium text-[rgb(var(--accent-color))] mb-4">
+                        {system.system}
+                      </p>
+                      <p className="text-[rgb(var(--secondary-text-color))]/80 mb-6 leading-relaxed">
+                        {system.description}
+                      </p>
+
+                      {/* Features */}
+                      <ul className="space-y-3">
+                        {system.features.map((feature, idx) => (
+                          <li key={idx} className="flex items-start gap-3">
+                            <CheckCircle className="w-5 h-5 text-[rgb(var(--accent-color))] flex-shrink-0 mt-0.5" />
+                            <span className="text-[rgb(var(--secondary-text-color))]/70 text-sm">
+                              {feature}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
-                    <div className="text-center text-lg sm:text-xl">+</div>
-                    <div className="flex items-center justify-center gap-2">
-                      <Moon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
-                      <span className="text-sm sm:text-base">{language === 'zh' ? '月亮系工程(紫微)' : language === 'ja' ? '月系工学(紫微)' : 'Lunar Engineering'}</span>
+                  </FadeUp>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* Engineering Applications - Modern Grid */}
+          <section id="products" className="px-4 sm:px-6 lg:px-8 py-16 sm:py-20 md:py-24">
+            <div className="max-w-7xl mx-auto">
+              <FadeUp>
+                <div className="text-center mb-16">
+                  <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-[rgb(var(--primary-text-color))]">
+                    {t.engineeringTitle}
+                  </h2>
+                </div>
+              </FadeUp>
+
+              {/* Applications Grid */}
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {t.engineeringCases.map((case_, index) => (
+                  <FadeUp key={index} delay={index * 0.1}>
+                    <div className="group p-6 rounded-xl border border-[rgb(var(--accent-color))]/20 bg-[rgb(var(--card-bg))]/30 backdrop-blur-sm hover:border-[rgb(var(--accent-color))]/40 transition-all duration-300 hover:shadow-lg h-full flex flex-col">
+                      {/* Header */}
+                      <div className="flex items-center gap-3 mb-6">
+                        <case_.icon className="w-6 h-6 text-[rgb(var(--accent-color))]" />
+                        <h3 className="text-lg font-bold text-[rgb(var(--primary-text-color))]">
+                          {case_.title}
+                        </h3>
+                      </div>
+
+                      {/* Details */}
+                      <div className="space-y-4 flex-grow">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-sm font-medium text-[rgb(var(--accent-color))]">
+                            <Sun className="w-4 h-4" />
+                            {t.engineeringLabels.solar}
+                          </div>
+                          <p className="text-sm text-[rgb(var(--secondary-text-color))]/70 pl-6">
+                            {case_.solar}
+                          </p>
+                        </div>
+
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-sm font-medium text-[rgb(var(--accent-color))]">
+                            <Moon className="w-4 h-4" />
+                            {t.engineeringLabels.lunar}
+                          </div>
+                          <p className="text-sm text-[rgb(var(--secondary-text-color))]/70 pl-6">
+                            {case_.lunar}
+                          </p>
+                        </div>
+
+                        <div className="pt-4 border-t border-[rgb(var(--accent-color))]/10">
+                          <div className="flex items-center gap-2 text-sm font-medium text-[rgb(var(--accent-color))] mb-2">
+                            <Target className="w-4 h-4" />
+                            {t.engineeringLabels.solution}
+                          </div>
+                          <p className="text-sm text-[rgb(var(--secondary-text-color))]/70 pl-6">
+                            {case_.combined}
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-center text-lg sm:text-xl">=</div>
-                    <div className="flex items-center justify-center gap-2">
-                      <Stars className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
-                      <span className="text-sm sm:text-base">{language === 'zh' ? '完整生命架构' : language === 'ja' ? '完全な生命アーキテクチャ' : 'Complete Life Architecture'}</span>
+                  </FadeUp>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* Pricing Section - Simplified */}
+          <section id="pricing" className="px-4 sm:px-6 lg:px-8 py-16 sm:py-20 md:py-24">
+            <div className="max-w-6xl mx-auto">
+              <FadeUp>
+                <div className="text-center mb-16">
+                  <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-[rgb(var(--primary-text-color))]">
+                    {t.pricingTitle}
+                  </h2>
+                  <p className="text-lg sm:text-xl text-[rgb(var(--secondary-text-color))]/80 max-w-3xl mx-auto">
+                    {t.pricingSubtitle}
+                  </p>
+                </div>
+              </FadeUp>
+              <PricingSection language={language} />
+            </div>
+          </section>
+
+          {/* Web3 Benefits - Clean Modern Design */}
+          <section id="about" className="px-4 sm:px-6 lg:px-8 py-16 sm:py-20 md:py-24 bg-gradient-to-t from-transparent to-[rgb(var(--accent-color))]/5">
+            <div className="max-w-4xl mx-auto">
+              <FadeUp>
+                {/* Header */}
+                <div className="text-center mb-12">
+                  <div className="inline-flex p-4 rounded-2xl bg-[rgb(var(--accent-color))]/10 mb-6">
+                    <Calendar className="w-12 h-12 text-[rgb(var(--accent-color))]" />
+                  </div>
+                  <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 text-[rgb(var(--primary-text-color))]">
+                    {language === 'zh' ? 'Web3 用户福利' : 'Web3 User Benefits'}
+                  </h2>
+                  <p className="text-lg sm:text-xl text-[rgb(var(--secondary-text-color))]/80 max-w-2xl mx-auto">
+                    {language === 'zh' ?
+                      '连接钱包即可享受每日签到奖励，获得AI分析次数和积分' :
+                      'Connect your wallet for daily rewards, AI analysis credits, and points'
+                    }
+                  </p>
+                </div>
+
+                {/* Benefits Grid - Simplified */}
+                <div className="grid sm:grid-cols-3 gap-6 mb-12">
+                  <div className="text-center">
+                    <div className="inline-flex p-3 rounded-xl bg-[rgb(var(--accent-color))]/10 mb-4">
+                      <CheckCircle className="w-8 h-8 text-[rgb(var(--accent-color))]" />
                     </div>
+                    <h3 className="font-bold text-lg mb-2 text-[rgb(var(--primary-text-color))]">
+                      {language === 'zh' ? '每日签到' : 'Daily Check-in'}
+                    </h3>
+                    <p className="text-sm text-[rgb(var(--secondary-text-color))]/70">
+                      {language === 'zh' ? '每日获取 AI 分析次数' : 'Daily AI analysis credits'}
+                    </p>
+                  </div>
+
+                  <div className="text-center">
+                    <div className="inline-flex p-3 rounded-xl bg-[rgb(var(--accent-color))]/10 mb-4">
+                      <Coins className="w-8 h-8 text-[rgb(var(--accent-color))]" />
+                    </div>
+                    <h3 className="font-bold text-lg mb-2 text-[rgb(var(--primary-text-color))]">
+                      {language === 'zh' ? '积分累积' : 'Earn Points'}
+                    </h3>
+                    <p className="text-sm text-[rgb(var(--secondary-text-color))]/70">
+                      {language === 'zh' ? '积累积分参与空投' : 'Accumulate for airdrops'}
+                    </p>
+                  </div>
+
+                  <div className="text-center">
+                    <div className="inline-flex p-3 rounded-xl bg-[rgb(var(--accent-color))]/10 mb-4">
+                      <Trophy className="w-8 h-8 text-[rgb(var(--accent-color))]" />
+                    </div>
+                    <h3 className="font-bold text-lg mb-2 text-[rgb(var(--primary-text-color))]">
+                      {language === 'zh' ? '连击奖励' : 'Streak Bonus'}
+                    </h3>
+                    <p className="text-sm text-[rgb(var(--secondary-text-color))]/70">
+                      {language === 'zh' ? '连续签到获得加倍奖励' : 'Consecutive days multiply rewards'}
+                    </p>
                   </div>
                 </div>
 
-                <Alert className="backdrop-blur-md bg-[rgba(var(--card-bg))] border-[rgb(var(--accent-color))]/30 shadow-xl">
-                  <Rocket className="h-5 w-5 sm:h-6 sm:w-6 text-[rgb(var(--accent-color))]" />
-                  <AlertTitle className="font-bold text-[rgb(var(--accent-color))] text-base sm:text-lg">
-                    {language === 'zh' ? '生命工程精度' : language === 'ja' ? '生命工学精度' : 'Life Engineering Precision'}
-                  </AlertTitle>
-                  <AlertDescription className="text-[rgb(var(--secondary-text-color))] text-sm sm:text-base">
-                    {language === 'zh' ?
-                      '精确的出生时间是生命工程算法的关键输入参数，影响双系统分析的准确性。' :
-                      'Precise birth time is crucial for life engineering algorithm accuracy and dual-system analysis.'
-                    }
-                  </AlertDescription>
-                </Alert>
-              </div>
-            </FadeRight>
-
-            {/* Right CTA Card - Mobile Optimized */}
-            <FadeLeft delay={0.4}>
-              <Card className="w-full max-w-lg shadow-2xl backdrop-blur-md border-2 rounded-xl sm:rounded-2xl bg-[rgba(var(--card-bg))] border-[rgb(var(--accent-color))]/30 hover:border-[rgb(var(--accent-color))]/50 transition-all duration-300 hover:shadow-[0_0_30px_rgba(var(--accent-color),0.3)]">
-                <CardHeader className="text-center px-4 sm:px-6">
-                  <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 bg-[rgb(var(--accent-color))] rounded-full flex items-center justify-center mb-3 sm:mb-4 shadow-xl">
-                    <Stars className="w-8 h-8 sm:w-10 sm:h-10 text-[rgb(var(--primary-text-color))]" />
-                  </div>
-                  <CardTitle className="text-lg sm:text-xl md:text-2xl text-center font-bold text-[rgb(var(--accent-color))]">
-                    {language === 'zh' ? '开始您的生命工程项目' : language === 'ja' ? 'あなたの生命工学プロジェクトを始めましょう' : 'Start Your Life Engineering Project'}
-                  </CardTitle>
-                  <CardDescription className="text-center text-[rgb(var(--secondary-text-color))] text-sm sm:text-base md:text-lg">
-                    {language === 'zh' ?
-                      '体验 AI 驱动的双系统生命工程分析，优化您的人生轨迹' :
-                      'Experience AI-driven dual-system life engineering analysis to optimize your life trajectory'
-                    }
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4 sm:space-y-6 px-4 sm:px-6">
-                  <div className="space-y-3 sm:space-y-4">
-                    <a href={language === 'zh' ? '/login' : language === 'ja' ? '/ja/login' : '/en/login'} className="w-full block">
-                      <button
-                        className="relative w-full py-4 sm:py-5 px-4 sm:px-6 text-base sm:text-lg font-bold rounded-lg sm:rounded-xl shadow-2xl transform hover:scale-105 transition-all duration-300 overflow-hidden group border-2 bg-[rgb(var(--accent-color))] text-[rgb(var(--primary-text-color))] border-[rgb(var(--accent-color))] hover:opacity-90 hover:shadow-[0_0_30px_rgba(var(--accent-color),0.5)]"
-                      >
-                        <span className="absolute top-0 right-0 px-2 py-1 text-xs font-bold bg-[rgb(var(--primary-text-color))] text-[rgb(var(--accent-color))] rounded-bl-lg shadow-lg flex items-center gap-1">
-                          <Gift className="w-3 h-3" />
-                          {language === 'zh' ? '推荐' : 'GIFT'}
-                        </span>
-                        <span className="flex items-center justify-center gap-2 sm:gap-3">
-                          <Wallet className="w-4 h-4 sm:w-5 sm:h-5" />
-                          <span className="text-sm sm:text-base">{language === 'zh' ? 'Web3钱包登录' : language === 'ja' ? 'ウォレット接続' : 'Connect Wallet'}</span>
-                        </span>
-                      </button>
-                    </a>
-
-                    <a href={language === 'zh' ? '/login' : language === 'ja' ? '/ja/login' : '/en/login'} className="w-full block">
-                      <button
-                        className="relative w-full py-4 sm:py-5 px-4 sm:px-6 text-base sm:text-lg font-bold rounded-lg sm:rounded-xl shadow-2xl transform hover:scale-105 transition-all duration-300 overflow-hidden group border-2 bg-[rgba(var(--card-bg))] text-[rgb(var(--secondary-text-color))] border-[rgb(var(--accent-color))]/50"
-                      >
-                        <span className="absolute top-0 right-0 px-2 py-1 text-xs font-bold bg-[rgb(var(--accent-color))] text-[rgb(var(--primary-text-color))] rounded-bl-lg shadow-lg">
-                          {language === 'zh' ? '¥9.9' : 'Web2 Users'}
-                        </span>
-                        <span className="flex items-center justify-center gap-2 sm:gap-3">
-                          <Mail className="w-4 h-4 sm:w-5 sm:h-5" />
-                          <span className="text-sm sm:text-base">{language === 'zh' ? '邮箱密码登录' : language === 'ja' ? 'メールログイン' : 'Email Login'}</span>
-                        </span>
-                      </button>
-                    </a>
-                  </div>
-
-
-                  <div className="text-center">
-                    <p className="text-xs sm:text-sm text-[rgb(var(--secondary-text-color))]">
-                      {language === 'zh' ?
-                        'Web3免费 • 邮箱¥9.9 • AI智能分析 • 区块链验证' :
-                        'Web3 Free • Email Login • AI Analysis • Blockchain Verified'
-                      }
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </FadeLeft>
-          </div>
-
-          {/* Dual-System Engineering Section - Mobile Optimized */}
-          <div id="features" className="w-full max-w-7xl mb-12 sm:mb-16 md:mb-20">
-            <FadeUp>
-              <div className="text-center mb-8 sm:mb-12 md:mb-16">
-                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 text-[rgb(var(--accent-color))]">{t.systemsTitle}</h2>
-                <p className="text-base sm:text-lg md:text-xl leading-relaxed max-w-5xl mx-auto text-[rgb(var(--secondary-text-color))]">{t.systemsSubtitle}</p>
-              </div>
-            </FadeUp>
-
-            {/* Systems Comparison - Responsive Grid */}
-            <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-10 mb-12 sm:mb-16">
-              {t.systems.map((system, index) => (
-                <StaggerItem key={index}>
-                  <Card className="backdrop-blur-md border-2 transition-all duration-300 rounded-xl sm:rounded-2xl shadow-2xl hover:shadow-[0_0_30px_rgba(var(--accent-color),0.2)] hover:-translate-y-2 bg-[rgba(var(--card-bg))] border-[rgb(var(--accent-color))]/30 hover:border-[rgb(var(--accent-color))]/50 h-full">
-                    <CardContent className="p-4 sm:p-6 md:p-8">
-                      <div className="flex items-center space-x-4 sm:space-x-6 mb-6 sm:mb-8">
-                        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-[rgb(var(--accent-color))] flex items-center justify-center shadow-2xl flex-shrink-0">
-                          <system.icon className="w-8 h-8 sm:w-10 sm:h-10 text-[rgb(var(--primary-text-color))]" />
-                        </div>
-                        <div className="min-w-0">
-                          <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-[rgb(var(--accent-color))] leading-tight">{system.title}</h3>
-                          <p className="font-bold text-[rgb(var(--secondary-text-color))] text-sm sm:text-base md:text-lg">{system.system}</p>
-                        </div>
-                      </div>
-                      <p className="leading-relaxed mb-6 sm:mb-8 text-[rgb(var(--secondary-text-color))] text-sm sm:text-base md:text-lg">{system.description}</p>
-                      <div className="space-y-3 sm:space-y-4">
-                        {system.features.map((feature, idx) => (
-                          <div key={idx} className="flex items-start space-x-3">
-                            <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-[rgb(var(--accent-color))] shadow-lg flex-shrink-0 mt-1.5 sm:mt-2"></div>
-                            <span className="text-[rgb(var(--secondary-text-color))] text-sm sm:text-base">{feature}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </StaggerItem>
-              ))}
-            </StaggerContainer>
-          </div>
-
-          {/* Engineering Applications - Mobile Optimized */}
-          <div id="products" className="w-full max-w-7xl mb-12 sm:mb-16 md:mb-20">
-            <FadeUp>
-              <div className="text-center mb-8 sm:mb-12 md:mb-16">
-                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 text-[rgb(var(--accent-color))]">{t.engineeringTitle}</h2>
-              </div>
-            </FadeUp>
-
-            <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-              {t.engineeringCases.map((case_, index) => (
-                <StaggerItem key={index}>
-                  <Card className="backdrop-blur-md border-2 transition-all duration-300 rounded-xl sm:rounded-2xl shadow-2xl hover:shadow-[0_0_30px_rgba(var(--accent-color),0.2)] hover:-translate-y-2 bg-[rgba(var(--card-bg))] border-[rgb(var(--accent-color))]/30 hover:border-[rgb(var(--accent-color))]/50 h-full">
-                    <CardContent className="p-4 sm:p-6 md:p-8">
-                      <div className="flex items-center space-x-3 sm:space-x-4 mb-4 sm:mb-6">
-                        <case_.icon className="w-8 h-8 sm:w-10 sm:h-10 text-[rgb(var(--accent-color))] flex-shrink-0" />
-                        <h3 className="text-base sm:text-lg md:text-xl font-bold text-[rgb(var(--accent-color))] leading-tight">{case_.title}</h3>
-                      </div>
-
-                      <div className="space-y-3 sm:space-y-4">
-                        <div className="p-3 sm:p-4 rounded-lg sm:rounded-xl border-l-4 bg-[rgb(var(--accent-color))]/10 border-l-[rgb(var(--accent-color))] backdrop-blur-sm">
-                          <p className="font-bold text-[rgb(var(--accent-color))] mb-2 flex items-center gap-2 text-sm sm:text-base"><Sun className="w-3 h-3 sm:w-4 sm:h-4" />{t.engineeringLabels.solar}</p>
-                          <p className="text-[rgb(var(--secondary-text-color))] text-xs sm:text-sm">{case_.solar}</p>
-                        </div>
-
-                        <div className="bg-[rgb(var(--accent-color))]/20 p-3 sm:p-4 rounded-lg sm:rounded-xl border-l-4 border-[rgb(var(--accent-color))] backdrop-blur-sm">
-                          <p className="text-[rgb(var(--accent-color))] font-bold mb-2 flex items-center gap-2 text-sm sm:text-base"><Moon className="w-3 h-3 sm:w-4 sm:h-4" />{t.engineeringLabels.lunar}</p>
-                          <p className="text-[rgb(var(--secondary-text-color))] text-xs sm:text-sm">{case_.lunar}</p>
-                        </div>
-
-                        <div className="bg-[rgb(var(--accent-color))]/20 p-3 sm:p-4 rounded-lg sm:rounded-xl border-l-4 border-[rgb(var(--accent-color))] backdrop-blur-sm">
-                          <p className="text-[rgb(var(--accent-color))] font-bold mb-2 flex items-center gap-2 text-sm sm:text-base"><Target className="w-3 h-3 sm:w-4 sm:h-4" />{t.engineeringLabels.solution}</p>
-                          <p className="text-[rgb(var(--secondary-text-color))] text-xs sm:text-sm">{case_.combined}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </StaggerItem>
-              ))}
-            </StaggerContainer>
-          </div>
-
-          {/* Revolution Section - Mobile Optimized */}
-          <div className="w-full max-w-7xl mb-12 sm:mb-16 md:mb-20">
-            <FadeUp>
-              <div className="text-center mb-8 sm:mb-12 md:mb-16">
-                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 text-[rgb(var(--accent-color))]">
-                  {t.revolutionTitle}
-                </h2>
-                <p className="text-base sm:text-lg md:text-xl lg:text-2xl max-w-4xl mx-auto mb-8 sm:mb-12 text-[rgb(var(--secondary-text-color))]">
-                  {t.revolutionSubtitle}
-                </p>
-
-                <ScrollReveal direction="fade" delay={0.3}>
-                  <div className="p-4 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl border-2 backdrop-blur-md shadow-2xl bg-[rgba(var(--card-bg))] border-[rgb(var(--accent-color))]/40 hover:border-[rgb(var(--accent-color))]/60 transition-all duration-300 hover:shadow-[0_0_30px_rgba(var(--accent-color),0.3)]">
-                    <p className="text-xl sm:text-2xl md:text-3xl font-bold mb-3 sm:mb-4 text-[rgb(var(--accent-color))]">{t.revolutionHighlight.title}</p>
-                    <p className="text-sm sm:text-base md:text-lg lg:text-xl text-[rgb(var(--secondary-text-color))]">{t.revolutionHighlight.description}</p>
-                  </div>
-                </ScrollReveal>
-              </div>
-            </FadeUp>
-
-            <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-              {t.advantages.map((advantage, index) => (
-                <StaggerItem key={index}>
-                  <Card className="backdrop-blur-md border-2 transition-all duration-300 rounded-xl sm:rounded-2xl shadow-2xl hover:shadow-[0_0_30px_rgba(var(--accent-color),0.2)] hover:-translate-y-2 bg-[rgba(var(--card-bg))] border-[rgb(var(--accent-color))]/30 hover:border-[rgb(var(--accent-color))]/50 h-full">
-                    <CardContent className="p-4 sm:p-6 md:p-8 text-center">
-                      <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 sm:mb-6 bg-[rgb(var(--accent-color))] rounded-full flex items-center justify-center shadow-xl">
-                        <advantage.icon className="w-6 h-6 sm:w-8 sm:h-8 text-[rgb(var(--primary-text-color))]" />
-                      </div>
-                      <h3 className="text-base sm:text-lg md:text-xl font-bold mb-3 sm:mb-4 text-[rgb(var(--accent-color))]">{advantage.title}</h3>
-                      <p className="leading-relaxed text-[rgb(var(--secondary-text-color))] text-sm sm:text-base">{advantage.description}</p>
-                    </CardContent>
-                  </Card>
-                </StaggerItem>
-              ))}
-            </StaggerContainer>
-          </div>
-
-          {/* Pricing Section - Mobile Optimized */}
-          <FadeUp>
-            <div id="pricing" className="w-full max-w-6xl mb-12 sm:mb-16 md:mb-20">
-              <div className="text-center mb-8 sm:mb-12 md:mb-16">
-                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 text-[rgb(var(--accent-color))]">
-                  {t.pricingTitle}
-                </h2>
-                <p className="text-base sm:text-lg md:text-xl max-w-3xl mx-auto text-[rgb(var(--secondary-text-color))]">
-                  {t.pricingSubtitle}
-                </p>
-              </div>
-              <PricingSection language={language} />
+                {/* CTA */}
+                <a href={language === 'zh' ? '/login' : language === 'ja' ? '/ja/login' : '/en/login'}>
+                  <button className="px-8 py-4 bg-[rgb(var(--accent-color))] text-[rgb(var(--primary-text-color))] rounded-lg font-semibold text-lg transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgba(var(--accent-color),0.4)] inline-flex items-center gap-2">
+                    <Wallet className="w-5 h-5" />
+                    {language === 'zh' ? '连接钱包开始' : 'Connect Wallet to Start'}
+                  </button>
+                </a>
+              </FadeUp>
             </div>
-          </FadeUp>
-
-          {/* Web3 Daily Check-in Benefits - Mobile Optimized */}
-          <FadeUp delay={0.2}>
-            <div id="about" className="w-full max-w-6xl text-center">
-              <Card className="backdrop-blur-md border-2 transition-all duration-300 rounded-xl sm:rounded-2xl shadow-2xl bg-[rgba(var(--card-bg))] border-[rgb(var(--accent-color))]/40 hover:border-[rgb(var(--accent-color))]/60 hover:shadow-[0_0_30px_rgba(var(--accent-color),0.3)]">
-                <CardContent className="p-6 sm:p-8 md:p-12">
-                  <div className="flex justify-center mb-4 sm:mb-6">
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-[rgb(var(--accent-color))] rounded-full flex items-center justify-center shadow-2xl">
-                      <Calendar className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-[rgb(var(--primary-text-color))]" />
-                    </div>
-                  </div>
-
-                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6 text-[rgb(var(--accent-color))]">
-                    {language === 'zh' ? 'Web3用户每日签到福利' : 'Web3 Users Daily Check-in Benefits'}
-                  </h2>
-
-                  <p className="text-sm sm:text-base md:text-lg lg:text-xl mb-6 sm:mb-8 leading-relaxed text-[rgb(var(--secondary-text-color))] max-w-4xl mx-auto">
-                    {language === 'zh' ? 
-                      '连接钱包即可享受每日签到奖励，获得AI分析次数、积累积分、参与未来空投分配，打造区块链驱动的命理分析体验' :
-                      'Connect your wallet to enjoy daily check-in rewards, earn AI analysis credits, accumulate points, and participate in future airdrop distributions with blockchain-powered astrology experience'
-                    }
-                  </p>
-                  
-                  {/* Benefits Grid - Mobile Optimized */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
-                    {/* Daily Check-in Mechanism */}
-                    <div className="p-4 sm:p-6 rounded-xl sm:rounded-2xl border backdrop-blur-sm bg-[rgba(var(--card-bg))] border-[rgb(var(--accent-color))]/30">
-                      <div className="flex justify-center mb-3 sm:mb-4">
-                        <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[rgb(var(--accent-color))] rounded-full flex items-center justify-center shadow-xl">
-                          <CheckCircle className="w-6 h-6 sm:w-8 sm:h-8 text-[rgb(var(--primary-text-color))]" />
-                        </div>
-                      </div>
-                      <h3 className="text-base sm:text-lg md:text-xl font-bold mb-3 text-[rgb(var(--accent-color))]">
-                        {language === 'zh' ? '每日签到机制' : 'Daily Check-in System'}
-                      </h3>
-                      <div className="space-y-2 text-[rgb(var(--secondary-text-color))] text-xs sm:text-sm">
-                        <div className="flex items-center justify-between p-2 bg-white/10 rounded">
-                          <span>{language === 'zh' ? '基础奖励' : 'Base Reward'}</span>
-                          <span className="text-[rgb(var(--accent-color))]">{language === 'zh' ? '1次AI分析' : '1 AI Analysis'}</span>
-                        </div>
-                        <div className="flex items-center justify-between p-2 bg-white/10 rounded">
-                          <span>{language === 'zh' ? '连续7天' : '7-Day Streak'}</span>
-                          <span className="text-[rgb(var(--accent-color))]">{language === 'zh' ? '2倍奖励' : '2x Rewards'}</span>
-                        </div>
-                        <div className="flex items-center justify-between p-2 bg-white/10 rounded">
-                          <span>{language === 'zh' ? '连续30天' : '30-Day Streak'}</span>
-                          <span className="text-[rgb(var(--accent-color))]">{language === 'zh' ? '5倍奖励' : '5x Rewards'}</span>
-                        </div>
-                        <div className="text-xs text-[rgb(var(--secondary-text-color))]/70 mt-3">
-                          {language === 'zh' ? '※ 仅需0.0002 BNB燃料费' : '※ Only 0.0002 BNB gas fee'}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* AI Report Mechanism */}
-                    <div className="p-4 sm:p-6 rounded-xl sm:rounded-2xl border backdrop-blur-sm bg-[rgba(var(--card-bg))] border-[rgb(var(--accent-color))]/30">
-                      <div className="flex justify-center mb-3 sm:mb-4">
-                        <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[rgb(var(--accent-color))] rounded-full flex items-center justify-center shadow-xl">
-                          <Bot className="w-6 h-6 sm:w-8 sm:h-8 text-[rgb(var(--primary-text-color))]" />
-                        </div>
-                      </div>
-                      <h3 className="text-base sm:text-lg md:text-xl font-bold mb-3 text-[rgb(var(--accent-color))]">
-                        {language === 'zh' ? 'AI报告机制' : 'AI Report System'}
-                      </h3>
-                      <div className="space-y-2 text-[rgb(var(--secondary-text-color))] text-xs sm:text-sm">
-                        <div className="flex items-center justify-between p-2 bg-white/10 rounded">
-                          <span>{language === 'zh' ? '用神大师' : 'Yong Shen Master'}</span>
-                          <span className="text-[rgb(var(--accent-color))]">{language === 'zh' ? '元素分析' : 'Element Analysis'}</span>
-                        </div>
-                        <div className="flex items-center justify-between p-2 bg-white/10 rounded">
-                          <span>{language === 'zh' ? '铁口直断' : 'Direct Fortune'}</span>
-                          <span className="text-[rgb(var(--accent-color))]">{language === 'zh' ? '直接预测' : 'Direct Prediction'}</span>
-                        </div>
-                        <div className="flex items-center justify-between p-2 bg-white/10 rounded">
-                          <span>{language === 'zh' ? '四化分析' : 'Four Changes'}</span>
-                          <span className="text-[rgb(var(--accent-color))]">{language === 'zh' ? '紫微专精' : 'ZiWei Expert'}</span>
-                        </div>
-                        <div className="text-xs text-[rgb(var(--secondary-text-color))]/70 mt-3">
-                          {language === 'zh' ? '※ 签到获得分析次数，永不过期' : '※ Get analysis credits via check-in, never expire'}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Points & Airdrop Mechanism */}
-                    <div className="p-4 sm:p-6 rounded-xl sm:rounded-2xl border backdrop-blur-sm bg-[rgba(var(--card-bg))] border-[rgb(var(--accent-color))]/30">
-                      <div className="flex justify-center mb-3 sm:mb-4">
-                        <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[rgb(var(--accent-color))] rounded-full flex items-center justify-center shadow-xl">
-                          <Coins className="w-6 h-6 sm:w-8 sm:h-8 text-[rgb(var(--primary-text-color))]" />
-                        </div>
-                      </div>
-                      <h3 className="text-base sm:text-lg md:text-xl font-bold mb-3 text-[rgb(var(--accent-color))]">
-                        {language === 'zh' ? '积分空投机制' : 'Points & Airdrop System'}
-                      </h3>
-                      <div className="space-y-2 text-[rgb(var(--secondary-text-color))] text-xs sm:text-sm">
-                        <div className="flex items-center justify-between p-2 bg-white/10 rounded">
-                          <span>{language === 'zh' ? '基础积分' : 'Base Points'}</span>
-                          <span className="text-[rgb(var(--accent-color))]">{language === 'zh' ? '10分/天' : '10 pts/day'}</span>
-                        </div>
-                        <div className="flex items-center justify-between p-2 bg-white/10 rounded">
-                          <span>{language === 'zh' ? '连击奖励' : 'Streak Bonus'}</span>
-                          <span className="text-[rgb(var(--accent-color))]">{language === 'zh' ? '最高5倍' : 'Up to 5x'}</span>
-                        </div>
-                        <div className="flex items-center justify-between p-2 bg-white/10 rounded">
-                          <span>{language === 'zh' ? '空投权重' : 'Airdrop Weight'}</span>
-                          <span className="text-[rgb(var(--accent-color))]">{language === 'zh' ? '积分累积' : 'Points Accumulate'}</span>
-                        </div>
-                        <div className="text-xs text-[rgb(var(--secondary-text-color))]/70 mt-3">
-                          {language === 'zh' ? '※ 积分决定未来代币分配比例' : '※ Points determine future token allocation ratio'}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* CTA Buttons - Mobile Optimized */}
-                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full max-w-3xl mx-auto mb-4 sm:mb-6 px-4">
-                    <a href={language === 'zh' ? '/login' : language === 'ja' ? '/ja/login' : '/en/login'} className="flex-1">
-                      <button
-                        className="relative w-full px-4 sm:px-6 md:px-8 py-4 sm:py-5 md:py-6 text-base sm:text-lg md:text-xl lg:text-2xl font-bold rounded-xl sm:rounded-2xl shadow-2xl transform hover:scale-105 transition-all duration-300 overflow-hidden group border-2 bg-[rgb(var(--accent-color))] text-[rgb(var(--primary-text-color))] border-[rgb(var(--accent-color))] hover:opacity-90 hover:shadow-[0_0_40px_rgba(var(--accent-color),0.6)]"
-                      >
-                        <span className="absolute top-0 right-0 px-2 sm:px-3 py-1 text-xs font-bold bg-[rgb(var(--accent-color))] text-[rgb(var(--primary-text-color))] rounded-bl-lg shadow-lg flex items-center gap-1">
-                          <Gift className="w-3 h-3" />
-                          {language === 'zh' ? '推荐' : 'GIFT'}
-                        </span>
-                        <span className="flex items-center justify-center gap-2 sm:gap-3">
-                          <Wallet className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
-                          <span className="text-sm sm:text-base md:text-lg">{language === 'zh' ? '连接钱包' : 'Connect Wallet'}</span>
-                        </span>
-                      </button>
-                    </a>
-
-                    <a href={language === 'zh' ? '/login' : language === 'ja' ? '/ja/login' : '/en/login'} className="flex-1">
-                      <button
-                        className="relative w-full px-4 sm:px-6 md:px-8 py-4 sm:py-5 md:py-6 text-base sm:text-lg md:text-xl lg:text-2xl font-bold rounded-xl sm:rounded-2xl shadow-2xl transform hover:scale-105 transition-all duration-300 overflow-hidden group border-2 bg-[rgba(var(--card-bg))] text-[rgb(var(--secondary-text-color))] border-[rgb(var(--accent-color))]/50"
-                      >
-                        <span className="absolute top-0 right-0 px-2 sm:px-3 py-1 text-xs font-bold bg-[rgb(var(--accent-color))] text-[rgb(var(--primary-text-color))] rounded-bl-lg shadow-lg">
-                          {language === 'zh' ? '¥9.9' : 'Web2 Users'}
-                        </span>
-                        <span className="flex items-center justify-center gap-2 sm:gap-3">
-                          <Mail className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
-                          <span className="text-sm sm:text-base md:text-lg">{language === 'zh' ? '打开 Web3 登录' : language === 'ja' ? 'Web3 ログインを開く' : 'Open Web3 Login'}</span>
-                        </span>
-                      </button>
-                    </a>
-                  </div>
-
-                  <div className="flex items-center justify-center space-x-6 text-sm text-[rgb(var(--secondary-text-color))]">
-                    <div className="flex items-center space-x-2">
-                      <Zap className="w-4 h-4 text-[rgb(var(--accent-color))]" />
-                      <span>{language === 'zh' ? '每日签到奖励' : 'Daily Check-in Rewards'}</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Trophy className="w-4 h-4 text-[rgb(var(--accent-color))]" />
-                      <span>{language === 'zh' ? '连击奖励加成' : 'Streak Bonus Multiplier'}</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Coins className="w-4 h-4 text-[rgb(var(--accent-color))]" />
-                      <span>{language === 'zh' ? '空投积分累积' : 'Airdrop Points Accumulation'}</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </FadeUp>
+          </section>
           
         </main>
       </div>

@@ -1,0 +1,172 @@
+{
+  "header": {
+    "title": "Dashboard",
+    "subtitle": "Welcome back to AstroZi",
+    "search": "Search...",
+    "notifications": "Notifications",
+    "settings": "Settings",
+    "profile": "Profile"
+  },
+  "sidebar": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "charts": "Charts",
+    "wiki": "Wiki",
+    "tasks": "Tasks",
+    "leaderboard": "Leaderboard",
+    "rewards": "Web3 Rewards",
+    "points": "Points",
+    "wallet": "Wallet",
+    "settings": "Settings",
+    "expandSidebar": "Expand sidebar",
+    "collapseSidebar": "Collapse sidebar"
+  },
+  "welcome": {
+    "greeting": {
+      "morning": "Good morning",
+      "afternoon": "Good afternoon",
+      "evening": "Good evening",
+      "night": "Good night"
+    },
+    "message": "Explore the mysteries of Eastern metaphysics and discover your destiny",
+    "createChart": "Create Chart",
+    "signIn": "Sign In",
+    "connectWallet": "Connect Wallet"
+  },
+  "metrics": {
+    "points": {
+      "title": "Total Points",
+      "subtitle": "Earned today",
+      "loading": "Loading...",
+      "error": "Unable to load points"
+    },
+    "streak": {
+      "title": "Check-in Streak",
+      "subtitle": "days",
+      "checkIn": "Check In Now",
+      "checkedIn": "Checked In",
+      "loading": "Loading...",
+      "error": "Unable to load streak"
+    },
+    "rank": {
+      "title": "Rank",
+      "subtitle": "Top {percent}%",
+      "loading": "Loading...",
+      "error": "Unable to load rank"
+    },
+    "tasks": {
+      "title": "Active Tasks",
+      "subtitle": "Completed",
+      "loading": "Loading...",
+      "error": "Unable to load tasks"
+    }
+  },
+  "quickActions": {
+    "title": "Quick Actions",
+    "createChart": "Create Chart",
+    "viewCharts": "View Charts",
+    "exploreWiki": "Explore Wiki",
+    "dailyFortune": "Daily Fortune"
+  },
+  "tasks": {
+    "title": "Active Tasks",
+    "viewAll": "View All",
+    "empty": "No active tasks. Check back tomorrow!",
+    "progress": "Progress",
+    "reward": "{points} points",
+    "loading": "Loading..."
+  },
+  "leaderboard": {
+    "title": "Leaderboard",
+    "viewFull": "View Full Leaderboard",
+    "rank": "Rank",
+    "user": "User",
+    "points": "Points",
+    "you": "You",
+    "top5": "Top 5",
+    "loading": "Loading...",
+    "empty": "No leaderboard data available"
+  },
+  "web3": {
+    "status": {
+      "title": "Unlock Web3 Features",
+      "description": "Connect your wallet to access daily rewards, points, and exclusive NFT badges",
+      "connect": "Connect Wallet",
+      "benefits": {
+        "rewards": "Daily check-in rewards",
+        "points": "Points system",
+        "nft": "NFT badge collection",
+        "leaderboard": "Global leaderboard"
+      }
+    },
+    "metrics": {
+      "title": "Web3 Assets",
+      "balance": "Balance",
+      "rewards": "Pending Rewards",
+      "nfts": "NFT Count",
+      "connect": "Connect wallet to view"
+    },
+    "nft": {
+      "title": "NFT Badge Collection",
+      "description": "Unlock exclusive NFT badges by completing tasks and achievements",
+      "rarity": {
+        "common": "Common",
+        "rare": "Rare",
+        "epic": "Epic",
+        "legendary": "Legendary"
+      },
+      "empty": "No NFT badges yet",
+      "loading": "Loading..."
+    }
+  },
+  "educational": {
+    "calendar": {
+      "title": "Perpetual Calendar",
+      "description": "Query lunar dates, solar terms, auspicious and inauspicious days"
+    },
+    "comparison": {
+      "title": "Ziwei vs Bazi",
+      "description": "Understand the differences between these two major metaphysical systems"
+    },
+    "fiveElements": {
+      "title": "Five Elements Encyclopedia",
+      "description": "Explore the mysteries of Metal, Wood, Water, Fire, and Earth"
+    },
+    "stars": {
+      "title": "Fourteen Major Stars",
+      "description": "Learn about the core stars in Ziwei astrology"
+    },
+    "expand": "Expand",
+    "collapse": "Collapse"
+  },
+  "activity": {
+    "title": "Recent Activity",
+    "empty": "No recent activity",
+    "types": {
+      "chart_created": "Created a chart",
+      "task_completed": "Completed a task",
+      "check_in": "Daily check-in",
+      "reward_claimed": "Claimed a reward"
+    },
+    "loading": "Loading...",
+    "error": "Unable to load recent activity"
+  },
+  "loading": {
+    "dashboard": "Loading dashboard...",
+    "data": "Loading data...",
+    "chart": "Generating chart..."
+  },
+  "errors": {
+    "loadFailed": "Load failed",
+    "retry": "Retry",
+    "networkError": "Network connection failed. Please check your network settings",
+    "serverError": "Server temporarily unavailable. Please try again later",
+    "unknownError": "An unknown error occurred"
+  },
+  "checkIn": {
+    "success": "Check-in successful!",
+    "message": "Earned +{points} points. Come back tomorrow!",
+    "streak": "{days} day streak",
+    "failed": "Check-in failed. Please try again"
+  }
+}

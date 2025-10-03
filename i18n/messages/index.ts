@@ -16,6 +16,11 @@ import web3TasksEn from './en/web3/tasks.json';
 import web3AuthEn from './en/web3/auth.json';
 import astroFortuneEn from './en/astro/fortune.json';
 import astroKarmaPalaceEn from './en/astro/karmaPalace.json';
+import userProfileEn from './en/user/profile.json';
+import userMembershipEn from './en/user/membership.json';
+import userSubscriptionEn from './en/user/subscription.json';
+import userPreferencesEn from './en/user/preferences.json';
+import dashboardEn from './en/dashboard.json';
 
 export const SUPPORTED_LOCALES = ['zh', 'en', 'ja'] as const;
 export type Locale = (typeof SUPPORTED_LOCALES)[number];
@@ -34,12 +39,17 @@ export const NAMESPACES = [
   'charts',
   'settings',
   'wiki',
+  'dashboard',
   'web3/dashboard',
   'web3/layout',
   'web3/tasks',
   'web3/auth',
   'astro/fortune',
-  'astro/karmaPalace'
+  'astro/karmaPalace',
+  'user/profile',
+  'user/membership',
+  'user/subscription',
+  'user/preferences'
 ] as const;
 export type Namespace = (typeof NAMESPACES)[number];
 
@@ -56,12 +66,17 @@ export type Messages = {
   charts: typeof chartsEn;
   settings: typeof settingsEn;
   wiki: typeof wikiEn;
+  dashboard: typeof dashboardEn;
   'web3/dashboard': typeof web3DashboardEn;
   'web3/layout': typeof web3LayoutEn;
   'web3/tasks': typeof web3TasksEn;
   'web3/auth': typeof web3AuthEn;
   'astro/fortune': typeof astroFortuneEn;
   'astro/karmaPalace': typeof astroKarmaPalaceEn;
+  'user/profile': typeof userProfileEn;
+  'user/membership': typeof userMembershipEn;
+  'user/subscription': typeof userSubscriptionEn;
+  'user/preferences': typeof userPreferencesEn;
 };
 
 export type Translator = (key: string, values?: Record<string, unknown>) => string;
@@ -82,12 +97,17 @@ export const MESSAGE_LOADERS: NamespaceLoaders = {
     charts: () => import('./en/charts.json').then((m) => m.default),
     settings: () => import('./en/settings.json').then((m) => m.default),
     wiki: () => import('./en/wiki.json').then((m) => m.default),
+    dashboard: () => import('./en/dashboard.json').then((m) => m.default),
     'web3/dashboard': () => import('./en/web3/dashboard.json').then((m) => m.default),
     'web3/layout': () => import('./en/web3/layout.json').then((m) => m.default),
     'web3/tasks': () => import('./en/web3/tasks.json').then((m) => m.default),
     'web3/auth': () => import('./en/web3/auth.json').then((m) => m.default),
     'astro/fortune': () => import('./en/astro/fortune.json').then((m) => m.default),
-    'astro/karmaPalace': () => import('./en/astro/karmaPalace.json').then((m) => m.default)
+    'astro/karmaPalace': () => import('./en/astro/karmaPalace.json').then((m) => m.default),
+    'user/profile': () => import('./en/user/profile.json').then((m) => m.default),
+    'user/membership': () => import('./en/user/membership.json').then((m) => m.default),
+    'user/subscription': () => import('./en/user/subscription.json').then((m) => m.default),
+    'user/preferences': () => import('./en/user/preferences.json').then((m) => m.default)
   },
   zh: {
     common: () => import('./zh/common.json').then((m) => m.default),
@@ -102,12 +122,17 @@ export const MESSAGE_LOADERS: NamespaceLoaders = {
     charts: () => import('./zh/charts.json').then((m) => m.default),
     settings: () => import('./zh/settings.json').then((m) => m.default),
     wiki: () => import('./zh/wiki.json').then((m) => m.default),
+    dashboard: () => import('./zh/dashboard.json').then((m) => m.default),
     'web3/dashboard': () => import('./zh/web3/dashboard.json').then((m) => m.default),
     'web3/layout': () => import('./zh/web3/layout.json').then((m) => m.default),
     'web3/tasks': () => import('./zh/web3/tasks.json').then((m) => m.default),
     'web3/auth': () => import('./zh/web3/auth.json').then((m) => m.default),
     'astro/fortune': () => import('./zh/astro/fortune.json').then((m) => m.default),
-    'astro/karmaPalace': () => import('./zh/astro/karmaPalace.json').then((m) => m.default)
+    'astro/karmaPalace': () => import('./zh/astro/karmaPalace.json').then((m) => m.default),
+    'user/profile': () => import('./zh/user/profile.json').then((m) => m.default),
+    'user/membership': () => import('./zh/user/membership.json').then((m) => m.default),
+    'user/subscription': () => import('./zh/user/subscription.json').then((m) => m.default),
+    'user/preferences': () => import('./zh/user/preferences.json').then((m) => m.default)
   },
   ja: {
     common: () => import('./ja/common.json').then((m) => m.default),
@@ -122,12 +147,17 @@ export const MESSAGE_LOADERS: NamespaceLoaders = {
     charts: () => import('./ja/charts.json').then((m) => m.default),
     settings: () => import('./ja/settings.json').then((m) => m.default),
     wiki: () => import('./ja/wiki.json').then((m) => m.default),
+    dashboard: () => import('./ja/dashboard.json').then((m) => m.default),
     'web3/dashboard': () => import('./ja/web3/dashboard.json').then((m) => m.default),
     'web3/layout': () => import('./ja/web3/layout.json').then((m) => m.default),
     'web3/tasks': () => import('./ja/web3/tasks.json').then((m) => m.default),
     'web3/auth': () => import('./ja/web3/auth.json').then((m) => m.default),
     'astro/fortune': () => import('./ja/astro/fortune.json').then((m) => m.default),
-    'astro/karmaPalace': () => import('./ja/astro/karmaPalace.json').then((m) => m.default)
+    'astro/karmaPalace': () => import('./ja/astro/karmaPalace.json').then((m) => m.default),
+    'user/profile': () => import('./ja/user/profile.json').then((m) => m.default),
+    'user/membership': () => import('./ja/user/membership.json').then((m) => m.default),
+    'user/subscription': () => import('./ja/user/subscription.json').then((m) => m.default),
+    'user/preferences': () => import('./ja/user/preferences.json').then((m) => m.default)
   }
 };
 

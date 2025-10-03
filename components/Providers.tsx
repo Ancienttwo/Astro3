@@ -4,11 +4,10 @@ import { ReactNode, useEffect } from "react";
 import type { Session } from "@supabase/supabase-js";
 // import { RecordsProvider } from "@/contexts/RecordsContext"; // 已迁移到新架构
 import { FateBookProvider } from "@/contexts/FateBookContext";
-// 移除旧的语言提供者，使用新的 language-manager.ts 系统
+// next-intl handles language initialization via middleware
 import { PaidUserProvider } from "@/contexts/PaidUserContext";
 import { setUserContext } from "@/lib/config/feature-flags";
 import { supabase } from "@/lib/supabase";
-import { initializeLanguage } from "@/lib/i18n/language-manager";
 import { Web3Provider } from "@/lib/web3/providers/Web3Provider";
 import dynamic from "next/dynamic";
 const PrivyAuthProviderNoSSR = dynamic(
@@ -22,6 +21,21 @@ export function Providers({ children }: { children: ReactNode }) {
   // 初始化功能开关的用户上下文
   useEffect(() => {
     if (typeof window === 'undefined') return;
+
+    // Clear potentially corrupted Supabase auth data
+    try {
+      const authKeys = Object.keys(localStorage).filter(key =>
+        key.startsWith('sb-') || key.includes('supabase')
+      );
+      authKeys.forEach(key => {
+        try {
+          const value = localStorage.getItem(key);
+          if (!value || value === 'null' || value === '{}') {
+            localStorage.removeItem(key);
+          }
+        } catch {}
+      });
+    } catch {}
 
     const persistSupabaseToken = (session: Session | null) => {
       try {
@@ -77,11 +91,6 @@ export function Providers({ children }: { children: ReactNode }) {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
-
-  // 初始化语言管理系统
-  useEffect(() => {
-    initializeLanguage();
   }, []);
 
   return (

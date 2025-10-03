@@ -19,6 +19,7 @@ This is AstroZi, a Chinese astrology and fortune-telling web application built w
 - **Authentication**: Supabase Auth + Web3 wallet integration
 - **Deployment**: Vercel with Cloudflare for China access
 - **Web3**: WalletConnect integration on BSC network
+- **i18n**: next-intl for internationalization (zh, en, ja)
 
 ## Development Guidelines
 
@@ -40,6 +41,55 @@ This is AstroZi, a Chinese astrology and fortune-telling web application built w
 - Implement proper input validation
 - Follow OWASP security guidelines
 
+### Internationalization (i18n) Guidelines
+- **Framework**: Use next-intl exclusively for all translations
+- **Languages**: Support 3 languages - Chinese (zh), English (en), Japanese (ja)
+- **URL Structure**:
+  - Chinese (default): `/bazi`, `/ziwei` (no language prefix)
+  - English: `/en/bazi`, `/en/ziwei`
+  - Japanese: `/ja/bazi`, `/ja/ziwei`
+- **No Hard-coded Text**: All user-facing text must use translation keys
+- **Namespace Usage**: Use appropriate namespaces for different features
+  - Common UI: `common` namespace
+  - Navigation: `navigation` namespace
+  - Feature-specific: Use feature namespaces like `bazi`, `ziwei`, `user/profile`
+- **Translation Files**: Located in `i18n/messages/{locale}/{namespace}.json`
+- **Type Safety**: All translation keys have TypeScript type checking
+
+#### Adding New Translations
+1. Edit JSON files in `i18n/messages/{zh,en,ja}/`
+2. Ensure all 3 language files have the same keys
+3. Register new namespaces in `i18n/messages/index.ts`
+4. Add route mappings in `i18n/loader.ts` if needed
+
+#### Using Translations in Code
+```typescript
+// Client component
+import { useTranslations } from 'next-intl';
+const t = useTranslations('common');
+return <button>{t('submit')}</button>;
+
+// Server component
+import { getTranslations } from 'next-intl/server';
+const t = await getTranslations('common');
+return <button>{t('submit')}</button>;
+```
+
+#### Language Switching
+```typescript
+import { useRouter, usePathname } from 'next/navigation';
+import { useLocale } from 'next-intl';
+
+const router = useRouter();
+const pathname = usePathname();
+const currentLocale = useLocale();
+
+// Remove current locale prefix and add new one
+// zh has no prefix, en/ja have prefixes
+```
+
+For complete i18n documentation, see [docs/i18n-developer-guide.md](docs/i18n-developer-guide.md).
+
 ## Project Structure
 
 - `/app` - Next.js app router pages and API routes
@@ -48,6 +98,14 @@ This is AstroZi, a Chinese astrology and fortune-telling web application built w
 - `/hooks` - Custom React hooks
 - `/types` - TypeScript type definitions
 - `/supabase` - Database migrations and functions
+- `/i18n` - Internationalization configuration and translation files
+  - `/messages/{locale}/{namespace}.json` - Translation files for each language
+  - `/loader.ts` - Route-based namespace loading configuration
+  - `/request.ts` - next-intl request configuration
+- `/docs` - Project documentation
+  - `i18n-developer-guide.md` - Complete i18n usage guide
+  - `i18n-migration-progress.md` - Migration tracking
+  - `phase{1-8}-*.md` - Phase-by-phase migration summaries
 
 ## Environment Setup
 

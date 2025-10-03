@@ -29,16 +29,60 @@ export async function POST(request: NextRequest) {
     const body = await request.json().catch(() => ({}))
     const { privyToken } = body || {}
 
+    console.log('🔐 Privy auth request:', {
+      hasToken: !!privyToken,
+      tokenLength: privyToken?.length,
+      tokenPrefix: privyToken?.substring(0, 30),
+      tokenType: typeof privyToken,
+    })
+
     if (!privyToken) {
       return NextResponse.json({ error: 'Missing privyToken' }, { status: 400 })
     }
 
-    const privy = getPrivyClient()
+    if (typeof privyToken !== 'string') {
+      console.error('❌ Invalid token type:', typeof privyToken)
+      return NextResponse.json({ error: 'Token must be a string' }, { status: 400 })
+    }
+
+    let privy
+    try {
+      privy = getPrivyClient()
+      console.log('✅ Privy client created')
+    } catch (error) {
+      console.error('❌ Failed to create Privy client:', error)
+      return NextResponse.json({
+        error: 'Server configuration error',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      }, { status: 500 })
+    }
 
     // Verify Privy access token and get user
-    const verification: any = await privy.verifyAuthToken(privyToken as any)
+    let verification: any
+    try {
+      console.log('🔍 Attempting to verify token...')
+      verification = await privy.verifyAuthToken(privyToken as any)
+      console.log('✅ Token verified successfully:', {
+        hasUser: !!verification?.user,
+        userId: verification?.user?.id,
+        hasWallet: !!verification?.user?.wallet,
+      })
+    } catch (error) {
+      console.error('❌ Token verification failed:', {
+        error: error instanceof Error ? error.message : 'Unknown',
+        stack: error instanceof Error ? error.stack : undefined,
+        tokenPreview: privyToken.substring(0, 50) + '...',
+      })
+      return NextResponse.json({
+        error: 'Invalid Privy token',
+        details: error instanceof Error ? error.message : 'Unknown error',
+        hint: 'The token may be expired or invalid. Please try logging in again.'
+      }, { status: 401 })
+    }
+
     const user = verification?.user
     if (!user) {
+      console.error('❌ No user in verification response')
       return NextResponse.json({ error: 'Invalid Privy token' }, { status: 401 })
     }
 

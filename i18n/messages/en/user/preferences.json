@@ -1,0 +1,20 @@
+{
+  "title": "Preferences",
+  "subtitle": "Personalize your experience",
+  "themeSettings": "Theme Settings",
+  "themeSettingsDesc": "Choose your preferred color theme",
+  "languageSettings": "Language Settings",
+  "languageSettingsDesc": "Choose your preferred display language",
+  "lightMode": "Light Mode",
+  "darkMode": "Dark Mode",
+  "systemMode": "System Mode",
+  "chinese": "Chinese",
+  "english": "English",
+  "japanese": "Japanese",
+  "comingSoon": "Coming Soon",
+  "comingSoonDesc": "This language version is coming soon!",
+  "currentTheme": "Current Theme",
+  "currentLanguage": "Current Language",
+  "available": "Available",
+  "notAvailable": "Not Available"
+}
